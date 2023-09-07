@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "gruntfuggly.todo-tree",
+    "davidanson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
+    "mquandalle.graphql"
+  ]
+}

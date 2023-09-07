@@ -12,6 +12,7 @@
     "lint:fix": "prettier --write ./src/ & yarn lint --fix"
   },
   "devDependencies": {
+    "@graphprotocol/client-cli": "^3.0.0",
     "@pulumi/gcp": "^6.0.0",
     "@pulumi/pulumi": "^3.0.0",
     "@types/jest": "^29.5.0",
@@ -31,7 +32,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^6.7.0",
-    "@google-cloud/storage": "^7.0.0"
+    "@google-cloud/firestore": "^6.7.0"
   }
 }
