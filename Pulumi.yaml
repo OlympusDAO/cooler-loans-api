@@ -1,0 +1,3 @@
+name: cooler-loans-api
+description: Provides pre-calculated Cooler Loans data
+runtime: nodejs
