@@ -12,10 +12,15 @@ export type Snapshot = {
   };
   // Per-loan summary
   loans: {
-    id: number;
+    /**
+     * cooler-loanId
+     */
+    id: string;
+    loanId: number;
     createdTimestamp: number;
-    borrower: string;
-    lender: string;
+    coolerAddress: string;
+    borrowerAddress: string;
+    lenderAddress: string;
     principal: number;
     interest: number;
     collateralDeposited: number;
@@ -28,12 +33,6 @@ export type Snapshot = {
     collateralClaimed: number;
     collateralClaimedValue: number;
   }[];
-  events: {
-    create: any[];
-    default: any[];
-    payment: any[];
-    rollover: any[];
-  };
 };
 
 export const generateSnapshots = (
