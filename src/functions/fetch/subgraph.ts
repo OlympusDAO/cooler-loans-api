@@ -1,9 +1,93 @@
-export const getData = async (startDate: string, endDate: string) => {
+type ClearinghouseSnapshot = {
+  id: string;
+  date: string;
+  blockNumber: number;
+  blockTimestamp: number;
+  clearinghouse: string;
+  isActive: boolean;
+  nextRebalanceTimestamp: number;
+  receivables: number;
+  daiBalance: number;
+  sDaiBalance: number;
+  sDaiInDaiBalance: number;
+};
+
+type Loan = {
+  id: string;
+  createdTimestamp: number;
+  loanId: number;
+  borrowerAddress: string;
+  coolerAddress: string;
+  lenderAddress: string;
+  amount: number;
+  interest: number;
+  principal: number;
+  collateralDeposited: number;
+  expiryTimestamp: number;
+};
+
+export type CreationEvent = {
+  id: string;
+  date: string;
+  blockTimestamp: number;
+  loan: Loan;
+};
+
+export type DefaultedClaimEvent = {
+  id: string;
+  date: string;
+  blockTimestamp: number;
+  loan: Loan;
+  collateralQuantityClaimed: number;
+  collateralPrice: number;
+  collateralValueClaimed: number;
+  collateralIncome: number;
+};
+
+export type RepaymentEvent = {
+  id: string;
+  date: string;
+  blockTimestamp: number;
+  loan: Loan;
+  secondsToExpiry: number;
+  amountPaid: number;
+  amountPayable: number;
+  interestIncome: number;
+  collateralDeposited: number;
+};
+
+export type RolloverEvent = {
+  id: string;
+  date: string;
+  blockTimestamp: number;
+  loan: Loan;
+  times: number;
+};
+
+export type SubgraphData = {
+  clearinghouseSnapshots: {
+    [key: string]: ClearinghouseSnapshot;
+  };
+  creationEvents: {
+    [key: string]: CreationEvent[];
+  };
+  defaultedClaimEvents: {
+    [key: string]: DefaultedClaimEvent[];
+  };
+  repaymentEvents: {
+    [key: string]: RepaymentEvent[];
+  };
+  rolloverEvents: {
+    [key: string]: RolloverEvent[];
+  };
+};
+
+export const getData = async (startDate: string, endDate: string): Promise<SubgraphData> => {
   // Get Cooler Loan data
   // Get event data
 
-  const clearinghouseSnapshots = [
-    {
+  const clearinghouseSnapshots = {
+    "2023-08-05": {
       id: "0",
       date: "2023-08-05",
       blockNumber: 12223,
@@ -16,7 +100,7 @@ export const getData = async (startDate: string, endDate: string) => {
       sDaiBalance: 500000.0,
       sDaiInDaiBalance: 600000.01,
     },
-    {
+    "2023-08-20": {
       id: "0",
       date: "2023-08-20",
       blockNumber: 12223,
@@ -29,48 +113,60 @@ export const getData = async (startDate: string, endDate: string) => {
       sDaiBalance: 500000.0,
       sDaiInDaiBalance: 600000.01,
     },
-  ];
+  };
 
-  const loans = [
-    {
-      id: "0",
-      // 2023-08-05
-      createdTimestamp: 1691222400,
-      loanId: 0,
-      borrower: 0x01,
-      lender: 0x02,
-      amount: 100000,
-      interest: 1000,
-      principal: 99000,
-      collateral: 30,
-      // 2023-09-10
-      expiryTimestamp: 1694332800,
-      creationEvents: [
-        {
-          id: "0",
-          date: "2023-08-05",
-          blockTimestamp: 1691222400,
-        },
-      ],
-      defaultedClaimEvents: [],
-      repaymentEvents: [
-        {
-          id: "0",
-          date: "2023-08-10",
-          blockTimestamp: 1691654400,
-          secondsToExpiry: 1694332800 - 1691654400,
-          amountPaid: 1000,
-          amountPayable: 100000 - 1000,
-          interestIncome: 10,
-          collateralDeposited: 29,
-        },
-      ],
-      rolloverEvents: [],
-    },
-  ];
+  const loan: Loan = {
+    id: "0",
+    // 2023-08-05
+    createdTimestamp: 1691222400,
+    loanId: 0,
+    coolerAddress: "0x03",
+    borrowerAddress: "0x01",
+    lenderAddress: "0x02",
+    amount: 100000,
+    interest: 1000,
+    principal: 99000,
+    collateralDeposited: 30,
+    // 2023-09-10
+    expiryTimestamp: 1694332800,
+  };
+
+  const creationEvents = {
+    "2023-08-05": [
+      {
+        id: "0",
+        date: "2023-08-05",
+        blockTimestamp: 1691222400,
+        loan: loan,
+      },
+    ],
+  };
+
+  const repaymentEvents = {
+    "2023-08-10": [
+      {
+        id: "0",
+        date: "2023-08-10",
+        blockTimestamp: 1691654400,
+        secondsToExpiry: 1694332800 - 1691654400,
+        amountPaid: 1000,
+        amountPayable: 100000 - 1000,
+        interestIncome: 10,
+        collateralDeposited: 29,
+        loan: loan,
+      },
+    ],
+  };
+
+  // Grab clearinghouse snapshots for the given date range
+
+  // Grab events for the given date range
 
   return {
     clearinghouseSnapshots: clearinghouseSnapshots,
-    loans: loans,
+    creationEvents: creationEvents,
+    defaultedClaimEvents: {},
+    repaymentEvents: repaymentEvents,
+    rolloverEvents: {},
   };
 };

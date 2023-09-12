@@ -1,6 +1,6 @@
 import { adjustDate, getISO8601DateString, setMidnight } from "../../helpers/dateHelper";
-import { generateSnapshots } from "./snapshot";
-import { getLatestCachedDate, writeSnapshots } from "./storage";
+import { generateSnapshots, Snapshot } from "./snapshot";
+import { getLatestCachedDate, getSnapshot, writeSnapshots } from "./storage";
 import { getData } from "./subgraph";
 
 export const handler = async () => {
@@ -12,8 +12,11 @@ export const handler = async () => {
   // Grab data from the subgraph
   const subgraphData = await getData(startDate, endDate);
 
+  // Grab the previous date's data
+  const previousSnapshot: Snapshot | null = await getSnapshot(startDate);
+
   // Prepare snapshots
-  const dateSnapshots = generateSnapshots(startDate, endDate, subgraphData);
+  const dateSnapshots = generateSnapshots(startDate, endDate, previousSnapshot, subgraphData);
 
   // Write to the bucket
   await writeSnapshots(dateSnapshots);

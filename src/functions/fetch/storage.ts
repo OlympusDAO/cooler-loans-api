@@ -1,7 +1,7 @@
 import { Firestore } from "@google-cloud/firestore";
 
 import { getISO8601DateString } from "../../helpers/dateHelper";
-import { Snapshot } from "./snapshot";
+import { Snapshot, SnapshotDateMap } from "./snapshot";
 
 const FIRESTORE_ROOT_COLLECTION = "snapshots";
 
@@ -25,13 +25,29 @@ export const getLatestCachedDate = async () => {
   return snapshot.docs[0].data().date;
 };
 
-export const writeSnapshots = async (snapshots: Snapshot[]) => {
+export const getSnapshot = async (date: string): Promise<Snapshot | null> => {
+  // Get the Firestore client
+  const client = getClient();
+
+  // Get the snapshot
+  const snapshot = await client.collection(FIRESTORE_ROOT_COLLECTION).doc(date).get();
+
+  // If there is no snapshot, return null
+  if (!snapshot.exists) {
+    return null;
+  }
+
+  // Return the snapshot
+  return snapshot.data() as Snapshot;
+};
+
+export const writeSnapshots = async (snapshots: SnapshotDateMap) => {
   // Get the Firestore client
   const client = getClient();
 
   // Write the snapshots
   await Promise.all(
-    snapshots.map(snapshot => {
+    Object.values(snapshots).map(snapshot => {
       return client.collection(FIRESTORE_ROOT_COLLECTION).doc(getISO8601DateString(snapshot.date)).set(snapshot);
     }),
   );

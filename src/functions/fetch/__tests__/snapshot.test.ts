@@ -1,10 +1,11 @@
 import { adjustDate } from "../../../helpers/dateHelper";
 import { generateSnapshots, Snapshot } from "../snapshot";
+import { SubgraphData } from "../subgraph";
 
-const getSampleData = () => {
+const getSampleData = (): SubgraphData => {
   return {
-    "2023-08-01": {
-      clearinghouse: {
+    clearinghouseSnapshots: {
+      "2023-08-01": {
         id: "12223",
         date: "2023-08-01",
         blockNumber: 12223,
@@ -17,47 +18,7 @@ const getSampleData = () => {
         sDaiBalance: 500000.0,
         sDaiInDaiBalance: 600000.01,
       },
-      loans: [
-        {
-          id: "0x3-0",
-          // 2023-08-01
-          createdTimestamp: 1690876800,
-          loanId: 0,
-          borrower: "0x1",
-          lender: "0x2",
-          cooler: "0x3",
-          amount: 100000,
-          interest: 1000,
-          principal: 99000,
-          collateral: 30,
-          // 2023-09-10
-          expiryTimestamp: 1694332800,
-          creationEvents: [
-            {
-              id: "0x3-0",
-              date: "2023-08-01",
-              blockTimestamp: 1690876800,
-            },
-          ],
-          defaultedClaimEvents: [],
-          repaymentEvents: [
-            {
-              id: "0x3-0-1691654400",
-              date: "2023-08-10",
-              blockTimestamp: 1691654400,
-              secondsToExpiry: 1694332800 - 1691654400,
-              amountPaid: 1000,
-              amountPayable: 100000 - 1000,
-              interestIncome: 10,
-              collateralDeposited: 29,
-            },
-          ],
-          rolloverEvents: [],
-        },
-      ],
-    },
-    "2023-08-20": {
-      clearinghouse: {
+      "2023-08-20": {
         id: "12255",
         date: "2023-08-20",
         blockNumber: 12255,
@@ -70,45 +31,62 @@ const getSampleData = () => {
         sDaiBalance: 500000.0,
         sDaiInDaiBalance: 600000.01,
       },
-      loans: [
+    },
+    creationEvents: {
+      "2023-08-01": [
         {
           id: "0x3-0",
-          // 2023-08-01
-          createdTimestamp: 1690876800,
-          loanId: 0,
-          borrower: "0x1",
-          lender: "0x2",
-          cooler: "0x3",
-          amount: 100000,
-          interest: 1000,
-          principal: 99000,
-          collateral: 30,
-          // 2023-09-10
-          expiryTimestamp: 1694332800,
-          creationEvents: [
-            {
-              id: "0x3-0",
-              date: "2023-08-01",
-              blockTimestamp: 1690876800,
-            },
-          ],
-          defaultedClaimEvents: [],
-          repaymentEvents: [
-            {
-              id: "0x3-0-1691654400",
-              date: "2023-08-10",
-              blockTimestamp: 1691654400,
-              secondsToExpiry: 1694332800 - 1691654400,
-              amountPaid: 1000,
-              amountPayable: 100000 - 1000,
-              interestIncome: 10,
-              collateralDeposited: 29,
-            },
-          ],
-          rolloverEvents: [],
+          date: "2023-08-01",
+          blockTimestamp: 1690876800,
+          loan: {
+            id: "0x3-0",
+            // 2023-08-01
+            createdTimestamp: 1690876800,
+            loanId: 0,
+            borrowerAddress: "0x1",
+            lenderAddress: "0x2",
+            coolerAddress: "0x3",
+            amount: 100000,
+            interest: 1000,
+            principal: 99000,
+            collateralDeposited: 30,
+            // 2023-09-10
+            expiryTimestamp: 1694332800,
+          },
         },
       ],
     },
+    defaultedClaimEvents: {},
+    repaymentEvents: {
+      "2023-08-10": [
+        {
+          id: "0x3-0-1691654400",
+          date: "2023-08-10",
+          blockTimestamp: 1691654400,
+          secondsToExpiry: 1694332800 - 1691654400,
+          amountPaid: 1000,
+          amountPayable: 100000 - 1000,
+          interestIncome: 10,
+          collateralDeposited: 29,
+          loan: {
+            id: "0x3-0",
+            // 2023-08-01
+            createdTimestamp: 1690876800,
+            loanId: 0,
+            borrowerAddress: "0x1",
+            lenderAddress: "0x2",
+            coolerAddress: "0x3",
+            amount: 100000,
+            interest: 1000,
+            principal: 99000,
+            collateralDeposited: 30,
+            // 2023-09-10
+            expiryTimestamp: 1694332800,
+          },
+        },
+      ],
+    },
+    rolloverEvents: {},
   };
 };
 
@@ -117,7 +95,13 @@ describe("generateSnapshots", () => {
     const startDate = "2022-01-01";
     const endDate = "2022-01-31";
     const previousDateRecords: Snapshot | null = null;
-    const subgraphData: never[] = [];
+    const subgraphData: SubgraphData = {
+      clearinghouseSnapshots: {},
+      creationEvents: {},
+      defaultedClaimEvents: {},
+      repaymentEvents: {},
+      rolloverEvents: {},
+    };
 
     const result = generateSnapshots(startDate, endDate, previousDateRecords, subgraphData);
 
@@ -155,7 +139,7 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.loans[0].amountRepaid).toBe(0);
     expect(snapshotOne.loans[0].amountPayable).toBe(100000);
     expect(snapshotOne.loans[0].interestIncome).toBe(0);
-    expect(snapshotOne.loans[0].collateralClaimed).toBe(0);
+    expect(snapshotOne.loans[0].collateralClaimedQuantity).toBe(0);
     expect(snapshotOne.loans[0].collateralClaimedValue).toBe(0);
 
     // Days 2-9 should be the same
@@ -185,7 +169,7 @@ describe("generateSnapshots", () => {
       expect(currentSnapshot.loans[0].amountRepaid).toBe(snapshotOne.loans[0].amountRepaid);
       expect(currentSnapshot.loans[0].amountPayable).toBe(snapshotOne.loans[0].amountPayable);
       expect(currentSnapshot.loans[0].interestIncome).toBe(snapshotOne.loans[0].interestIncome);
-      expect(currentSnapshot.loans[0].collateralClaimed).toBe(snapshotOne.loans[0].collateralClaimed);
+      expect(currentSnapshot.loans[0].collateralClaimedQuantity).toBe(snapshotOne.loans[0].collateralClaimedQuantity);
       expect(currentSnapshot.loans[0].collateralClaimedValue).toBe(snapshotOne.loans[0].collateralClaimedValue);
     }
 
@@ -207,7 +191,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.loans[0].amountRepaid).toBe(1000);
     expect(snapshotTen.loans[0].amountPayable).toBe(100000 - 1000);
     expect(snapshotTen.loans[0].interestIncome).toBe(10);
-    expect(snapshotTen.loans[0].collateralClaimed).toBe(0);
+    expect(snapshotTen.loans[0].collateralClaimedQuantity).toBe(0);
     expect(snapshotTen.loans[0].collateralClaimedValue).toBe(0);
 
     // Days 11-19 should be the same
@@ -237,7 +221,7 @@ describe("generateSnapshots", () => {
       expect(currentSnapshot.loans[0].amountRepaid).toBe(snapshotTen.loans[0].amountRepaid);
       expect(currentSnapshot.loans[0].amountPayable).toBe(snapshotTen.loans[0].amountPayable);
       expect(currentSnapshot.loans[0].interestIncome).toBe(snapshotTen.loans[0].interestIncome);
-      expect(currentSnapshot.loans[0].collateralClaimed).toBe(snapshotTen.loans[0].collateralClaimed);
+      expect(currentSnapshot.loans[0].collateralClaimedQuantity).toBe(snapshotTen.loans[0].collateralClaimedQuantity);
       expect(currentSnapshot.loans[0].collateralClaimedValue).toBe(snapshotTen.loans[0].collateralClaimedValue);
     }
 
@@ -267,7 +251,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwenty.loans[0].amountRepaid).toBe(snapshotTen.loans[0].amountRepaid);
     expect(snapshotTwenty.loans[0].amountPayable).toBe(snapshotTen.loans[0].amountPayable);
     expect(snapshotTwenty.loans[0].interestIncome).toBe(snapshotTen.loans[0].interestIncome);
-    expect(snapshotTwenty.loans[0].collateralClaimed).toBe(snapshotTen.loans[0].collateralClaimed);
+    expect(snapshotTwenty.loans[0].collateralClaimedQuantity).toBe(snapshotTen.loans[0].collateralClaimedQuantity);
     expect(snapshotTwenty.loans[0].collateralClaimedValue).toBe(snapshotTen.loans[0].collateralClaimedValue);
   });
 
@@ -297,15 +281,26 @@ describe("generateSnapshots", () => {
           amountRepaid: 0,
           amountPayable: 100000,
           interestIncome: 0,
-          collateralClaimed: 0,
+          collateralIncome: 0,
+          collateralClaimedQuantity: 0,
           collateralClaimedValue: 0,
         },
       ],
+      creationEvents: [],
+      defaultedClaimEvents: [],
+      repaymentEvents: [],
+      rolloverEvents: [],
     };
 
     const startDate = "2023-08-02";
     const endDate = "2023-08-02";
-    const subgraphData = {};
+    const subgraphData = {
+      clearinghouseSnapshots: {},
+      creationEvents: {},
+      defaultedClaimEvents: {},
+      repaymentEvents: {},
+      rolloverEvents: {},
+    };
 
     const snapshots = generateSnapshots(startDate, endDate, previousDateSnapshot, subgraphData);
 
@@ -330,7 +325,9 @@ describe("generateSnapshots", () => {
     expect(snapshots[0].loans[0].amountRepaid).toBe(0);
     expect(snapshots[0].loans[0].amountPayable).toBe(100000);
     expect(snapshots[0].loans[0].interestIncome).toBe(0);
-    expect(snapshots[0].loans[0].collateralClaimed).toBe(0);
+    expect(snapshots[0].loans[0].collateralClaimedQuantity).toBe(0);
     expect(snapshots[0].loans[0].collateralClaimedValue).toBe(0);
   });
 });
+
+// TODO mark defaulted loans
