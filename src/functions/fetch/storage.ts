@@ -1,7 +1,7 @@
 import { Firestore } from "@google-cloud/firestore";
 
 import { getISO8601DateString } from "../../helpers/dateHelper";
-import { Snapshot, SnapshotDateMap } from "./snapshot";
+import { Snapshot } from "./snapshot";
 
 const FIRESTORE_ROOT_COLLECTION = "snapshots";
 
@@ -9,7 +9,7 @@ const getClient = () => {
   return new Firestore();
 };
 
-export const getLatestCachedDate = async () => {
+export const getLatestCachedDate = async (): Promise<string | null> => {
   // Get the Firestore client
   const client = getClient();
 
@@ -22,7 +22,7 @@ export const getLatestCachedDate = async () => {
   }
 
   // Return the date
-  return snapshot.docs[0].data().date;
+  return getISO8601DateString(snapshot.docs[0].data().date as Date);
 };
 
 export const getSnapshot = async (date: string): Promise<Snapshot | null> => {
@@ -41,13 +41,13 @@ export const getSnapshot = async (date: string): Promise<Snapshot | null> => {
   return snapshot.data() as Snapshot;
 };
 
-export const writeSnapshots = async (snapshots: SnapshotDateMap) => {
+export const writeSnapshots = async (snapshots: Snapshot[]) => {
   // Get the Firestore client
   const client = getClient();
 
   // Write the snapshots
   await Promise.all(
-    Object.values(snapshots).map(snapshot => {
+    snapshots.map(snapshot => {
       return client.collection(FIRESTORE_ROOT_COLLECTION).doc(getISO8601DateString(snapshot.date)).set(snapshot);
     }),
   );

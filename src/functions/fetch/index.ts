@@ -3,10 +3,12 @@ import { generateSnapshots, Snapshot } from "./snapshot";
 import { getLatestCachedDate, getSnapshot, writeSnapshots } from "./storage";
 import { getData } from "./subgraph";
 
+const INITIAL_DATE = "2023-09-01";
+
 export const handler = async () => {
   // Determine the last cached date in Firestore
-  const lastCachedDate: string = await getLatestCachedDate();
-  const startDate: string = getISO8601DateString(setMidnight(adjustDate(new Date(lastCachedDate), -1)));
+  const lastCachedDate: string | null = await getLatestCachedDate();
+  const startDate: string = getISO8601DateString(setMidnight(adjustDate(new Date(lastCachedDate || INITIAL_DATE), -1)));
   const endDate: string = getISO8601DateString(setMidnight(adjustDate(new Date(), 1)));
 
   // Grab data from the subgraph

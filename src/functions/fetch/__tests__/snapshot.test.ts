@@ -90,8 +90,15 @@ const getSampleData = (): SubgraphData => {
   };
 };
 
+const validateSecondsToExpiry = (date: Date, loan: Record<string, any>, expiryTimestamp: number): void => {
+  const dateTimestamp = date.getTime() / 1000;
+
+  // The seconds to expiry should be the difference between the expiry timestamp and the current timestamp
+  expect(loan.secondsToExpiry).toBe(expiryTimestamp - dateTimestamp);
+};
+
 describe("generateSnapshots", () => {
-  it("should return an empty array if no subgraphData is provided", () => {
+  it("should return empty records if no subgraphData is provided", () => {
     const startDate = "2022-01-01";
     const endDate = "2022-01-31";
     const previousDateRecords: Snapshot | null = null;
@@ -105,12 +112,24 @@ describe("generateSnapshots", () => {
 
     const result = generateSnapshots(startDate, endDate, previousDateRecords, subgraphData);
 
-    expect(result).toEqual([]);
+    const resultOne = result[0];
+    expect(resultOne.date.toISOString()).toBe("2022-01-01T00:00:00.000Z");
+    expect(resultOne.receivables).toBe(0);
+    expect(resultOne.clearinghouse.daiBalance).toBe(0);
+    expect(resultOne.clearinghouse.sDaiBalance).toBe(0);
+    expect(resultOne.clearinghouse.sDaiInDaiBalance).toBe(0);
+    expect(resultOne.loans).toEqual([]);
+    expect(resultOne.creationEvents).toEqual([]);
+    expect(resultOne.defaultedClaimEvents).toEqual([]);
+    expect(resultOne.repaymentEvents).toEqual([]);
+    expect(resultOne.rolloverEvents).toEqual([]);
+
+    expect(result.length).toBe(31);
   });
 
   it("should generate a snapshot for each day in the date range", () => {
     const startDate = "2023-08-01";
-    const endDate = "2022-08-31";
+    const endDate = "2023-08-31";
     const previousDateRecords: Snapshot | null = null;
     const subgraphData = getSampleData();
 
@@ -134,7 +153,7 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.loans[0].interest).toBe(1000);
     expect(snapshotOne.loans[0].collateralDeposited).toBe(30);
     expect(snapshotOne.loans[0].expiryTimestamp).toBe(1694332800);
-    expect(snapshotOne.loans[0].secondsToExpiry).toBe(1694332800 - 1690876800);
+    validateSecondsToExpiry(snapshots[0].date, snapshots[0].loans[0], 1694332800);
     expect(snapshotOne.loans[0].status).toBe("Active");
     expect(snapshotOne.loans[0].amountRepaid).toBe(0);
     expect(snapshotOne.loans[0].amountPayable).toBe(100000);
@@ -159,12 +178,7 @@ describe("generateSnapshots", () => {
       expect(currentSnapshot.loans[0].interest).toBe(snapshotOne.loans[0].interest);
       expect(currentSnapshot.loans[0].collateralDeposited).toBe(snapshotOne.loans[0].collateralDeposited);
       expect(currentSnapshot.loans[0].expiryTimestamp).toBe(snapshotOne.loans[0].expiryTimestamp);
-
-      // The seconds to expiry should be the difference between the expiry timestamp and the current timestamp
-      expect(currentSnapshot.loans[0].secondsToExpiry).toBe(
-        currentSnapshot.loans[0].expiryTimestamp - currentSnapshot.date.getTime() / 1000,
-      );
-
+      validateSecondsToExpiry(currentSnapshot.date, currentSnapshot.loans[0], 1694332800);
       expect(currentSnapshot.loans[0].status).toBe(snapshotOne.loans[0].status);
       expect(currentSnapshot.loans[0].amountRepaid).toBe(snapshotOne.loans[0].amountRepaid);
       expect(currentSnapshot.loans[0].amountPayable).toBe(snapshotOne.loans[0].amountPayable);
@@ -186,7 +200,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.loans[0].interest).toBe(1000);
     expect(snapshotTen.loans[0].collateralDeposited).toBe(29);
     expect(snapshotTen.loans[0].expiryTimestamp).toBe(1694332800);
-    expect(snapshotTen.loans[0].secondsToExpiry).toBe(1694332800 - snapshotTen.date.getTime() / 1000);
+    validateSecondsToExpiry(snapshotTen.date, snapshotTen.loans[0], 1694332800);
     expect(snapshotTen.loans[0].status).toBe("Active");
     expect(snapshotTen.loans[0].amountRepaid).toBe(1000);
     expect(snapshotTen.loans[0].amountPayable).toBe(100000 - 1000);
@@ -211,12 +225,7 @@ describe("generateSnapshots", () => {
       expect(currentSnapshot.loans[0].interest).toBe(snapshotTen.loans[0].interest);
       expect(currentSnapshot.loans[0].collateralDeposited).toBe(snapshotTen.loans[0].collateralDeposited);
       expect(currentSnapshot.loans[0].expiryTimestamp).toBe(snapshotTen.loans[0].expiryTimestamp);
-
-      // The seconds to expiry should be the difference between the expiry timestamp and the current timestamp
-      expect(currentSnapshot.loans[0].secondsToExpiry).toBe(
-        currentSnapshot.loans[0].expiryTimestamp - currentSnapshot.date.getTime() / 1000,
-      );
-
+      validateSecondsToExpiry(currentSnapshot.date, currentSnapshot.loans[0], 1694332800);
       expect(currentSnapshot.loans[0].status).toBe(snapshotTen.loans[0].status);
       expect(currentSnapshot.loans[0].amountRepaid).toBe(snapshotTen.loans[0].amountRepaid);
       expect(currentSnapshot.loans[0].amountPayable).toBe(snapshotTen.loans[0].amountPayable);
@@ -241,12 +250,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwenty.loans[0].interest).toBe(snapshotTen.loans[0].interest);
     expect(snapshotTwenty.loans[0].collateralDeposited).toBe(snapshotTen.loans[0].collateralDeposited);
     expect(snapshotTwenty.loans[0].expiryTimestamp).toBe(snapshotTen.loans[0].expiryTimestamp);
-
-    // The seconds to expiry should be the difference between the expiry timestamp and the current timestamp
-    expect(snapshotTwenty.loans[0].secondsToExpiry).toBe(
-      snapshotTwenty.loans[0].expiryTimestamp - snapshotTwenty.date.getTime() / 1000,
-    );
-
+    validateSecondsToExpiry(snapshotTwenty.date, snapshotTwenty.loans[0], 1694332800);
     expect(snapshotTwenty.loans[0].status).toBe(snapshotTen.loans[0].status);
     expect(snapshotTwenty.loans[0].amountRepaid).toBe(snapshotTen.loans[0].amountRepaid);
     expect(snapshotTwenty.loans[0].amountPayable).toBe(snapshotTen.loans[0].amountPayable);
@@ -320,7 +324,7 @@ describe("generateSnapshots", () => {
     expect(snapshots[0].loans[0].interest).toBe(1000);
     expect(snapshots[0].loans[0].collateralDeposited).toBe(30);
     expect(snapshots[0].loans[0].expiryTimestamp).toBe(1694332800);
-    expect(snapshots[0].loans[0].secondsToExpiry).toBe(1694332800 - 1690876800);
+    validateSecondsToExpiry(snapshots[0].date, snapshots[0].loans[0], 1694332800);
     expect(snapshots[0].loans[0].status).toBe("Active");
     expect(snapshots[0].loans[0].amountRepaid).toBe(0);
     expect(snapshots[0].loans[0].amountPayable).toBe(100000);

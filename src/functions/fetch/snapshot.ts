@@ -1,4 +1,4 @@
-import { adjustDate, getISO8601DateString } from "../../helpers/dateHelper";
+import { adjustDate, setMidnight } from "../../helpers/dateHelper";
 import { CreationEvent, DefaultedClaimEvent, RepaymentEvent, RolloverEvent, SubgraphData } from "./subgraph";
 
 export type Snapshot = {
@@ -43,11 +43,11 @@ export type Snapshot = {
   rolloverEvents: RolloverEvent[];
 };
 
-const createSnapshot = (previousSnapshot: Snapshot | null): Snapshot => {
+const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
   // If there is no previous snapshot, return a new one
   if (!previousSnapshot) {
     return {
-      date: new Date(),
+      date: currentDate,
       receivables: 0,
       clearinghouse: {
         daiBalance: 0,
@@ -63,11 +63,9 @@ const createSnapshot = (previousSnapshot: Snapshot | null): Snapshot => {
   }
 
   // Otherwise, return a new one based on the previous one
-  return JSON.parse(JSON.stringify(previousSnapshot));
-};
-
-export type SnapshotDateMap = {
-  [date: string]: Snapshot;
+  const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot));
+  newSnapshot.date = currentDate;
+  return newSnapshot;
 };
 
 const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number => {
@@ -80,18 +78,22 @@ export const generateSnapshots = (
   endDate: string,
   previousDateRecord: Snapshot | null,
   subgraphData: SubgraphData,
-): SnapshotDateMap => {
-  const snapshots: SnapshotDateMap = {};
+): Snapshot[] => {
+  const FUNC = "generateSnapshots";
+  const snapshots: Snapshot[] = [];
 
   // Iterate through the dates
-  let currentDate = new Date(startDate);
-  const endDateDate = new Date(endDate);
+  let currentDate = setMidnight(new Date(startDate));
+  const endDateDate = setMidnight(new Date(endDate));
 
   const previousSnapshot: Snapshot | null = previousDateRecord;
+  console.log(`${FUNC}: previousSnapshot: ${previousSnapshot}`);
 
   while (currentDate <= endDateDate) {
+    console.log(`${FUNC}: currentDate: ${currentDate}`);
+
     // Populate a new Snapshot based on the previous one
-    const currentSnapshot = createSnapshot(previousSnapshot);
+    const currentSnapshot = createSnapshot(currentDate, previousSnapshot);
 
     // Update clearinghouse data, if it exists
     const currentClearinghouseData = subgraphData.clearinghouseSnapshots[currentDate.toISOString()];
@@ -103,6 +105,7 @@ export const generateSnapshots = (
 
     // Create loans where there were creation events
     const currentCreationEvents = subgraphData.creationEvents[currentDate.toISOString()] || [];
+    console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
     currentCreationEvents.forEach(creationEvent => {
       currentSnapshot.loans.push({
         id: creationEvent.id,
@@ -128,6 +131,7 @@ export const generateSnapshots = (
 
     // Update loans where there were repayment events
     const currentRepaymentEvents = subgraphData.repaymentEvents[currentDate.toISOString()] || [];
+    console.log(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
     currentRepaymentEvents.forEach(repaymentEvent => {
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === repaymentEvent.loan.id);
@@ -144,6 +148,7 @@ export const generateSnapshots = (
 
     // Update loans where there were defaulted claim events
     const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDate.toISOString()] || [];
+    console.log(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
     currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === defaultedClaimEvent.loan.id);
@@ -160,6 +165,7 @@ export const generateSnapshots = (
 
     // Update loans where there were rollover events
     const currentRolloverEvents = subgraphData.rolloverEvents[currentDate.toISOString()] || [];
+    console.log(`${FUNC}: processing ${currentRolloverEvents.length} rollover events`);
     currentRolloverEvents.forEach(rolloverEvent => {
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === rolloverEvent.loan.id);
@@ -191,7 +197,7 @@ export const generateSnapshots = (
     currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
     currentSnapshot.rolloverEvents.push(...currentRolloverEvents);
 
-    snapshots[getISO8601DateString(currentDate)] = currentSnapshot;
+    snapshots.push(currentSnapshot);
 
     currentDate = adjustDate(currentDate, 1);
   }
