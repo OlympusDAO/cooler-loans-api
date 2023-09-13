@@ -1,4 +1,4 @@
-import { adjustDate, setMidnight } from "../../helpers/dateHelper";
+import { adjustDate, getISO8601DateString, setMidnight } from "../../helpers/dateHelper";
 import { CreationEvent, DefaultedClaimEvent, RepaymentEvent, RolloverEvent, SubgraphData } from "./subgraph";
 
 export type Snapshot = {
@@ -74,8 +74,8 @@ const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number 
 };
 
 export const generateSnapshots = (
-  startDate: string,
-  endDate: string,
+  startDateString: string,
+  endDateString: string,
   previousDateRecord: Snapshot | null,
   subgraphData: SubgraphData,
 ): Snapshot[] => {
@@ -83,20 +83,21 @@ export const generateSnapshots = (
   const snapshots: Snapshot[] = [];
 
   // Iterate through the dates
-  let currentDate = setMidnight(new Date(startDate));
-  const endDateDate = setMidnight(new Date(endDate));
+  let currentDate = setMidnight(new Date(startDateString));
+  const endDate = setMidnight(new Date(endDateString));
 
-  const previousSnapshot: Snapshot | null = previousDateRecord;
+  let previousSnapshot: Snapshot | null = previousDateRecord;
   console.log(`${FUNC}: previousSnapshot: ${previousSnapshot}`);
 
-  while (currentDate <= endDateDate) {
-    console.log(`${FUNC}: currentDate: ${currentDate}`);
+  while (currentDate <= endDate) {
+    const currentDateString = getISO8601DateString(currentDate);
+    console.log(`${FUNC}: currentDate: ${currentDateString}`);
 
     // Populate a new Snapshot based on the previous one
     const currentSnapshot = createSnapshot(currentDate, previousSnapshot);
 
     // Update clearinghouse data, if it exists
-    const currentClearinghouseData = subgraphData.clearinghouseSnapshots[currentDate.toISOString()];
+    const currentClearinghouseData = subgraphData.clearinghouseSnapshots[currentDateString];
     if (currentClearinghouseData) {
       currentSnapshot.clearinghouse.daiBalance = currentClearinghouseData.daiBalance;
       currentSnapshot.clearinghouse.sDaiBalance = currentClearinghouseData.sDaiBalance;
@@ -104,11 +105,15 @@ export const generateSnapshots = (
     }
 
     // Create loans where there were creation events
-    const currentCreationEvents = subgraphData.creationEvents[currentDate.toISOString()] || [];
+    const currentCreationEvents = subgraphData.creationEvents[currentDateString] || [];
     console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
     currentCreationEvents.forEach(creationEvent => {
+      console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
+      currentSnapshot.receivables += creationEvent.loan.amount;
+
+      console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
       currentSnapshot.loans.push({
-        id: creationEvent.id,
+        id: creationEvent.loan.id,
         loanId: creationEvent.loan.loanId,
         createdTimestamp: creationEvent.blockTimestamp,
         coolerAddress: creationEvent.loan.coolerAddress,
@@ -130,13 +135,15 @@ export const generateSnapshots = (
     });
 
     // Update loans where there were repayment events
-    const currentRepaymentEvents = subgraphData.repaymentEvents[currentDate.toISOString()] || [];
+    const currentRepaymentEvents = subgraphData.repaymentEvents[currentDateString] || [];
     console.log(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
     currentRepaymentEvents.forEach(repaymentEvent => {
+      console.log(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
+
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === repaymentEvent.loan.id);
       if (!loan) {
-        throw new Error(`Could not find loan ${repaymentEvent.loan.id}`);
+        throw new Error(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
       }
 
       // Update the loan
@@ -144,16 +151,21 @@ export const generateSnapshots = (
       loan.amountPayable -= repaymentEvent.amountPaid;
       loan.interestIncome += repaymentEvent.interestIncome;
       loan.collateralDeposited = repaymentEvent.collateralDeposited;
+
+      // Update overall receivables
+      currentSnapshot.receivables -= repaymentEvent.amountPaid;
     });
 
     // Update loans where there were defaulted claim events
-    const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDate.toISOString()] || [];
+    const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDateString] || [];
     console.log(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
     currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
+      console.log(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
+
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === defaultedClaimEvent.loan.id);
       if (!loan) {
-        throw new Error(`Could not find loan ${defaultedClaimEvent.loan.id}`);
+        throw new Error(`defaultClaimEvents: Could not find loan ${defaultedClaimEvent.loan.id}`);
       }
 
       // Update the loan
@@ -161,22 +173,29 @@ export const generateSnapshots = (
       loan.collateralClaimedQuantity = defaultedClaimEvent.collateralQuantityClaimed;
       loan.collateralClaimedValue = defaultedClaimEvent.collateralValueClaimed;
       loan.collateralIncome = defaultedClaimEvent.collateralIncome;
+
+      // Update overall receivables
+      currentSnapshot.receivables -= defaultedClaimEvent.loan.amount;
     });
 
     // Update loans where there were rollover events
-    const currentRolloverEvents = subgraphData.rolloverEvents[currentDate.toISOString()] || [];
+    const currentRolloverEvents = subgraphData.rolloverEvents[currentDateString] || [];
     console.log(`${FUNC}: processing ${currentRolloverEvents.length} rollover events`);
     currentRolloverEvents.forEach(rolloverEvent => {
+      console.log(`${FUNC}: processing rollover event ${rolloverEvent.id}`);
+
       // Find the loan
       const loan = currentSnapshot.loans.find(loan => loan.id === rolloverEvent.loan.id);
       if (!loan) {
-        throw new Error(`Could not find loan ${rolloverEvent.loan.id}`);
+        throw new Error(`rolloverEvents: Could not find loan ${rolloverEvent.loan.id}`);
       }
 
       // Update the loan
       loan.status = "Active";
       loan.expiryTimestamp = rolloverEvent.loan.expiryTimestamp;
       loan.amountPayable = rolloverEvent.loan.principal + rolloverEvent.loan.interest; // TODO check this
+
+      // TODO update receivables
     });
 
     // Update secondsToExpiry for all loans
@@ -199,6 +218,7 @@ export const generateSnapshots = (
 
     snapshots.push(currentSnapshot);
 
+    previousSnapshot = currentSnapshot;
     currentDate = adjustDate(currentDate, 1);
   }
 
