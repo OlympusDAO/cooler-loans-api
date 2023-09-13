@@ -1,4 +1,4 @@
-type ClearinghouseSnapshot = {
+export type ClearinghouseSnapshot = {
   id: string;
   date: string;
   blockNumber: number;
@@ -37,6 +37,7 @@ export type DefaultedClaimEvent = {
   id: string;
   date: string;
   blockTimestamp: number;
+  secondsSinceExpiry: number;
   loan: Loan;
   collateralQuantityClaimed: number;
   collateralPrice: number;

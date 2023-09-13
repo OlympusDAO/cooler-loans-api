@@ -1,5 +1,12 @@
 import { adjustDate, getISO8601DateString, setMidnight } from "../../helpers/dateHelper";
-import { CreationEvent, DefaultedClaimEvent, RepaymentEvent, RolloverEvent, SubgraphData } from "./subgraph";
+import {
+  ClearinghouseSnapshot,
+  CreationEvent,
+  DefaultedClaimEvent,
+  RepaymentEvent,
+  RolloverEvent,
+  SubgraphData,
+} from "./subgraph";
 
 export type Snapshot = {
   date: Date;
@@ -41,6 +48,7 @@ export type Snapshot = {
   defaultedClaimEvents: DefaultedClaimEvent[];
   repaymentEvents: RepaymentEvent[];
   rolloverEvents: RolloverEvent[];
+  clearinghouseEvents: ClearinghouseSnapshot[];
 };
 
 const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
@@ -59,12 +67,23 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       defaultedClaimEvents: [],
       repaymentEvents: [],
       rolloverEvents: [],
+      clearinghouseEvents: [],
     };
   }
 
   // Otherwise, return a new one based on the previous one
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot));
+
+  // Set the current date
   newSnapshot.date = currentDate;
+
+  // Events are not carried over
+  newSnapshot.creationEvents = [];
+  newSnapshot.repaymentEvents = [];
+  newSnapshot.defaultedClaimEvents = [];
+  newSnapshot.rolloverEvents = [];
+  newSnapshot.clearinghouseEvents = [];
+
   return newSnapshot;
 };
 
@@ -107,6 +126,7 @@ export const generateSnapshots = (
       currentSnapshot.clearinghouse.daiBalance = currentClearinghouseData.daiBalance;
       currentSnapshot.clearinghouse.sDaiBalance = currentClearinghouseData.sDaiBalance;
       currentSnapshot.clearinghouse.sDaiInDaiBalance = currentClearinghouseData.sDaiInDaiBalance;
+      currentSnapshot.clearinghouseEvents.push(currentClearinghouseData);
     }
 
     // Create loans where there were creation events
@@ -173,14 +193,16 @@ export const generateSnapshots = (
         throw new Error(`defaultClaimEvents: Could not find loan ${defaultedClaimEvent.loan.id}`);
       }
 
+      // Remove the loan payable from the receivables
+      currentSnapshot.receivables -= loan.amountPayable;
+
       // Update the loan
       loan.status = "Reclaimed";
-      loan.collateralClaimedQuantity = defaultedClaimEvent.collateralQuantityClaimed;
-      loan.collateralClaimedValue = defaultedClaimEvent.collateralValueClaimed;
-      loan.collateralIncome = defaultedClaimEvent.collateralIncome;
-
-      // Update overall receivables
-      currentSnapshot.receivables -= defaultedClaimEvent.loan.amount;
+      loan.collateralClaimedQuantity += defaultedClaimEvent.collateralQuantityClaimed;
+      loan.collateralClaimedValue += defaultedClaimEvent.collateralValueClaimed;
+      loan.collateralIncome += defaultedClaimEvent.collateralIncome;
+      loan.amountPayable = 0;
+      loan.collateralDeposited = 0;
     });
 
     // Update loans where there were rollover events
