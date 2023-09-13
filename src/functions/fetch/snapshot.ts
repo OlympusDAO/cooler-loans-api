@@ -70,7 +70,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
 
 const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number => {
   const expiryDate = new Date(expiryTimestamp * 1000);
-  return Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
+  const timestampDifference = expiryDate.getTime() - currentDate.getTime();
+  if (timestampDifference < 0) {
+    return 0;
+  }
+
+  return Math.floor(timestampDifference / 1000);
 };
 
 export const generateSnapshots = (

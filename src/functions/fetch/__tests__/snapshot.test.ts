@@ -101,12 +101,9 @@ const getSampleData = (): SubgraphData => {
   };
 };
 
-const getSecondsToExpiry = (date: Date, expiryTimestamp: number): number => {
-  const dateTimestamp = date.getTime() / 1000;
-  console.log(`expiryTimestamp: ${expiryTimestamp}`);
-  console.log(`dateTimestamp: ${dateTimestamp}`);
-
-  return Math.floor(expiryTimestamp) - Math.floor(dateTimestamp);
+const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number => {
+  const expiryDate = new Date(expiryTimestamp * 1000);
+  return Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
 };
 
 describe("generateSnapshots", () => {
@@ -312,7 +309,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.loans[0].status).toEqual("Expired");
     expect(snapshotDayOfExpiry.loans[0].amountRepaid).toEqual(1000);
     expect(snapshotDayOfExpiry.loans[0].amountPayable).toEqual(100000 - 1000);
-    expect(snapshotDayOfExpiry.loans[0].interestIncome).toEqual(0);
+    expect(snapshotDayOfExpiry.loans[0].interestIncome).toEqual(10); // From payment
     expect(snapshotDayOfExpiry.loans[0].collateralClaimedQuantity).toEqual(0);
     expect(snapshotDayOfExpiry.loans[0].collateralClaimedValue).toEqual(0);
   });
