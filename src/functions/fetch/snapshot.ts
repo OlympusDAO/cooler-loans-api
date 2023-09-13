@@ -3,8 +3,8 @@ import {
   ClearinghouseSnapshot,
   CreationEvent,
   DefaultedClaimEvent,
+  ExtendEvent,
   RepaymentEvent,
-  RolloverEvent,
   SubgraphData,
 } from "./subgraph";
 
@@ -47,7 +47,7 @@ export type Snapshot = {
   creationEvents: CreationEvent[];
   defaultedClaimEvents: DefaultedClaimEvent[];
   repaymentEvents: RepaymentEvent[];
-  rolloverEvents: RolloverEvent[];
+  extendEvents: ExtendEvent[];
   clearinghouseEvents: ClearinghouseSnapshot[];
 };
 
@@ -66,7 +66,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       creationEvents: [],
       defaultedClaimEvents: [],
       repaymentEvents: [],
-      rolloverEvents: [],
+      extendEvents: [],
       clearinghouseEvents: [],
     };
   }
@@ -206,7 +206,7 @@ export const generateSnapshots = (
     });
 
     // Update loans where there were rollover events
-    const currentRolloverEvents = subgraphData.rolloverEvents[currentDateString] || [];
+    const currentRolloverEvents = subgraphData.extendEvents[currentDateString] || [];
     console.log(`${FUNC}: processing ${currentRolloverEvents.length} rollover events`);
     currentRolloverEvents.forEach(rolloverEvent => {
       console.log(`${FUNC}: processing rollover event ${rolloverEvent.id}`);
@@ -241,7 +241,7 @@ export const generateSnapshots = (
     currentSnapshot.creationEvents.push(...currentCreationEvents);
     currentSnapshot.repaymentEvents.push(...currentRepaymentEvents);
     currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
-    currentSnapshot.rolloverEvents.push(...currentRolloverEvents);
+    currentSnapshot.extendEvents.push(...currentRolloverEvents);
 
     snapshots.push(currentSnapshot);
 

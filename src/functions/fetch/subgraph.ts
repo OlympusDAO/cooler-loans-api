@@ -57,7 +57,7 @@ export type RepaymentEvent = {
   collateralDeposited: number;
 };
 
-export type RolloverEvent = {
+export type ExtendEvent = {
   id: string;
   date: string;
   blockTimestamp: number;
@@ -78,8 +78,8 @@ export type SubgraphData = {
   repaymentEvents: {
     [key: string]: RepaymentEvent[];
   };
-  rolloverEvents: {
-    [key: string]: RolloverEvent[];
+  extendEvents: {
+    [key: string]: ExtendEvent[];
   };
 };
 
@@ -168,6 +168,6 @@ export const getData = async (startDate: string, endDate: string): Promise<Subgr
     creationEvents: creationEvents,
     defaultedClaimEvents: {},
     repaymentEvents: repaymentEvents,
-    rolloverEvents: {},
+    extendEvents: {},
   };
 };

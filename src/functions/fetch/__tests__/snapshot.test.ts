@@ -100,7 +100,7 @@ const getSampleData = (): SubgraphData => {
         },
       ],
     },
-    rolloverEvents: {},
+    extendEvents: {},
   };
 };
 
@@ -119,7 +119,7 @@ describe("generateSnapshots", () => {
       creationEvents: {},
       defaultedClaimEvents: {},
       repaymentEvents: {},
-      rolloverEvents: {},
+      extendEvents: {},
     };
 
     const result = generateSnapshots(startDate, endDate, previousDateRecords, subgraphData);
@@ -134,7 +134,7 @@ describe("generateSnapshots", () => {
     expect(resultOne.creationEvents).toEqual([]);
     expect(resultOne.defaultedClaimEvents).toEqual([]);
     expect(resultOne.repaymentEvents).toEqual([]);
-    expect(resultOne.rolloverEvents).toEqual([]);
+    expect(resultOne.extendEvents).toEqual([]);
     expect(resultOne.clearinghouseEvents).toEqual([]);
 
     expect(result.length).toEqual(31);
@@ -180,7 +180,7 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.creationEvents.length).toEqual(1);
     expect(snapshotOne.repaymentEvents.length).toEqual(0);
     expect(snapshotOne.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotOne.rolloverEvents.length).toEqual(0);
+    expect(snapshotOne.extendEvents.length).toEqual(0);
     expect(snapshotOne.clearinghouseEvents.length).toEqual(1);
 
     const snapshotTwo = snapshots[1];
@@ -212,7 +212,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.creationEvents.length).toEqual(0);
     expect(snapshotTwo.repaymentEvents.length).toEqual(0);
     expect(snapshotTwo.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotTwo.rolloverEvents.length).toEqual(0);
+    expect(snapshotTwo.extendEvents.length).toEqual(0);
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
   });
 
@@ -253,7 +253,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.creationEvents.length).toEqual(0);
     expect(snapshotTen.repaymentEvents.length).toEqual(1);
     expect(snapshotTen.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotTen.rolloverEvents.length).toEqual(0);
+    expect(snapshotTen.extendEvents.length).toEqual(0);
     expect(snapshotTen.clearinghouseEvents.length).toEqual(0);
 
     // Day after should be the same
@@ -283,7 +283,7 @@ describe("generateSnapshots", () => {
     expect(snapshotEleven.creationEvents.length).toEqual(0);
     expect(snapshotEleven.repaymentEvents.length).toEqual(0);
     expect(snapshotEleven.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotEleven.rolloverEvents.length).toEqual(0);
+    expect(snapshotEleven.extendEvents.length).toEqual(0);
     expect(snapshotEleven.clearinghouseEvents.length).toEqual(0);
   });
 
@@ -307,7 +307,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwenty.creationEvents.length).toEqual(0);
     expect(snapshotTwenty.repaymentEvents.length).toEqual(0);
     expect(snapshotTwenty.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotTwenty.rolloverEvents.length).toEqual(0);
+    expect(snapshotTwenty.extendEvents.length).toEqual(0);
     expect(snapshotTwenty.clearinghouseEvents.length).toEqual(1);
 
     // Day 21 should carry on balances
@@ -320,7 +320,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwentyOne.creationEvents.length).toEqual(0);
     expect(snapshotTwentyOne.repaymentEvents.length).toEqual(0);
     expect(snapshotTwentyOne.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotTwentyOne.rolloverEvents.length).toEqual(0);
+    expect(snapshotTwentyOne.extendEvents.length).toEqual(0);
     expect(snapshotTwentyOne.clearinghouseEvents.length).toEqual(0);
   });
 
@@ -358,7 +358,7 @@ describe("generateSnapshots", () => {
       creationEvents: [],
       defaultedClaimEvents: [],
       repaymentEvents: [],
-      rolloverEvents: [],
+      extendEvents: [],
       clearinghouseEvents: [],
     };
 
@@ -369,7 +369,7 @@ describe("generateSnapshots", () => {
       creationEvents: {},
       defaultedClaimEvents: {},
       repaymentEvents: {},
-      rolloverEvents: {},
+      extendEvents: {},
     };
 
     const snapshots = generateSnapshots(startDate, endDate, previousDateSnapshot, subgraphData);
@@ -405,7 +405,7 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.creationEvents.length).toEqual(0);
     expect(snapshotOne.repaymentEvents.length).toEqual(0);
     expect(snapshotOne.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotOne.rolloverEvents.length).toEqual(0);
+    expect(snapshotOne.extendEvents.length).toEqual(0);
     expect(snapshotOne.clearinghouseEvents.length).toEqual(0);
   });
 
@@ -444,7 +444,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.repaymentEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotDayOfExpiry.rolloverEvents.length).toEqual(0);
+    expect(snapshotDayOfExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.clearinghouseEvents.length).toEqual(0);
 
     // Same for the next day
@@ -471,7 +471,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.repaymentEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotDayAfterExpiry.rolloverEvents.length).toEqual(0);
+    expect(snapshotDayAfterExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.clearinghouseEvents.length).toEqual(0);
   });
 
@@ -510,7 +510,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.repaymentEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.defaultedClaimEvents.length).toEqual(1);
-    expect(snapshotDayOfExpiry.rolloverEvents.length).toEqual(0);
+    expect(snapshotDayOfExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.clearinghouseEvents.length).toEqual(0);
 
     // Same for next day
@@ -537,9 +537,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.repaymentEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.defaultedClaimEvents.length).toEqual(0);
-    expect(snapshotDayAfterExpiry.rolloverEvents.length).toEqual(0);
+    expect(snapshotDayAfterExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.clearinghouseEvents.length).toEqual(0);
   });
 });
 
-// TODO Add tests for rollover
+// TODO Add tests for extend
