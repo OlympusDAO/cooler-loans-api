@@ -29,7 +29,7 @@ export type Snapshot = {
     collateralDeposited: number;
     expiryTimestamp: number;
     secondsToExpiry: number;
-    status: "Active" | "Default - Unclaimed" | "Default - Claimed" | "Repaid";
+    status: "Active" | "Expired" | "Reclaimed" | "Repaid";
     amountRepaid: number;
     amountPayable: number;
     interestIncome: number;
@@ -169,7 +169,7 @@ export const generateSnapshots = (
       }
 
       // Update the loan
-      loan.status = "Default - Claimed";
+      loan.status = "Reclaimed";
       loan.collateralClaimedQuantity = defaultedClaimEvent.collateralQuantityClaimed;
       loan.collateralClaimedValue = defaultedClaimEvent.collateralValueClaimed;
       loan.collateralIncome = defaultedClaimEvent.collateralIncome;
@@ -206,7 +206,7 @@ export const generateSnapshots = (
     // Update the status for all loans
     currentSnapshot.loans.forEach(loan => {
       if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
-        loan.status = "Default - Unclaimed";
+        loan.status = "Expired";
       }
     });
 

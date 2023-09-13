@@ -14,6 +14,6 @@ export const adjustDate = (date: Date, days: number) => {
 
 export const setMidnight = (date: Date) => {
   const newDate = new Date(date);
-  newDate.setUTCHours(0, 0, 0, 0);
+  newDate.setUTCHours(23, 59, 59);
   return newDate;
 };
