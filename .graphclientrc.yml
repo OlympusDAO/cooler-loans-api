@@ -2,4 +2,4 @@ sources:
   - name: cooler-loans
     handler:
       graphql:
-        endpoint: 
+        endpoint: https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1
