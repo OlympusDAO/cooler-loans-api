@@ -1,173 +1,280 @@
-export type ClearinghouseSnapshot = {
-  id: string;
-  date: string;
-  blockNumber: number;
-  blockTimestamp: number;
-  clearinghouse: string;
-  isActive: boolean;
-  nextRebalanceTimestamp: number;
-  receivables: number;
-  daiBalance: number;
-  sDaiBalance: number;
-  sDaiInDaiBalance: number;
-};
+import gql from "graphql-tag";
 
-type Loan = {
-  id: string;
-  createdTimestamp: number;
-  loanId: number;
-  borrowerAddress: string;
-  coolerAddress: string;
-  lenderAddress: string;
-  amount: number;
-  interest: number;
-  principal: number;
-  collateralDeposited: number;
-  expiryTimestamp: number;
-};
+import {
+  ClaimDefaultedLoanEvent,
+  ClearinghouseSnapshot,
+  ClearLoanRequestEvent,
+  ExtendLoanEvent,
+  getBuiltGraphSDK,
+  RepayLoanEvent,
+} from "../../../.graphclient";
+import { getISO8601DateString, getTimestampSeconds } from "../../helpers/dateHelper";
 
-export type CreationEvent = {
-  id: string;
-  date: string;
-  blockTimestamp: number;
-  loan: Loan;
-};
-
-export type DefaultedClaimEvent = {
-  id: string;
-  date: string;
-  blockTimestamp: number;
-  secondsSinceExpiry: number;
-  loan: Loan;
-  collateralQuantityClaimed: number;
-  collateralPrice: number;
-  collateralValueClaimed: number;
-  collateralIncome: number;
-};
-
-export type RepaymentEvent = {
-  id: string;
-  date: string;
-  blockTimestamp: number;
-  loan: Loan;
-  secondsToExpiry: number;
-  amountPaid: number;
-  amountPayable: number;
-  interestIncome: number;
-  collateralDeposited: number;
-};
-
-export type ExtendEvent = {
-  id: string;
-  date: string;
-  blockTimestamp: number;
-  loan: Loan;
-  times: number;
-};
+export type ClearinghouseSnapshotOptional = Omit<ClearinghouseSnapshot, "rebalanceEvents" | "defundEvents">;
+export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan">;
+export type RepayLoanEventOptional = Omit<RepayLoanEvent, "loan">;
+export type ClaimDefaultedLoanEventOptional = Omit<ClaimDefaultedLoanEvent, "loan">;
+export type ExtendLoanEventOptional = Omit<ExtendLoanEvent, "loan">;
 
 export type SubgraphData = {
   clearinghouseSnapshots: {
-    [key: string]: ClearinghouseSnapshot;
+    [key: string]: ClearinghouseSnapshotOptional[];
   };
   creationEvents: {
-    [key: string]: CreationEvent[];
-  };
-  defaultedClaimEvents: {
-    [key: string]: DefaultedClaimEvent[];
+    [key: string]: ClearLoanRequestEventOptional[];
   };
   repaymentEvents: {
-    [key: string]: RepaymentEvent[];
+    [key: string]: RepayLoanEventOptional[];
+  };
+  defaultedClaimEvents: {
+    [key: string]: ClaimDefaultedLoanEventOptional[];
   };
   extendEvents: {
-    [key: string]: ExtendEvent[];
+    [key: string]: ExtendLoanEventOptional[];
   };
 };
 
-export const getData = async (startDate: string, endDate: string): Promise<SubgraphData> => {
-  // Get Cooler Loan data
-  // Get event data
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const coolerLoansQuery = gql`
+  query CoolerLoans($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
+    claimDefaultedLoanEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      blockNumber
+      blockTimestamp
+      collateralPrice
+      collateralQuantityClaimed
+      collateralValueClaimed
+      date
+      id
+      secondsSinceExpiry
+      transactionHash
+    }
+    clearLoanRequestEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      blockNumber
+      blockTimestamp
+      date
+      id
+      transactionHash
+    }
+    defundEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      amount
+      blockNumber
+      blockTimestamp
+      clearinghouse
+      clearinghouseSnapshot {
+        blockNumber
+        blockTimestamp
+        clearinghouse
+        daiBalance
+        date
+        id
+        interestReceivables
+        isActive
+        nextRebalanceTimestamp
+        principalReceivables
+        sDaiBalance
+        sDaiInDaiBalance
+        treasuryDaiBalance
+        treasurySDaiBalance
+        treasurySDaiInDaiBalance
+      }
+      date
+      id
+      transactionHash
+    }
+    extendLoanEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      blockNumber
+      blockTimestamp
+      date
+      expiryTimestamp
+      id
+      interestDue
+      periods
+      transactionHash
+    }
+    rebalanceEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      amount
+      blockNumber
+      blockTimestamp
+      clearinghouse
+      clearinghouseSnapshot {
+        blockNumber
+        blockTimestamp
+        clearinghouse
+        daiBalance
+        date
+        id
+        interestReceivables
+        isActive
+        nextRebalanceTimestamp
+        principalReceivables
+        sDaiBalance
+        sDaiInDaiBalance
+        treasuryDaiBalance
+        treasurySDaiBalance
+        treasurySDaiInDaiBalance
+      }
+      date
+      id
+      transactionHash
+    }
+    repayLoanEvents(
+      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+      orderBy: blockTimestamp
+      orderDirection: asc
+    ) {
+      amountPaid
+      blockNumber
+      blockTimestamp
+      collateralDeposited
+      date
+      id
+      interestPayable
+      principalPayable
+      secondsToExpiry
+      transactionHash
+    }
+  }
+`;
 
-  const clearinghouseSnapshots = {
-    "2023-08-05": {
-      id: "0",
-      date: "2023-08-05",
-      blockNumber: 12223,
-      blockTimestamp: 100000,
-      clearinghouse: "0x00000",
-      isActive: true,
-      nextRebalanceTimestamp: 100001,
-      receivables: 100000,
-      daiBalance: 10000000.0,
-      sDaiBalance: 500000.0,
-      sDaiInDaiBalance: 600000.01,
+export const getData = async (startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
+  const sdk = getBuiltGraphSDK();
+
+  // Fetch events
+  const result = await sdk.CoolerLoans({
+    startTimestamp: getTimestampSeconds(startDate),
+    beforeTimestamp: getTimestampSeconds(beforeDate),
+  });
+
+  // TODO Fetch loans up to beforeDate
+
+  /**
+   * Clearinghouse Snapshots
+   */
+  const clearinghouseSnapshotsArray: ClearinghouseSnapshotOptional[] = [];
+
+  result.defundEvents.forEach(defundEvent => {
+    clearinghouseSnapshotsArray.push(defundEvent.clearinghouseSnapshot);
+  });
+
+  result.rebalanceEvents.forEach(rebalanceEvent => {
+    clearinghouseSnapshotsArray.push(rebalanceEvent.clearinghouseSnapshot);
+  });
+
+  // Convert to a map with the date in YYYY-MM-DD format as the key and an array of snapshots as the values
+  const clearinghouseSnapshots = clearinghouseSnapshotsArray.reduce(
+    (accumulator, currentValue) => {
+      const dateString: string = getISO8601DateString(new Date(currentValue.date));
+      if (!accumulator[dateString]) {
+        accumulator[dateString] = [];
+      }
+
+      accumulator[dateString].push(currentValue);
+      return accumulator;
     },
-    "2023-08-20": {
-      id: "0",
-      date: "2023-08-20",
-      blockNumber: 12223,
-      blockTimestamp: 100000,
-      clearinghouse: "0x00000",
-      isActive: true,
-      nextRebalanceTimestamp: 100001,
-      receivables: 20000000.01,
-      daiBalance: 9000000.0,
-      sDaiBalance: 500000.0,
-      sDaiInDaiBalance: 600000.01,
+    {} as { [key: string]: ClearinghouseSnapshotOptional[] },
+  );
+
+  /**
+   * Creation Events
+   */
+  const creationEventsArray: ClearLoanRequestEventOptional[] = result.clearLoanRequestEvents;
+
+  // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
+  const creationEvents = creationEventsArray.reduce(
+    (accumulator, currentValue) => {
+      const dateString: string = getISO8601DateString(new Date(currentValue.date));
+      if (!accumulator[dateString]) {
+        accumulator[dateString] = [];
+      }
+
+      accumulator[dateString].push(currentValue);
+      return accumulator;
     },
-  };
+    {} as { [key: string]: ClearLoanRequestEventOptional[] },
+  );
 
-  const loan: Loan = {
-    id: "0",
-    // 2023-08-05
-    createdTimestamp: 1691222400,
-    loanId: 0,
-    coolerAddress: "0x03",
-    borrowerAddress: "0x01",
-    lenderAddress: "0x02",
-    amount: 100000,
-    interest: 1000,
-    principal: 99000,
-    collateralDeposited: 30,
-    // 2023-09-10
-    expiryTimestamp: 1694332800,
-  };
+  /**
+   * Repayment Events
+   */
+  const repaymentEventsArray: RepayLoanEventOptional[] = result.repayLoanEvents;
 
-  const creationEvents = {
-    "2023-08-05": [
-      {
-        id: "0",
-        date: "2023-08-05",
-        blockTimestamp: 1691222400,
-        loan: loan,
-      },
-    ],
-  };
+  // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
+  const repaymentEvents = repaymentEventsArray.reduce(
+    (accumulator, currentValue) => {
+      const dateString: string = getISO8601DateString(new Date(currentValue.date));
+      if (!accumulator[dateString]) {
+        accumulator[dateString] = [];
+      }
 
-  const repaymentEvents = {
-    "2023-08-10": [
-      {
-        id: "0",
-        date: "2023-08-10",
-        blockTimestamp: 1691654400,
-        secondsToExpiry: 1694332800 - 1691654400,
-        amountPaid: 1000,
-        amountPayable: 100000 - 1000,
-        interestIncome: 10,
-        collateralDeposited: 29,
-        loan: loan,
-      },
-    ],
-  };
+      accumulator[dateString].push(currentValue);
+      return accumulator;
+    },
+    {} as { [key: string]: RepayLoanEventOptional[] },
+  );
 
-  // Grab clearinghouse snapshots for the given date range
+  /**
+   * Claim Default Events
+   */
+  const claimDefaultedEventsArray: ClaimDefaultedLoanEventOptional[] = result.claimDefaultedLoanEvents;
 
-  // Grab events for the given date range
+  // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
+  const claimDefaultedEvents = claimDefaultedEventsArray.reduce(
+    (accumulator, currentValue) => {
+      const dateString: string = getISO8601DateString(new Date(currentValue.date));
+      if (!accumulator[dateString]) {
+        accumulator[dateString] = [];
+      }
+
+      accumulator[dateString].push(currentValue);
+      return accumulator;
+    },
+    {} as { [key: string]: ClaimDefaultedLoanEventOptional[] },
+  );
+
+  /**
+   * Extend Events
+   */
+  const extendEventsArray: ExtendLoanEventOptional[] = result.extendLoanEvents;
+
+  // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
+  const extendEvents = extendEventsArray.reduce(
+    (accumulator, currentValue) => {
+      const dateString: string = getISO8601DateString(new Date(currentValue.date));
+      if (!accumulator[dateString]) {
+        accumulator[dateString] = [];
+      }
+
+      accumulator[dateString].push(currentValue);
+      return accumulator;
+    },
+    {} as { [key: string]: ExtendLoanEventOptional[] },
+  );
 
   return {
     clearinghouseSnapshots: clearinghouseSnapshots,
     creationEvents: creationEvents,
-    defaultedClaimEvents: {},
+    defaultedClaimEvents: claimDefaultedEvents,
     repaymentEvents: repaymentEvents,
-    extendEvents: {},
+    extendEvents: extendEvents,
   };
 };

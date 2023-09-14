@@ -3,3 +3,10 @@ sources:
     handler:
       graphql:
         endpoint: https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1
+    transforms:
+      - autoPagination:
+          # You might want to disable schema validation for faster startup
+          validateSchema: true
+documents:
+  - './src/**/*.graphql'
+  - './src/**/*.{ts,tsx,js,jsx}'

@@ -1,4 +1,4 @@
-import { adjustDate, getISO8601DateString, setMidnight } from "../../helpers/dateHelper";
+import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
 import {
   ClearinghouseSnapshot,
   CreationEvent,
@@ -98,8 +98,8 @@ const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number 
 };
 
 export const generateSnapshots = (
-  startDateString: string,
-  endDateString: string,
+  startDate: Date,
+  beforeDate: Date,
   previousDateRecord: Snapshot | null,
   subgraphData: SubgraphData,
 ): Snapshot[] => {
@@ -107,18 +107,19 @@ export const generateSnapshots = (
   const snapshots: Snapshot[] = [];
 
   // Iterate through the dates
-  let currentDate = setMidnight(new Date(startDateString));
-  const endDate = setMidnight(new Date(endDateString));
+  let currentDate = setMidnight(startDate);
+  const endDate = beforeDate;
 
   let previousSnapshot: Snapshot | null = previousDateRecord;
   console.log(`${FUNC}: previousSnapshot: ${previousSnapshot}`);
 
-  while (currentDate <= endDate) {
+  while (currentDate.getTime() < endDate.getTime()) {
     const currentDateString = getISO8601DateString(currentDate);
+    const currentDateBeforeMidnight = setBeforeMidnight(currentDate);
     console.log(`${FUNC}: currentDate: ${currentDateString}`);
 
     // Populate a new Snapshot based on the previous one
-    const currentSnapshot = createSnapshot(currentDate, previousSnapshot);
+    const currentSnapshot = createSnapshot(currentDateBeforeMidnight, previousSnapshot);
 
     // Update clearinghouse data, if it exists
     const currentClearinghouseData = subgraphData.clearinghouseSnapshots[currentDateString];
@@ -148,7 +149,7 @@ export const generateSnapshots = (
         interest: creationEvent.loan.interest,
         collateralDeposited: creationEvent.loan.collateralDeposited,
         expiryTimestamp: creationEvent.loan.expiryTimestamp,
-        secondsToExpiry: getSecondsToExpiry(currentDate, creationEvent.loan.expiryTimestamp),
+        secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, creationEvent.loan.expiryTimestamp),
         status: "Active",
         amountRepaid: 0,
         amountPayable: creationEvent.loan.principal + creationEvent.loan.interest,
@@ -227,7 +228,7 @@ export const generateSnapshots = (
 
     // Update secondsToExpiry for all loans
     currentSnapshot.loans.forEach(loan => {
-      loan.secondsToExpiry = getSecondsToExpiry(currentDate, loan.expiryTimestamp);
+      loan.secondsToExpiry = getSecondsToExpiry(currentDateBeforeMidnight, loan.expiryTimestamp);
     });
 
     // Update the status for all loans

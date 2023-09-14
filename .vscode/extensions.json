@@ -3,6 +3,7 @@
     "gruntfuggly.todo-tree",
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
-    "mquandalle.graphql"
+    "mquandalle.graphql",
+    "graphql.vscode-graphql"
   ]
 }

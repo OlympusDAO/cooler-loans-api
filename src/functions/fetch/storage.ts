@@ -25,12 +25,12 @@ export const getLatestCachedDate = async (): Promise<string | null> => {
   return getISO8601DateString(snapshot.docs[0].data().date as Date);
 };
 
-export const getSnapshot = async (date: string): Promise<Snapshot | null> => {
+export const getSnapshot = async (date: Date): Promise<Snapshot | null> => {
   // Get the Firestore client
   const client = getClient();
 
   // Get the snapshot
-  const snapshot = await client.collection(FIRESTORE_ROOT_COLLECTION).doc(date).get();
+  const snapshot = await client.collection(FIRESTORE_ROOT_COLLECTION).doc(getISO8601DateString(date)).get();
 
   // If there is no snapshot, return null
   if (!snapshot.exists) {

@@ -14,6 +14,16 @@ export const adjustDate = (date: Date, days: number) => {
 
 export const setMidnight = (date: Date) => {
   const newDate = new Date(date);
-  newDate.setUTCHours(23, 59, 59);
+  newDate.setUTCHours(0, 0, 0);
   return newDate;
+};
+
+export const setBeforeMidnight = (date: Date) => {
+  const newDate = new Date(date);
+  newDate.setUTCHours(23, 59, 59, 999);
+  return newDate;
+};
+
+export const getTimestampSeconds = (date: Date) => {
+  return Math.floor(date.getTime() / 1000);
 };
