@@ -9,13 +9,14 @@ const getClient = () => {
   return new Firestore();
 };
 
+// TODO converter
+
 export const getLatestCachedDate = async (): Promise<string | null> => {
   // Get the Firestore client
   const client = getClient();
 
   // Get the latest snapshot
   const snapshot = await client.collection(FIRESTORE_ROOT_COLLECTION).orderBy("date", "desc").limit(1).get();
-
   // If there are no snapshots, return null
   if (snapshot.empty) {
     return null;

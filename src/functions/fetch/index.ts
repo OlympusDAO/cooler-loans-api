@@ -20,8 +20,6 @@ export const handler = async () => {
   // Prepare snapshots
   const dateSnapshots = generateSnapshots(startDate, beforeDate, previousSnapshot, subgraphData);
 
-  // Write loans
-
   // Write snapshots
   await writeSnapshots(dateSnapshots);
 };
