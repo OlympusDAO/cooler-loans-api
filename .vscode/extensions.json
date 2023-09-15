@@ -4,6 +4,7 @@
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
     "mquandalle.graphql",
-    "graphql.vscode-graphql"
+    "graphql.vscode-graphql",
+    "kavod-io.vscode-jest-test-adapter"
   ]
 }
