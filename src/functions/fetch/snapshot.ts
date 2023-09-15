@@ -259,7 +259,7 @@ export const generateSnapshots = (
       loan.status = "Active";
       loan.expiryTimestamp = rolloverEvent.expiryTimestamp;
 
-      const incrementalInterest = loan.interest * rolloverEvent.periods;
+      const incrementalInterest = rolloverEvent.interestDue - loan.interest;
       loan.interest += incrementalInterest;
 
       // Update receivables

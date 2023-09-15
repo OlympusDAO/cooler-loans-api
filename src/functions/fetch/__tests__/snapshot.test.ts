@@ -833,8 +833,65 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.clearinghouseEvents.length).toEqual(0);
   });
-});
 
-// TODO Add tests for extend
+  it("extend loan", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-03");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+
+    // Add extension on day 2
+    const newInterestDue = LOAN_INTEREST + 2 * LOAN_INTEREST;
+    const newExpiryTimestamp = 99999999999;
+    subgraphData.extendEvents["2023-08-02"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-02",
+        blockNumber: 1233456,
+        blockTimestamp: 1691654400,
+        transactionHash: "0x0000002",
+        periods: 2,
+        expiryTimestamp: 99999999999,
+        interestDue: newInterestDue,
+        loan: {
+          id: "0x3-0",
+        },
+      },
+    ];
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    // Day 2 should have the loan extended
+    const snapshotTwo = snapshots[1];
+    expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
+    expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL);
+    expect(snapshotTwo.interestReceivables).toEqual(newInterestDue);
+
+    expect(Object.values(snapshotTwo.loans)).toHaveLength(1);
+    const snapshotTwoLoanOne = snapshotTwo.loans[LOAN_ID];
+    expect(snapshotTwoLoanOne.loanId).toEqual(0);
+    expect(snapshotTwoLoanOne.createdTimestamp).toEqual(LOAN_CREATION_TIMESTAMP);
+    expect(snapshotTwoLoanOne.borrowerAddress).toEqual("0x01");
+    expect(snapshotTwoLoanOne.lenderAddress).toEqual("0x02");
+    expect(snapshotTwoLoanOne.principal).toEqual(LOAN_PRINCIPAL);
+    expect(snapshotTwoLoanOne.interest).toEqual(newInterestDue);
+    expect(snapshotTwoLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
+    expect(snapshotTwoLoanOne.expiryTimestamp).toEqual(newExpiryTimestamp);
+    expect(snapshotTwoLoanOne.secondsToExpiry).toEqual(
+      getSecondsToExpiry(snapshotTwo.date, snapshotTwoLoanOne.expiryTimestamp),
+    );
+    expect(snapshotTwoLoanOne.status).toEqual("Active");
+    expect(snapshotTwoLoanOne.principalPaid).toEqual(0);
+    expect(snapshotTwoLoanOne.interestPaid).toEqual(0);
+    expect(snapshotTwoLoanOne.collateralClaimedQuantity).toEqual(0);
+    expect(snapshotTwoLoanOne.collateralClaimedValue).toEqual(0);
+    expect(snapshotTwoLoanOne.collateralIncome).toEqual(0);
+    expect(snapshotTwo.creationEvents.length).toEqual(0);
+    expect(snapshotTwo.repaymentEvents.length).toEqual(0);
+    expect(snapshotTwo.defaultedClaimEvents.length).toEqual(0);
+    expect(snapshotTwo.extendEvents.length).toEqual(1);
+    expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
+  });
+});
 
 // TODO extend and repayment
