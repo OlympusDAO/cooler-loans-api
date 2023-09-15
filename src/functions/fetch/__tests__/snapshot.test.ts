@@ -317,6 +317,64 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
   });
 
+  it("multiple loans", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-03");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+
+    // Add a second loan
+    const loanTwoPrincipal = 10000;
+    const loanTwoInterest = 500;
+    subgraphData.creationEvents["2023-08-02"] = [
+      {
+        id: "0x3-1",
+        date: "2023-08-02",
+        blockTimestamp: 1690876800,
+        blockNumber: 12223,
+        transactionHash: "0x0000001",
+        loan: {
+          id: "0x3-1",
+          createdBlock: 12223,
+          createdTransaction: "0x0000001",
+          // 2023-08-02
+          createdTimestamp: 1690876800,
+          loanId: 1,
+          borrower: "0x01",
+          lender: "0x02",
+          cooler: "0x03",
+          interest: loanTwoInterest,
+          principal: loanTwoPrincipal,
+          collateral: 30,
+          // 2023-09-11
+          expiryTimestamp: 1694246400,
+          collateralToken: "0x04",
+          debtToken: "0x05",
+          hasCallback: false,
+        },
+      },
+    ];
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    const snapshotTwo = snapshots[1];
+
+    expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
+    expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL + loanTwoPrincipal);
+    expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST + loanTwoInterest);
+
+    // Should have 2 loans
+    expect(Object.values(snapshotTwo.loans)).toHaveLength(2);
+
+    // Loan 1
+    const snapshotTwoLoanOne = snapshotTwo.loans[LOAN_ID];
+    expect(snapshotTwoLoanOne.id).toEqual(LOAN_ID);
+
+    // Loan 2
+    const snapshotTwoLoanTwo = snapshotTwo.loans["0x3-1"];
+    expect(snapshotTwoLoanTwo.id).toEqual("0x3-1");
+  });
+
   it("loan repayment", () => {
     const startDate = new Date("2023-08-01");
     const beforeDate = new Date("2023-08-12");
@@ -780,4 +838,3 @@ describe("generateSnapshots", () => {
 // TODO Add tests for extend
 
 // TODO extend and repayment
-// TODO multiple loans
