@@ -3,9 +3,6 @@ import { Firestore } from "@google-cloud/firestore";
 import { Snapshot } from "../snapshot";
 import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../storage";
 
-// Set the variable to connect to the Firestore emulator
-process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
-
 const getFirestoreClient = () => {
   return new Firestore();
 };
@@ -18,22 +15,28 @@ type SnapshotStub = {
 const addSnapshots = async (snapshots: SnapshotStub[]) => {
   const client = getFirestoreClient();
 
-  for (const snapshot of snapshots) {
+  for (let i = 0; i < snapshots.length; i++) {
+    const snapshot = snapshots[i];
     await client.collection("snapshots").doc(snapshot.id).set(snapshot);
   }
 };
 
-beforeEach(async () => {
+const clearFirestore = async () => {
   // Clear the Firestore database
   const client = getFirestoreClient();
   const documents = await client.collection("snapshots").listDocuments();
   console.log("Clearing Firestore documents");
-  for (const document of documents) {
+  for (let i = 0; i < documents.length; i++) {
+    const document = documents[i];
     await document.delete();
   }
-});
+};
 
 describe("getLatestCachedDate", () => {
+  beforeEach(async () => {
+    await clearFirestore();
+  }, 10000);
+
   test("empty", async () => {
     const latestCachedDate = await getLatestCachedDate();
 
@@ -41,7 +44,7 @@ describe("getLatestCachedDate", () => {
   });
 
   test("returns the most recent date", async () => {
-    addSnapshots([
+    await addSnapshots([
       {
         id: "2020-01-01",
         date: new Date("2020-01-01"),
@@ -59,10 +62,14 @@ describe("getLatestCachedDate", () => {
     const latestCachedDate = await getLatestCachedDate();
 
     expect(latestCachedDate).toEqual("2020-01-03");
-  });
+  }, 10000);
 });
 
 describe("writeSnapshots", () => {
+  beforeEach(async () => {
+    await clearFirestore();
+  }, 10000);
+
   test("writes multiple snapshots, one per day", async () => {
     const snapshots: Snapshot[] = [
       {
@@ -119,5 +126,5 @@ describe("writeSnapshots", () => {
 
     const snapshotTwo = await getSnapshot(new Date("2020-01-02"));
     expect(snapshotTwo?.date).toEqual(new Date("2020-01-02"));
-  });
+  }, 10000);
 });

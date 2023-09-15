@@ -3903,11 +3903,6 @@ firebase-admin@^11.10.1:
     "@google-cloud/firestore" "^6.6.0"
     "@google-cloud/storage" "^6.9.5"
 
-firestore-jest-mock@^0.21.0:
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/firestore-jest-mock/-/firestore-jest-mock-0.21.0.tgz#ce91a1f8b17eeffe016ab45d06ee637152fa2e03"
-  integrity sha512-pGMFVNxBJ+VLI/VCqC4OAXWfWPku0BwgluEXtoiZUyoVH7sXmAlcTDNEy8y8BFWhRFA/mQ2x2oZh3IFHmFmjFg==
-
 flat-cache@^3.0.4:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/flat-cache/-/flat-cache-3.1.0.tgz#0e54ab4a1a60fe87e2946b6b00657f1c99e1af3f"
