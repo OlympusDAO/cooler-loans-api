@@ -14,8 +14,6 @@ export const handler = async () => {
   // Fetch event data
   const subgraphData = await getData(startDate, beforeDate);
 
-  // Fetch loan data
-
   // Grab the previous date's data
   const previousSnapshot: Snapshot | null = await getSnapshot(startDate);
 

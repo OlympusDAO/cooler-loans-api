@@ -3013,12 +3013,6 @@ const merger = new(BareMerger as any)({
           return printWithCache(CoolerLoanEventsDocument);
         },
         location: 'CoolerLoanEventsDocument.graphql'
-      },{
-        document: CoolerLoansDocument,
-        get rawSDL() {
-          return printWithCache(CoolerLoansDocument);
-        },
-        location: 'CoolerLoansDocument.graphql'
       }
     ];
     },
@@ -3063,20 +3057,25 @@ export type CoolerLoanEventsQueryVariables = Exact<{
 }>;
 
 
-export type CoolerLoanEventsQuery = { claimDefaultedLoanEvents: Array<Pick<ClaimDefaultedLoanEvent, 'blockNumber' | 'blockTimestamp' | 'collateralPrice' | 'collateralQuantityClaimed' | 'collateralValueClaimed' | 'date' | 'id' | 'secondsSinceExpiry' | 'transactionHash'>>, clearLoanRequestEvents: Array<Pick<ClearLoanRequestEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'id' | 'transactionHash'>>, defundEvents: Array<(
+export type CoolerLoanEventsQuery = { claimDefaultedLoanEvents: Array<(
+    Pick<ClaimDefaultedLoanEvent, 'blockNumber' | 'blockTimestamp' | 'collateralPrice' | 'collateralQuantityClaimed' | 'collateralValueClaimed' | 'date' | 'id' | 'secondsSinceExpiry' | 'transactionHash'>
+    & { loan: Pick<CoolerLoan, 'id'> }
+  )>, clearLoanRequestEvents: Array<(
+    Pick<ClearLoanRequestEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'id' | 'transactionHash'>
+    & { loan: Pick<CoolerLoan, 'borrower' | 'collateral' | 'collateralToken' | 'cooler' | 'createdBlock' | 'createdTimestamp' | 'createdTransaction' | 'debtToken' | 'expiryTimestamp' | 'hasCallback' | 'id' | 'interest' | 'lender' | 'loanId' | 'principal'> }
+  )>, defundEvents: Array<(
     Pick<DefundEvent, 'amount' | 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'date' | 'id' | 'transactionHash'>
     & { clearinghouseSnapshot: Pick<ClearinghouseSnapshot, 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'daiBalance' | 'date' | 'id' | 'interestReceivables' | 'isActive' | 'nextRebalanceTimestamp' | 'principalReceivables' | 'sDaiBalance' | 'sDaiInDaiBalance' | 'treasuryDaiBalance' | 'treasurySDaiBalance' | 'treasurySDaiInDaiBalance'> }
-  )>, extendLoanEvents: Array<Pick<ExtendLoanEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'expiryTimestamp' | 'id' | 'interestDue' | 'periods' | 'transactionHash'>>, rebalanceEvents: Array<(
+  )>, extendLoanEvents: Array<(
+    Pick<ExtendLoanEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'expiryTimestamp' | 'id' | 'interestDue' | 'periods' | 'transactionHash'>
+    & { loan: Pick<CoolerLoan, 'id'> }
+  )>, rebalanceEvents: Array<(
     Pick<RebalanceEvent, 'amount' | 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'date' | 'id' | 'transactionHash'>
     & { clearinghouseSnapshot: Pick<ClearinghouseSnapshot, 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'daiBalance' | 'date' | 'id' | 'interestReceivables' | 'isActive' | 'nextRebalanceTimestamp' | 'principalReceivables' | 'sDaiBalance' | 'sDaiInDaiBalance' | 'treasuryDaiBalance' | 'treasurySDaiBalance' | 'treasurySDaiInDaiBalance'> }
-  )>, repayLoanEvents: Array<Pick<RepayLoanEvent, 'amountPaid' | 'blockNumber' | 'blockTimestamp' | 'collateralDeposited' | 'date' | 'id' | 'interestPayable' | 'principalPayable' | 'secondsToExpiry' | 'transactionHash'>> };
-
-export type CoolerLoansQueryVariables = Exact<{
-  beforeTimestamp: Scalars['BigInt'];
-}>;
-
-
-export type CoolerLoansQuery = { coolerLoans: Array<Pick<CoolerLoan, 'borrower' | 'collateral' | 'collateralToken' | 'cooler' | 'createdBlock' | 'createdTimestamp' | 'createdTransaction' | 'debtToken' | 'expiryTimestamp' | 'hasCallback' | 'id' | 'interest' | 'lender' | 'loanId' | 'principal'>> };
+  )>, repayLoanEvents: Array<(
+    Pick<RepayLoanEvent, 'amountPaid' | 'blockNumber' | 'blockTimestamp' | 'collateralDeposited' | 'date' | 'id' | 'interestPayable' | 'principalPayable' | 'secondsToExpiry' | 'transactionHash'>
+    & { loan: Pick<CoolerLoan, 'id'> }
+  )> };
 
 
 export const CoolerLoanEventsDocument = gql`
@@ -3095,6 +3094,9 @@ export const CoolerLoanEventsDocument = gql`
     id
     secondsSinceExpiry
     transactionHash
+    loan {
+      id
+    }
   }
   clearLoanRequestEvents(
     where: {blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp}
@@ -3106,6 +3108,23 @@ export const CoolerLoanEventsDocument = gql`
     date
     id
     transactionHash
+    loan {
+      borrower
+      collateral
+      collateralToken
+      cooler
+      createdBlock
+      createdTimestamp
+      createdTransaction
+      debtToken
+      expiryTimestamp
+      hasCallback
+      id
+      interest
+      lender
+      loanId
+      principal
+    }
   }
   defundEvents(
     where: {blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp}
@@ -3150,6 +3169,9 @@ export const CoolerLoanEventsDocument = gql`
     interestDue
     periods
     transactionHash
+    loan {
+      id
+    }
   }
   rebalanceEvents(
     where: {blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp}
@@ -3196,35 +3218,12 @@ export const CoolerLoanEventsDocument = gql`
     principalPayable
     secondsToExpiry
     transactionHash
+    loan {
+      id
+    }
   }
 }
     ` as unknown as DocumentNode<CoolerLoanEventsQuery, CoolerLoanEventsQueryVariables>;
-export const CoolerLoansDocument = gql`
-    query CoolerLoans($beforeTimestamp: BigInt!) {
-  coolerLoans(
-    where: {createdTimestamp_lt: $beforeTimestamp}
-    orderBy: createdTimestamp
-    orderDirection: asc
-  ) {
-    borrower
-    collateral
-    collateralToken
-    cooler
-    createdBlock
-    createdTimestamp
-    createdTransaction
-    debtToken
-    expiryTimestamp
-    hasCallback
-    id
-    interest
-    lender
-    loanId
-    principal
-  }
-}
-    ` as unknown as DocumentNode<CoolerLoansQuery, CoolerLoansQueryVariables>;
-
 
 
 export type Requester<C = {}, E = unknown> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
@@ -3232,9 +3231,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
     CoolerLoanEvents(variables: CoolerLoanEventsQueryVariables, options?: C): Promise<CoolerLoanEventsQuery> {
       return requester<CoolerLoanEventsQuery, CoolerLoanEventsQueryVariables>(CoolerLoanEventsDocument, variables, options) as Promise<CoolerLoanEventsQuery>;
-    },
-    CoolerLoans(variables: CoolerLoansQueryVariables, options?: C): Promise<CoolerLoansQuery> {
-      return requester<CoolerLoansQuery, CoolerLoansQueryVariables>(CoolerLoansDocument, variables, options) as Promise<CoolerLoansQuery>;
     }
   };
 }

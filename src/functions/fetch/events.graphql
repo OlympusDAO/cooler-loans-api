@@ -13,6 +13,9 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     id
     secondsSinceExpiry
     transactionHash
+    loan {
+      id
+    }
   }
   clearLoanRequestEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -24,6 +27,23 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     date
     id
     transactionHash
+    loan {
+      borrower
+      collateral
+      collateralToken
+      cooler
+      createdBlock
+      createdTimestamp
+      createdTransaction
+      debtToken
+      expiryTimestamp
+      hasCallback
+      id
+      interest
+      lender
+      loanId
+      principal
+    }
   }
   defundEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -68,6 +88,9 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     interestDue
     periods
     transactionHash
+    loan {
+      id
+    }
   }
   rebalanceEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -114,5 +137,8 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     principalPayable
     secondsToExpiry
     transactionHash
+    loan {
+      id
+    }
   }
 }

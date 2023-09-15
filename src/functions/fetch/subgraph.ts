@@ -15,15 +15,26 @@ export type CoolerLoanOptional = Omit<
   "creationEvents" | "repaymentEvents" | "defaultedClaimEvents" | "extendEvents" | "request"
 >;
 export type ClearinghouseSnapshotOptional = Omit<ClearinghouseSnapshot, "rebalanceEvents" | "defundEvents">;
-export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan">;
-export type RepayLoanEventOptional = Omit<RepayLoanEvent, "loan">;
-export type ClaimDefaultedLoanEventOptional = Omit<ClaimDefaultedLoanEvent, "loan">;
-export type ExtendLoanEventOptional = Omit<ExtendLoanEvent, "loan">;
+export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan"> & {
+  loan: CoolerLoanOptional;
+};
+export type RepayLoanEventOptional = Omit<RepayLoanEvent, "loan"> & {
+  loan: {
+    id: string;
+  };
+};
+export type ClaimDefaultedLoanEventOptional = Omit<ClaimDefaultedLoanEvent, "loan"> & {
+  loan: {
+    id: string;
+  };
+};
+export type ExtendLoanEventOptional = Omit<ExtendLoanEvent, "loan"> & {
+  loan: {
+    id: string;
+  };
+};
 
 export type SubgraphData = {
-  loans: {
-    [key: string]: CoolerLoanOptional;
-  };
   clearinghouseSnapshots: {
     [key: string]: ClearinghouseSnapshotOptional[];
   };
@@ -48,19 +59,6 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   const eventData = await sdk.CoolerLoanEvents({
     startTimestamp: getTimestampSeconds(startDate),
     beforeTimestamp: getTimestampSeconds(beforeDate),
-  });
-
-  // Fetch loans created up to beforeDate
-  const loanData = await sdk.CoolerLoans({
-    beforeTimestamp: getTimestampSeconds(beforeDate),
-  });
-
-  /**
-   * Loans
-   */
-  const loanMap: Record<string, CoolerLoanOptional> = {};
-  loanData.coolerLoans.forEach(loan => {
-    loanMap[loan.id] = loan;
   });
 
   /**
@@ -167,7 +165,6 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   );
 
   return {
-    loans: loanMap,
     clearinghouseSnapshots: clearinghouseSnapshots,
     creationEvents: creationEvents,
     defaultedClaimEvents: claimDefaultedEvents,
