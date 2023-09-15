@@ -1,0 +1,19 @@
+query CoolerLoans($beforeTimestamp: BigInt!) {
+  coolerLoans(where: { createdTimestamp_lt: $beforeTimestamp }, orderBy: createdTimestamp, orderDirection: asc) {
+    borrower
+    collateral
+    collateralToken
+    cooler
+    createdBlock
+    createdTimestamp
+    createdTransaction
+    debtToken
+    expiryTimestamp
+    hasCallback
+    id
+    interest
+    lender
+    loanId
+    principal
+  }
+}

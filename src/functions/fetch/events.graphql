@@ -1,4 +1,4 @@
-query CoolerLoans($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
+query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
   claimDefaultedLoanEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp

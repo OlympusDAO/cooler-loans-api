@@ -2,6 +2,7 @@ import {
   ClaimDefaultedLoanEvent,
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
+  CoolerLoan,
   ExtendLoanEvent,
   getBuiltGraphSDK,
   RepayLoanEvent,
@@ -9,6 +10,10 @@ import {
 import { getISO8601DateString, getTimestampSeconds } from "../../helpers/dateHelper";
 
 // A number of the entity properties are required, but we don't include them in the query, so they are omitted here. (Else we get linting errors.)
+export type CoolerLoanOptional = Omit<
+  CoolerLoan,
+  "creationEvents" | "repaymentEvents" | "defaultedClaimEvents" | "extendEvents" | "request"
+>;
 export type ClearinghouseSnapshotOptional = Omit<ClearinghouseSnapshot, "rebalanceEvents" | "defundEvents">;
 export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan">;
 export type RepayLoanEventOptional = Omit<RepayLoanEvent, "loan">;
@@ -16,6 +21,9 @@ export type ClaimDefaultedLoanEventOptional = Omit<ClaimDefaultedLoanEvent, "loa
 export type ExtendLoanEventOptional = Omit<ExtendLoanEvent, "loan">;
 
 export type SubgraphData = {
+  loans: {
+    [key: string]: CoolerLoanOptional;
+  };
   clearinghouseSnapshots: {
     [key: string]: ClearinghouseSnapshotOptional[];
   };
@@ -37,23 +45,34 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   const sdk = getBuiltGraphSDK();
 
   // Fetch events
-  const result = await sdk.CoolerLoans({
+  const eventData = await sdk.CoolerLoanEvents({
     startTimestamp: getTimestampSeconds(startDate),
     beforeTimestamp: getTimestampSeconds(beforeDate),
   });
 
-  // TODO Fetch loans up to beforeDate
+  // Fetch loans created up to beforeDate
+  const loanData = await sdk.CoolerLoans({
+    beforeTimestamp: getTimestampSeconds(beforeDate),
+  });
+
+  /**
+   * Loans
+   */
+  const loanMap: Record<string, CoolerLoanOptional> = {};
+  loanData.coolerLoans.forEach(loan => {
+    loanMap[loan.id] = loan;
+  });
 
   /**
    * Clearinghouse Snapshots
    */
   const clearinghouseSnapshotsArray: ClearinghouseSnapshotOptional[] = [];
 
-  result.defundEvents.forEach(defundEvent => {
+  eventData.defundEvents.forEach(defundEvent => {
     clearinghouseSnapshotsArray.push(defundEvent.clearinghouseSnapshot);
   });
 
-  result.rebalanceEvents.forEach(rebalanceEvent => {
+  eventData.rebalanceEvents.forEach(rebalanceEvent => {
     clearinghouseSnapshotsArray.push(rebalanceEvent.clearinghouseSnapshot);
   });
 
@@ -74,7 +93,7 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   /**
    * Creation Events
    */
-  const creationEventsArray: ClearLoanRequestEventOptional[] = result.clearLoanRequestEvents;
+  const creationEventsArray: ClearLoanRequestEventOptional[] = eventData.clearLoanRequestEvents;
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const creationEvents = creationEventsArray.reduce(
@@ -93,7 +112,7 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   /**
    * Repayment Events
    */
-  const repaymentEventsArray: RepayLoanEventOptional[] = result.repayLoanEvents;
+  const repaymentEventsArray: RepayLoanEventOptional[] = eventData.repayLoanEvents;
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const repaymentEvents = repaymentEventsArray.reduce(
@@ -112,7 +131,7 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   /**
    * Claim Default Events
    */
-  const claimDefaultedEventsArray: ClaimDefaultedLoanEventOptional[] = result.claimDefaultedLoanEvents;
+  const claimDefaultedEventsArray: ClaimDefaultedLoanEventOptional[] = eventData.claimDefaultedLoanEvents;
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const claimDefaultedEvents = claimDefaultedEventsArray.reduce(
@@ -131,7 +150,7 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   /**
    * Extend Events
    */
-  const extendEventsArray: ExtendLoanEventOptional[] = result.extendLoanEvents;
+  const extendEventsArray: ExtendLoanEventOptional[] = eventData.extendLoanEvents;
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const extendEvents = extendEventsArray.reduce(
@@ -148,6 +167,7 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
   );
 
   return {
+    loans: loanMap,
     clearinghouseSnapshots: clearinghouseSnapshots,
     creationEvents: creationEvents,
     defaultedClaimEvents: claimDefaultedEvents,
