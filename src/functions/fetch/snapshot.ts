@@ -145,6 +145,10 @@ export const generateSnapshots = (
       currentSnapshot.clearinghouse.daiBalance = clearinghouseSnapshot.daiBalance;
       currentSnapshot.clearinghouse.sDaiBalance = clearinghouseSnapshot.sDaiBalance;
       currentSnapshot.clearinghouse.sDaiInDaiBalance = clearinghouseSnapshot.sDaiInDaiBalance;
+      currentSnapshot.treasury.daiBalance = clearinghouseSnapshot.treasuryDaiBalance;
+      currentSnapshot.treasury.sDaiBalance = clearinghouseSnapshot.treasurySDaiBalance;
+      currentSnapshot.treasury.sDaiInDaiBalance = clearinghouseSnapshot.treasurySDaiInDaiBalance;
+
       currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
     });
 
@@ -199,6 +203,11 @@ export const generateSnapshots = (
       const principalPaid = repaymentEvent.amountPaid - interestPaid;
       loan.interestPaid += interestPaid;
       loan.principalPaid += principalPaid;
+
+      // If the loan is fully repaid, update the status
+      if (loan.interestPaid >= loan.interest && loan.principalPaid >= loan.principal) {
+        loan.status = "Repaid";
+      }
 
       // Update overall receivables
       currentSnapshot.interestReceivables -= interestPaid;
