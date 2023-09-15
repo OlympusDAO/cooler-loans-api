@@ -1,0 +1,118 @@
+query CoolerLoans($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
+  claimDefaultedLoanEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    blockNumber
+    blockTimestamp
+    collateralPrice
+    collateralQuantityClaimed
+    collateralValueClaimed
+    date
+    id
+    secondsSinceExpiry
+    transactionHash
+  }
+  clearLoanRequestEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    blockNumber
+    blockTimestamp
+    date
+    id
+    transactionHash
+  }
+  defundEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    amount
+    blockNumber
+    blockTimestamp
+    clearinghouse
+    clearinghouseSnapshot {
+      blockNumber
+      blockTimestamp
+      clearinghouse
+      daiBalance
+      date
+      id
+      interestReceivables
+      isActive
+      nextRebalanceTimestamp
+      principalReceivables
+      sDaiBalance
+      sDaiInDaiBalance
+      treasuryDaiBalance
+      treasurySDaiBalance
+      treasurySDaiInDaiBalance
+    }
+    date
+    id
+    transactionHash
+  }
+  extendLoanEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    blockNumber
+    blockTimestamp
+    date
+    expiryTimestamp
+    id
+    interestDue
+    periods
+    transactionHash
+  }
+  rebalanceEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    amount
+    blockNumber
+    blockTimestamp
+    clearinghouse
+    clearinghouseSnapshot {
+      blockNumber
+      blockTimestamp
+      clearinghouse
+      daiBalance
+      date
+      id
+      interestReceivables
+      isActive
+      nextRebalanceTimestamp
+      principalReceivables
+      sDaiBalance
+      sDaiInDaiBalance
+      treasuryDaiBalance
+      treasurySDaiBalance
+      treasurySDaiInDaiBalance
+    }
+    date
+    id
+    transactionHash
+  }
+  repayLoanEvents(
+    where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    amountPaid
+    blockNumber
+    blockTimestamp
+    collateralDeposited
+    date
+    id
+    interestPayable
+    principalPayable
+    secondsToExpiry
+    transactionHash
+  }
+}

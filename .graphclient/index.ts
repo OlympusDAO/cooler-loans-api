@@ -2630,7 +2630,7 @@ export type ResolversParentTypes = ResolversObject<{
   _Meta_: _Meta_;
 }>;
 
-export type entityDirectiveArgs = {};
+export type entityDirectiveArgs = { };
 
 export type entityDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = entityDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
@@ -2927,10 +2927,10 @@ const baseDir = pathModule.join(typeof __dirname === 'string' ? __dirname : '/',
 
 const importFn: ImportFn = <T>(moduleId: string) => {
   const relativeModuleId = (pathModule.isAbsolute(moduleId) ? pathModule.relative(baseDir, moduleId) : moduleId).split('\\').join('/').replace(baseDir + '/', '');
-  switch (relativeModuleId) {
+  switch(relativeModuleId) {
     case ".graphclient/sources/cooler-loans/introspectionSchema":
       return Promise.resolve(importedModule$0) as T;
-
+    
     default:
       return Promise.reject(new Error(`Cannot find module '${relativeModuleId}'.`));
   }
@@ -2947,53 +2947,53 @@ const rootStore = new MeshStore('.graphclient', new FsStoreStorageAdapter({
 
 export const rawServeConfig: YamlConfig.Config['serve'] = undefined as any
 export async function getMeshOptions(): Promise<GetMeshOptions> {
-  const pubsub = new PubSub();
-  const sourcesStore = rootStore.child('sources');
-  const logger = new DefaultLogger("GraphClient");
-  const cache = new (MeshCache as any)({
-    ...({} as any),
-    importFn,
-    store: rootStore.child('cache'),
-    pubsub,
-    logger,
-  } as any)
+const pubsub = new PubSub();
+const sourcesStore = rootStore.child('sources');
+const logger = new DefaultLogger("GraphClient");
+const cache = new (MeshCache as any)({
+      ...({} as any),
+      importFn,
+      store: rootStore.child('cache'),
+      pubsub,
+      logger,
+    } as any)
 
-  const sources: MeshResolvedSource[] = [];
-  const transforms: MeshTransform[] = [];
-  const additionalEnvelopPlugins: MeshPlugin<any>[] = [];
-  const coolerLoansTransforms = [];
-  const additionalTypeDefs = [] as any[];
-  const coolerLoansHandler = new GraphqlHandler({
-    name: "cooler-loans",
-    config: { "endpoint": "https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1" },
-    baseDir,
-    cache,
-    pubsub,
-    store: sourcesStore.child("cooler-loans"),
-    logger: logger.child("cooler-loans"),
-    importFn,
-  });
-  coolerLoansTransforms[0] = new AutoPaginationTransform({
-    apiName: "cooler-loans",
-    config: { "validateSchema": true },
-    baseDir,
-    cache,
-    pubsub,
-    importFn,
-    logger,
-  });
-  sources[0] = {
-    name: 'cooler-loans',
-    handler: coolerLoansHandler,
-    transforms: coolerLoansTransforms
-  }
-  const additionalResolvers = [] as any[]
-  const merger = new (BareMerger as any)({
-    cache,
-    pubsub,
-    logger: logger.child('bareMerger'),
-    store: rootStore.child('bareMerger')
-  })
+const sources: MeshResolvedSource[] = [];
+const transforms: MeshTransform[] = [];
+const additionalEnvelopPlugins: MeshPlugin<any>[] = [];
+const coolerLoansTransforms = [];
+const additionalTypeDefs = [] as any[];
+const coolerLoansHandler = new GraphqlHandler({
+              name: "cooler-loans",
+              config: {"endpoint":"https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1"},
+              baseDir,
+              cache,
+              pubsub,
+              store: sourcesStore.child("cooler-loans"),
+              logger: logger.child("cooler-loans"),
+              importFn,
+            });
+coolerLoansTransforms[0] = new AutoPaginationTransform({
+                  apiName: "cooler-loans",
+                  config: {"validateSchema":true},
+                  baseDir,
+                  cache,
+                  pubsub,
+                  importFn,
+                  logger,
+                });
+sources[0] = {
+          name: 'cooler-loans',
+          handler: coolerLoansHandler,
+          transforms: coolerLoansTransforms
+        }
+const additionalResolvers = [] as any[]
+const merger = new(BareMerger as any)({
+        cache,
+        pubsub,
+        logger: logger.child('bareMerger'),
+        store: rootStore.child('bareMerger')
+      })
 
   return {
     sources,
@@ -3007,14 +3007,14 @@ export async function getMeshOptions(): Promise<GetMeshOptions> {
     additionalEnvelopPlugins,
     get documents() {
       return [
-        {
-          document: CoolerLoansDocument,
-          get rawSDL() {
-            return printWithCache(CoolerLoansDocument);
-          },
-          location: 'CoolerLoansDocument.graphql'
-        }
-      ];
+      {
+        document: CoolerLoansDocument,
+        get rawSDL() {
+          return printWithCache(CoolerLoansDocument);
+        },
+        location: 'CoolerLoansDocument.graphql'
+      }
+    ];
     },
     fetchFn,
   };
@@ -3057,18 +3057,13 @@ export type CoolerLoansQueryVariables = Exact<{
 }>;
 
 
-export type CoolerLoansQuery = {
-  claimDefaultedLoanEvents: Array<Pick<ClaimDefaultedLoanEvent, 'blockNumber' | 'blockTimestamp' | 'collateralPrice' | 'collateralQuantityClaimed' | 'collateralValueClaimed' | 'date' | 'id' | 'secondsSinceExpiry' | 'transactionHash'>>, clearLoanRequestEvents: Array<(
-    Pick<ClearLoanRequestEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'id' | 'transactionHash'>
-    & { loan: Pick<CoolerLoan, 'borrower' | 'collateral' | 'collateralToken' | 'cooler' | 'createdBlock' | 'createdTimestamp' | 'createdTransaction' | 'debtToken' | 'expiryTimestamp' | 'hasCallback' | 'id' | 'interest' | 'lender' | 'loanId' | 'principal'> }
-  )>, defundEvents: Array<(
+export type CoolerLoansQuery = { claimDefaultedLoanEvents: Array<Pick<ClaimDefaultedLoanEvent, 'blockNumber' | 'blockTimestamp' | 'collateralPrice' | 'collateralQuantityClaimed' | 'collateralValueClaimed' | 'date' | 'id' | 'secondsSinceExpiry' | 'transactionHash'>>, clearLoanRequestEvents: Array<Pick<ClearLoanRequestEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'id' | 'transactionHash'>>, defundEvents: Array<(
     Pick<DefundEvent, 'amount' | 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'date' | 'id' | 'transactionHash'>
     & { clearinghouseSnapshot: Pick<ClearinghouseSnapshot, 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'daiBalance' | 'date' | 'id' | 'interestReceivables' | 'isActive' | 'nextRebalanceTimestamp' | 'principalReceivables' | 'sDaiBalance' | 'sDaiInDaiBalance' | 'treasuryDaiBalance' | 'treasurySDaiBalance' | 'treasurySDaiInDaiBalance'> }
   )>, extendLoanEvents: Array<Pick<ExtendLoanEvent, 'blockNumber' | 'blockTimestamp' | 'date' | 'expiryTimestamp' | 'id' | 'interestDue' | 'periods' | 'transactionHash'>>, rebalanceEvents: Array<(
     Pick<RebalanceEvent, 'amount' | 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'date' | 'id' | 'transactionHash'>
     & { clearinghouseSnapshot: Pick<ClearinghouseSnapshot, 'blockNumber' | 'blockTimestamp' | 'clearinghouse' | 'daiBalance' | 'date' | 'id' | 'interestReceivables' | 'isActive' | 'nextRebalanceTimestamp' | 'principalReceivables' | 'sDaiBalance' | 'sDaiInDaiBalance' | 'treasuryDaiBalance' | 'treasurySDaiBalance' | 'treasurySDaiInDaiBalance'> }
-  )>, repayLoanEvents: Array<Pick<RepayLoanEvent, 'amountPaid' | 'blockNumber' | 'blockTimestamp' | 'collateralDeposited' | 'date' | 'id' | 'interestPayable' | 'principalPayable' | 'secondsToExpiry' | 'transactionHash'>>
-};
+  )>, repayLoanEvents: Array<Pick<RepayLoanEvent, 'amountPaid' | 'blockNumber' | 'blockTimestamp' | 'collateralDeposited' | 'date' | 'id' | 'interestPayable' | 'principalPayable' | 'secondsToExpiry' | 'transactionHash'>> };
 
 
 export const CoolerLoansDocument = gql`
@@ -3097,23 +3092,6 @@ export const CoolerLoansDocument = gql`
     blockTimestamp
     date
     id
-    loan {
-      borrower
-      collateral
-      collateralToken
-      cooler
-      createdBlock
-      createdTimestamp
-      createdTransaction
-      debtToken
-      expiryTimestamp
-      hasCallback
-      id
-      interest
-      lender
-      loanId
-      principal
-    }
     transactionHash
   }
   defundEvents(

@@ -1,5 +1,3 @@
-import gql from "graphql-tag";
-
 import {
   ClaimDefaultedLoanEvent,
   ClearinghouseSnapshot,
@@ -10,6 +8,7 @@ import {
 } from "../../../.graphclient";
 import { getISO8601DateString, getTimestampSeconds } from "../../helpers/dateHelper";
 
+// A number of the entity properties are required, but we don't include them in the query, so they are omitted here. (Else we get linting errors.)
 export type ClearinghouseSnapshotOptional = Omit<ClearinghouseSnapshot, "rebalanceEvents" | "defundEvents">;
 export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan">;
 export type RepayLoanEventOptional = Omit<RepayLoanEvent, "loan">;
@@ -33,128 +32,6 @@ export type SubgraphData = {
     [key: string]: ExtendLoanEventOptional[];
   };
 };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const coolerLoansQuery = gql`
-  query CoolerLoans($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
-    claimDefaultedLoanEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      blockNumber
-      blockTimestamp
-      collateralPrice
-      collateralQuantityClaimed
-      collateralValueClaimed
-      date
-      id
-      secondsSinceExpiry
-      transactionHash
-    }
-    clearLoanRequestEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      blockNumber
-      blockTimestamp
-      date
-      id
-      transactionHash
-    }
-    defundEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      amount
-      blockNumber
-      blockTimestamp
-      clearinghouse
-      clearinghouseSnapshot {
-        blockNumber
-        blockTimestamp
-        clearinghouse
-        daiBalance
-        date
-        id
-        interestReceivables
-        isActive
-        nextRebalanceTimestamp
-        principalReceivables
-        sDaiBalance
-        sDaiInDaiBalance
-        treasuryDaiBalance
-        treasurySDaiBalance
-        treasurySDaiInDaiBalance
-      }
-      date
-      id
-      transactionHash
-    }
-    extendLoanEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      blockNumber
-      blockTimestamp
-      date
-      expiryTimestamp
-      id
-      interestDue
-      periods
-      transactionHash
-    }
-    rebalanceEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      amount
-      blockNumber
-      blockTimestamp
-      clearinghouse
-      clearinghouseSnapshot {
-        blockNumber
-        blockTimestamp
-        clearinghouse
-        daiBalance
-        date
-        id
-        interestReceivables
-        isActive
-        nextRebalanceTimestamp
-        principalReceivables
-        sDaiBalance
-        sDaiInDaiBalance
-        treasuryDaiBalance
-        treasurySDaiBalance
-        treasurySDaiInDaiBalance
-      }
-      date
-      id
-      transactionHash
-    }
-    repayLoanEvents(
-      where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
-      orderBy: blockTimestamp
-      orderDirection: asc
-    ) {
-      amountPaid
-      blockNumber
-      blockTimestamp
-      collateralDeposited
-      date
-      id
-      interestPayable
-      principalPayable
-      secondsToExpiry
-      transactionHash
-    }
-  }
-`;
 
 export const getData = async (startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
   const sdk = getBuiltGraphSDK();
