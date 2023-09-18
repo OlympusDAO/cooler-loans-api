@@ -16,6 +16,10 @@ export async function handleGet(req: any, res: any) {
   // Grab from Firestore
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
 
-  // Return
-  return snapshots;
+  // Required to end the function
+  res
+    .json({
+      records: snapshots,
+    })
+    .end();
 }

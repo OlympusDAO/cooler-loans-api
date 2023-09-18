@@ -6,7 +6,8 @@ import { getData } from "./subgraph";
 
 const INITIAL_DATE = "2023-09-01";
 
-export const handleGenerate = async () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const handleGenerate = async (req: any, res: any) => {
   // Determine the last cached date in Firestore
   const lastCachedDate: string | null = await getLatestCachedDate();
   const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || INITIAL_DATE), -1));
@@ -28,4 +29,7 @@ export const handleGenerate = async () => {
 
   // Write snapshots
   await writeSnapshots(dateSnapshots);
+
+  // Required to end the function
+  res.send("OK").end();
 };
