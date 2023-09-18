@@ -7,14 +7,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "codegen": "graphclient build && yarn lint:fix",
+    "codegen": "graphql-code-generator && yarn lint:fix",
     "test": "jest",
     "lint": "eslint --config ./.eslintrc.js ./src/ --ext .jsx,.js,.tsx,.ts",
     "lint:fix": "prettier --write ./src/ & yarn lint --fix",
     "firestore:start": "gcloud emulators firestore start --host-port=localhost:8080"
   },
   "devDependencies": {
-    "@graphprotocol/client-cli": "^3.0.0",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typed-document-node": "^5.0.1",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
     "@pulumi/gcp": "^6.0.0",
     "@pulumi/pulumi": "^3.0.0",
     "@types/express": "^4.17.17",
@@ -38,6 +41,7 @@
     "@google-cloud/firestore": "^6.7.0",
     "firebase-admin": "^11.10.1",
     "graphql": "^16.8.0",
+    "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6"
   }
 }

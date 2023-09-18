@@ -3,9 +3,11 @@ import {
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
   CoolerLoan,
+  DefundEvent,
   ExtendLoanEvent,
+  RebalanceEvent,
   RepayLoanEvent,
-} from "../../.graphclient";
+} from "../generated/graphql";
 
 // A number of the entity properties are required, but we don't include them in the query, so they are omitted here. (Else we get linting errors.)
 export type CoolerLoanOptional = Omit<
@@ -30,6 +32,12 @@ export type ExtendLoanEventOptional = Omit<ExtendLoanEvent, "loan"> & {
   loan: {
     id: string;
   };
+};
+export type DefundEventOptional = Omit<DefundEvent, "clearinghouseSnapshot"> & {
+  clearinghouseSnapshot: ClearinghouseSnapshotOptional;
+};
+export type RebalanceEventOptional = Omit<RebalanceEvent, "clearinghouseSnapshot"> & {
+  clearinghouseSnapshot: ClearinghouseSnapshotOptional;
 };
 
 export type SubgraphData = {

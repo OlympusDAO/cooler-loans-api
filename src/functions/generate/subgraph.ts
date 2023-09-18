@@ -1,21 +1,27 @@
-import { getBuiltGraphSDK } from "../../../.graphclient";
+import { request } from "graphql-request";
+
+import { CoolerLoanEventsDocument, CoolerLoanEventsQuery } from "../../generated/graphql";
 import { getISO8601DateString, getTimestampSeconds } from "../../helpers/dateHelper";
 import {
   ClaimDefaultedLoanEventOptional,
   ClearinghouseSnapshotOptional,
   ClearLoanRequestEventOptional,
+  DefundEventOptional,
   ExtendLoanEventOptional,
+  RebalanceEventOptional,
   RepayLoanEventOptional,
   SubgraphData,
 } from "../../types/subgraph";
 
-export const getData = async (startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
-  const sdk = getBuiltGraphSDK();
-
+export const getData = async (endpointUrl: string, startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
   // Fetch events
-  const eventData = await sdk.CoolerLoanEvents({
-    startTimestamp: getTimestampSeconds(startDate),
-    beforeTimestamp: getTimestampSeconds(beforeDate),
+  const eventData: CoolerLoanEventsQuery = await request({
+    url: endpointUrl,
+    document: CoolerLoanEventsDocument,
+    variables: {
+      startTimestamp: getTimestampSeconds(startDate),
+      beforeTimestamp: getTimestampSeconds(beforeDate),
+    },
   });
 
   /**
@@ -23,11 +29,11 @@ export const getData = async (startDate: Date, beforeDate: Date): Promise<Subgra
    */
   const clearinghouseSnapshotsArray: ClearinghouseSnapshotOptional[] = [];
 
-  eventData.defundEvents.forEach(defundEvent => {
+  eventData.defundEvents.forEach((defundEvent: DefundEventOptional) => {
     clearinghouseSnapshotsArray.push(defundEvent.clearinghouseSnapshot);
   });
 
-  eventData.rebalanceEvents.forEach(rebalanceEvent => {
+  eventData.rebalanceEvents.forEach((rebalanceEvent: RebalanceEventOptional) => {
     clearinghouseSnapshotsArray.push(rebalanceEvent.clearinghouseSnapshot);
   });
 

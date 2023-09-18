@@ -12,8 +12,13 @@ export const handleGenerate = async () => {
   const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || INITIAL_DATE), -1));
   const beforeDate: Date = setMidnight(adjustDate(new Date(), 1)); // So that all of the current day is captured
 
+  const endpointUrl = process.env.GRAPHQL_ENDPOINT;
+  if (!endpointUrl) {
+    throw new Error(`The environment variable GRAPHQL_ENDPOINT must be set`);
+  }
+
   // Fetch event data
-  const subgraphData = await getData(startDate, beforeDate);
+  const subgraphData = await getData(endpointUrl, startDate, beforeDate);
 
   // Grab the previous date's data
   const previousSnapshot: Snapshot | null = await getSnapshot(startDate);
