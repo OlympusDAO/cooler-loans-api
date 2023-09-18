@@ -68,6 +68,10 @@ export const generateSnapshots = (
   const endDate = beforeDate;
 
   let previousSnapshot: Snapshot | null = previousDateRecord;
+  if (previousSnapshot) {
+    console.log(`Previous snapshot exists`);
+  }
+
   while (currentDate.getTime() < endDate.getTime()) {
     const currentDateString = getISO8601DateString(currentDate);
     const currentDateBeforeMidnight = setBeforeMidnight(currentDate);
@@ -208,7 +212,8 @@ export const generateSnapshots = (
     });
 
     // Update secondsToExpiry and status for all loans
-    Object.values(currentSnapshot.loans).forEach(loan => {
+    const loans = currentSnapshot.loans ? Object.values(currentSnapshot.loans) : [];
+    loans.forEach(loan => {
       loan.secondsToExpiry = getSecondsToExpiry(currentDateBeforeMidnight, loan.expiryTimestamp);
 
       if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
