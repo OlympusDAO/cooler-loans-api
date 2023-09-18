@@ -1,4 +1,5 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
+import { parseNumber } from "../../helpers/numberHelper";
 import { Snapshot } from "../../types/snapshot";
 import { SubgraphData } from "../../types/subgraph";
 
@@ -113,12 +114,12 @@ export const generateSnapshots = (
       console.log(`${FUNC}: processing clearinghouse snapshot ${clearinghouseSnapshot.id}`);
 
       // If there are multiple snapshots in a day, successive ones will overwrite the previous values
-      currentSnapshot.clearinghouse.daiBalance = clearinghouseSnapshot.daiBalance;
-      currentSnapshot.clearinghouse.sDaiBalance = clearinghouseSnapshot.sDaiBalance;
-      currentSnapshot.clearinghouse.sDaiInDaiBalance = clearinghouseSnapshot.sDaiInDaiBalance;
-      currentSnapshot.treasury.daiBalance = clearinghouseSnapshot.treasuryDaiBalance;
-      currentSnapshot.treasury.sDaiBalance = clearinghouseSnapshot.treasurySDaiBalance;
-      currentSnapshot.treasury.sDaiInDaiBalance = clearinghouseSnapshot.treasurySDaiInDaiBalance;
+      currentSnapshot.clearinghouse.daiBalance = parseNumber(clearinghouseSnapshot.daiBalance);
+      currentSnapshot.clearinghouse.sDaiBalance = parseNumber(clearinghouseSnapshot.sDaiBalance);
+      currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.sDaiInDaiBalance);
+      currentSnapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryDaiBalance);
+      currentSnapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiBalance);
+      currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiInDaiBalance);
 
       currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
     });
@@ -128,23 +129,23 @@ export const generateSnapshots = (
     console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
     currentCreationEvents.forEach(creationEvent => {
       console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
-      currentSnapshot.principalReceivables += creationEvent.loan.principal;
-      currentSnapshot.interestReceivables += creationEvent.loan.interest;
+      currentSnapshot.principalReceivables += parseNumber(creationEvent.loan.principal);
+      currentSnapshot.interestReceivables += parseNumber(creationEvent.loan.interest);
 
       // Add any new loans into running list
       console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
       currentSnapshot.loans[creationEvent.loan.id] = {
         id: creationEvent.loan.id,
-        loanId: creationEvent.loan.loanId,
-        createdTimestamp: creationEvent.blockTimestamp,
+        loanId: parseNumber(creationEvent.loan.loanId),
+        createdTimestamp: parseNumber(creationEvent.blockTimestamp),
         coolerAddress: creationEvent.loan.cooler,
         borrowerAddress: creationEvent.loan.borrower,
         lenderAddress: creationEvent.loan.lender,
-        principal: creationEvent.loan.principal,
-        interest: creationEvent.loan.interest,
-        collateralDeposited: creationEvent.loan.collateral,
-        expiryTimestamp: creationEvent.loan.expiryTimestamp,
-        secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, creationEvent.loan.expiryTimestamp),
+        principal: parseNumber(creationEvent.loan.principal),
+        interest: parseNumber(creationEvent.loan.interest),
+        collateralDeposited: parseNumber(creationEvent.loan.collateral),
+        expiryTimestamp: parseNumber(creationEvent.loan.expiryTimestamp),
+        secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, parseNumber(creationEvent.loan.expiryTimestamp)),
         status: "Active",
         principalPaid: 0,
         interestPaid: 0,
@@ -167,11 +168,12 @@ export const generateSnapshots = (
       }
 
       // Update the loan state
-      loan.collateralDeposited = repaymentEvent.collateralDeposited;
+      loan.collateralDeposited = parseNumber(repaymentEvent.collateralDeposited);
 
       // Calculate the interest and principal paid for this payment
-      const interestPaid = (repaymentEvent.amountPaid / (loan.principal + loan.interest)) * loan.interest;
-      const principalPaid = repaymentEvent.amountPaid - interestPaid;
+      const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
+      const interestPaid = (eventAmountPaid / (loan.principal + loan.interest)) * loan.interest;
+      const principalPaid = eventAmountPaid - interestPaid;
       loan.interestPaid += interestPaid;
       loan.principalPaid += principalPaid;
 
@@ -202,12 +204,12 @@ export const generateSnapshots = (
 
       // Update the loan
       loan.status = "Reclaimed";
-      loan.collateralClaimedQuantity += defaultedClaimEvent.collateralQuantityClaimed;
-      loan.collateralClaimedValue += defaultedClaimEvent.collateralValueClaimed;
+      loan.collateralClaimedQuantity += parseNumber(defaultedClaimEvent.collateralQuantityClaimed);
+      loan.collateralClaimedValue += parseNumber(defaultedClaimEvent.collateralValueClaimed);
       loan.collateralDeposited = 0;
 
       // Calculate the income from the collateral claim
-      loan.collateralIncome += defaultedClaimEvent.collateralValueClaimed;
+      loan.collateralIncome += parseNumber(defaultedClaimEvent.collateralValueClaimed);
 
       // Remove the loan payable from the receivables
       currentSnapshot.interestReceivables -= interestPayable;
@@ -228,9 +230,9 @@ export const generateSnapshots = (
 
       // Update the loan
       loan.status = "Active";
-      loan.expiryTimestamp = extendEvent.expiryTimestamp;
+      loan.expiryTimestamp = parseNumber(extendEvent.expiryTimestamp);
 
-      const incrementalInterest = extendEvent.interestDue - loan.interest;
+      const incrementalInterest = parseNumber(extendEvent.interestDue) - loan.interest;
       loan.interest += incrementalInterest;
 
       // Update receivables
