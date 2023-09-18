@@ -1,0 +1,3 @@
+config:
+  gcp:project: cooler-loans-api-prod
+  gcp:region: us-east1
