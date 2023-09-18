@@ -49,7 +49,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
     timeout: 540,
     callback: handleGenerate,
     environmentVariables: {
-      GRAPHQL_ENDPOINT: "https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1",
+      GRAPHQL_ENDPOINT: "https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.2",
     },
   },
   {
