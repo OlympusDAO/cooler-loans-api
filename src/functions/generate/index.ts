@@ -6,7 +6,7 @@ import { getData } from "./subgraph";
 
 const INITIAL_DATE = "2023-09-01";
 
-export const handler = async () => {
+export const handleGenerate = async () => {
   // Determine the last cached date in Firestore
   const lastCachedDate: string | null = await getLatestCachedDate();
   const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || INITIAL_DATE), -1));
