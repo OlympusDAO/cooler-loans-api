@@ -6,7 +6,17 @@ This repository contains the source code for middleware that will provide time-s
 
 ## Design
 
-TODO
+This repository deploys two API endpoints:
+
+- `generate`
+
+  - Generates daily snapshots for Cooler Loans
+  - A Google Cloud Function (with a periodic trigger) determines the previous date for which the snapshot was generated, and generates from that day until the current day.
+  - The snapshots are stored in Google Firestore
+
+- `get`
+
+  - Fetches the daily snapshots for the given `startDate` and `beforeDate`
 
 ## Developer
 
