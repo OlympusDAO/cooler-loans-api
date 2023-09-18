@@ -1,7 +1,7 @@
 import { adjustDate, setMidnight } from "../../helpers/dateHelper";
+import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../../helpers/storage";
 import { Snapshot } from "../../types/snapshot";
 import { generateSnapshots } from "./snapshot";
-import { getLatestCachedDate, getSnapshot, writeSnapshots } from "./storage";
 import { getData } from "./subgraph";
 
 const INITIAL_DATE = "2023-09-01";

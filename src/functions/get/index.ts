@@ -1,9 +1,8 @@
-import { Request, Response } from "express-serve-static-core";
-
 import { isISO8601DateString } from "../../helpers/dateHelper";
 import { getSnapshots } from "../../helpers/storage";
 
-export async function handleGet(req: Request, res: Response) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function handleGet(req: any, res: any) {
   // Get start and end parameters
   const startDate: string | undefined = req.query.startDate as string;
   const beforeDate: string | undefined = req.query.beforeDate as string;
