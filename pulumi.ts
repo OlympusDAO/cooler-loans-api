@@ -29,6 +29,7 @@ const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
 new gcp.firestore.Database(
   "firestore",
   {
+    name: "(default)",
     locationId: gcpConfig.require("region"),
     type: "FIRESTORE_NATIVE",
   },

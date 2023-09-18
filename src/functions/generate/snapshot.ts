@@ -46,6 +46,24 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     newSnapshot.loans = {};
   }
 
+  // Ensure the clearinghouse snapshot has a value
+  if (!newSnapshot.clearinghouse) {
+    newSnapshot.clearinghouse = {
+      daiBalance: 0,
+      sDaiBalance: 0,
+      sDaiInDaiBalance: 0,
+    };
+  }
+
+  // Ensure the treasury snapshot has a value
+  if (!newSnapshot.treasury) {
+    newSnapshot.treasury = {
+      daiBalance: 0,
+      sDaiBalance: 0,
+      sDaiInDaiBalance: 0,
+    };
+  }
+
   return newSnapshot;
 };
 
