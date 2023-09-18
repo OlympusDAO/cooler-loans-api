@@ -27,7 +27,7 @@ const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
  * Create Firestore database
  */
 new gcp.firestore.Database(
-  "firestore",
+  "default",
   {
     name: "(default)",
     locationId: gcpConfig.require("region"),
