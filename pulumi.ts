@@ -10,38 +10,48 @@ const gcpConfig = new pulumi.Config("gcp");
 /**
  * Enable services
  */
-new gcp.projects.Service("firestore", {
+const serviceFirestore = new gcp.projects.Service("firestore", {
   service: "firestore.googleapis.com",
 });
-new gcp.projects.Service("cloudbuild", {
+const serviceCloudBuild = new gcp.projects.Service("cloudbuild", {
   service: "cloudbuild.googleapis.com",
 });
-new gcp.projects.Service("cloudfunctions", {
+const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
   service: "cloudfunctions.googleapis.com",
 });
-new gcp.projects.Service("cloudscheduler", {
-  service: "cloudscheduler.googleapis.com",
-});
+// const serviceCloudScheduler = new gcp.projects.Service("cloudscheduler", {
+//   service: "cloudscheduler.googleapis.com",
+// });
 
 /**
  * Create Firestore database
  */
-new gcp.firestore.Database("firestore", {
-  locationId: gcpConfig.require("region"),
-  type: "FIRESTORE_NATIVE",
-});
+new gcp.firestore.Database(
+  "firestore",
+  {
+    locationId: gcpConfig.require("region"),
+    type: "FIRESTORE_NATIVE",
+  },
+  {
+    dependsOn: [serviceFirestore],
+  },
+);
 
 /**
  * Deploy Cloud Function - Generate
  */
-const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction("generate", handleGenerate);
+const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction("generate", handleGenerate, {
+  dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
+});
 
 // TODO Schedule it
 
 /**
  * Deploy Cloud Function - Fetch
  */
-const functionGet = new gcp.cloudfunctions.HttpCallbackFunction("get", handleGet);
+const functionGet = new gcp.cloudfunctions.HttpCallbackFunction("get", handleGet, {
+  dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
+});
 
 export const generateHttpsUrl = functionGenerate.httpsTriggerUrl;
 export const getHttpsUrl = functionGet.httpsTriggerUrl;
