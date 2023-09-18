@@ -40,18 +40,36 @@ new gcp.firestore.Database(
 /**
  * Deploy Cloud Function - Generate
  */
-const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction("generate", handleGenerate, {
-  dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
-});
+const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
+  "generate",
+  {
+    runtime: "nodejs18",
+    availableMemoryMb: 512,
+    callback: handleGenerate,
+    environmentVariables: {
+      GRAPHQL_ENDPOINT: "https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1",
+    },
+  },
+  {
+    dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
+  },
+);
 
 // TODO Schedule it
 
 /**
  * Deploy Cloud Function - Fetch
  */
-const functionGet = new gcp.cloudfunctions.HttpCallbackFunction("get", handleGet, {
-  dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
-});
+const functionGet = new gcp.cloudfunctions.HttpCallbackFunction(
+  "get",
+  {
+    runtime: "nodejs18",
+    callback: handleGet,
+  },
+  {
+    dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
+  },
+);
 
 export const generateHttpsUrl = functionGenerate.httpsTriggerUrl;
 export const getHttpsUrl = functionGet.httpsTriggerUrl;
