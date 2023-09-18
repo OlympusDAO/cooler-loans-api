@@ -28,3 +28,7 @@ TODO
 ### Rebuild Snapshots
 
 If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the snapshot structure), simply delete the `snapshots` collection in the GCP project's Firestore section.
+
+### OpenAPI
+
+REST API clients can utilise the `openapi.yml` file to generate typings. The schema, contained in `snapshot.jsonschema` is regenerated with the `yarn codegen` command.

@@ -7,7 +7,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "codegen": "graphql-code-generator && yarn lint:fix",
+    "codegen:graphql": "graphql-code-generator",
+    "codegen:jsonschema": "yarn typescript-json-schema src/types/snapshot.ts Snapshot -o snapshot.jsonschema",
+    "codegen": "yarn codegen:graphql && yarn codegen:jsonschema && yarn lint:fix",
     "test": "jest",
     "lint": "eslint --config ./.eslintrc.js ./src/ --ext .jsx,.js,.tsx,.ts",
     "lint:fix": "prettier --write ./src/ & yarn lint --fix",
@@ -35,7 +37,8 @@
     "prettier": "^3.0.3",
     "ts-jest": "^29.0.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "typescript-json-schema": "^0.61.0"
   },
   "dependencies": {
     "@google-cloud/firestore": "^6.7.0",

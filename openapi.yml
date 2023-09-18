@@ -1,0 +1,37 @@
+openapi: "3.0.2"
+info:
+  title: Cooler Loans
+  version: "1.0"
+servers:
+  - url: https://olympusdao-cooler-loans-api-prod.web.app/
+paths:
+  /:
+    get:
+      summary: Retrieves all Cooler Loans snapshots between the given dates.
+      parameters:
+        - name: startDate
+          in: query
+          description: The start date (YYYY-MM-DD) of the loan period
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: beforeDate
+          in: query
+          description: The date (YYYY-MM-DD) up to (but not including) which records should be retrieved
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: "snapshot.jsonschema"
