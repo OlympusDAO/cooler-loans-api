@@ -29,7 +29,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   }
 
   // Otherwise, return a new one based on the previous one
-  const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot));
+  const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date
   newSnapshot.date = currentDate;
@@ -38,8 +38,13 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   newSnapshot.creationEvents = [];
   newSnapshot.repaymentEvents = [];
   newSnapshot.defaultedClaimEvents = [];
-  newSnapshot.rolloverEvents = [];
+  newSnapshot.extendEvents = [];
   newSnapshot.clearinghouseEvents = [];
+
+  // Ensure the loans property has a value
+  if (!newSnapshot.loans) {
+    newSnapshot.loans = {};
+  }
 
   return newSnapshot;
 };
@@ -168,7 +173,7 @@ export const generateSnapshots = (
       // Find the loan
       const loan = currentSnapshot.loans[defaultedClaimEvent.loan.id];
       if (!loan) {
-        throw new Error(`repaymentEvents: Could not find loan ${defaultedClaimEvent.loan.id}`);
+        throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
       }
 
       const interestPayable = loan.interest - loan.interestPaid;
@@ -188,23 +193,23 @@ export const generateSnapshots = (
       currentSnapshot.principalReceivables -= principalPayable;
     });
 
-    // Update loans where there were rollover events
-    const currentRolloverEvents = subgraphData.extendEvents[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentRolloverEvents.length} rollover events`);
-    currentRolloverEvents.forEach(rolloverEvent => {
-      console.log(`${FUNC}: processing rollover event ${rolloverEvent.id}`);
+    // Update loans where there were extend events
+    const currentExtendEvents = subgraphData.extendEvents[currentDateString] || [];
+    console.log(`${FUNC}: processing ${currentExtendEvents.length} extend events`);
+    currentExtendEvents.forEach(extendEvent => {
+      console.log(`${FUNC}: processing extend event ${extendEvent.id}`);
 
       // Find the loan
-      const loan = currentSnapshot.loans[rolloverEvent.loan.id];
+      const loan = currentSnapshot.loans[extendEvent.loan.id];
       if (!loan) {
-        throw new Error(`repaymentEvents: Could not find loan ${rolloverEvent.loan.id}`);
+        throw new Error(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
       }
 
       // Update the loan
       loan.status = "Active";
-      loan.expiryTimestamp = rolloverEvent.expiryTimestamp;
+      loan.expiryTimestamp = extendEvent.expiryTimestamp;
 
-      const incrementalInterest = rolloverEvent.interestDue - loan.interest;
+      const incrementalInterest = extendEvent.interestDue - loan.interest;
       loan.interest += incrementalInterest;
 
       // Update receivables
@@ -213,6 +218,7 @@ export const generateSnapshots = (
 
     // Update secondsToExpiry and status for all loans
     const loans = currentSnapshot.loans ? Object.values(currentSnapshot.loans) : [];
+    console.log(`${FUNC}: processing ${loans.length} loans`);
     loans.forEach(loan => {
       loan.secondsToExpiry = getSecondsToExpiry(currentDateBeforeMidnight, loan.expiryTimestamp);
 
@@ -225,7 +231,7 @@ export const generateSnapshots = (
     currentSnapshot.creationEvents.push(...currentCreationEvents);
     currentSnapshot.repaymentEvents.push(...currentRepaymentEvents);
     currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
-    currentSnapshot.extendEvents.push(...currentRolloverEvents);
+    currentSnapshot.extendEvents.push(...currentExtendEvents);
 
     snapshots.push(currentSnapshot);
 

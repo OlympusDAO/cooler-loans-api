@@ -45,6 +45,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
   {
     runtime: "nodejs18",
     availableMemoryMb: 512,
+    timeout: 540,
     callback: handleGenerate,
     environmentVariables: {
       GRAPHQL_ENDPOINT: "https://api.studio.thegraph.com/query/28103/cooler-loans-goerli/0.0.1",
