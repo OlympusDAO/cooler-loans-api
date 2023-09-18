@@ -10,7 +10,8 @@
     "codegen": "graphclient build && yarn lint:fix",
     "test": "jest",
     "lint": "eslint --config ./.eslintrc.js ./src/ --ext .jsx,.js,.tsx,.ts",
-    "lint:fix": "prettier --write ./src/ & yarn lint --fix"
+    "lint:fix": "prettier --write ./src/ & yarn lint --fix",
+    "firestore:start": "gcloud emulators firestore start --host-port=localhost:8080"
   },
   "devDependencies": {
     "@graphprotocol/client-cli": "^3.0.0",

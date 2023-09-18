@@ -3,6 +3,9 @@ import { Firestore } from "@google-cloud/firestore";
 import { Snapshot } from "../snapshot";
 import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../storage";
 
+// Set up the firestore emulator
+process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
+
 const getFirestoreClient = () => {
   return new Firestore();
 };
