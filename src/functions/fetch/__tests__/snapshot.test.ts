@@ -115,8 +115,8 @@ const getSampleData = (): SubgraphData => {
           date: "2023-08-10",
           blockNumber: 1233455,
           transactionHash: "0x0000002",
-          principalPayable: 100000, // Unused
-          interestPayable: 1000, // Unused
+          principalPayable: LOAN_PRINCIPAL - (REPAYMENT_AMOUNT * LOAN_PRINCIPAL) / (LOAN_PRINCIPAL + LOAN_INTEREST),
+          interestPayable: LOAN_INTEREST - (REPAYMENT_AMOUNT * LOAN_INTEREST) / (LOAN_PRINCIPAL + LOAN_INTEREST),
           blockTimestamp: 1691654400,
           secondsToExpiry: 1694332800 - 1691654400,
           amountPaid: REPAYMENT_AMOUNT,
@@ -406,8 +406,11 @@ describe("generateSnapshots", () => {
       getSecondsToExpiry(snapshotTen.date, snapshotTenLoanOne.expiryTimestamp),
     );
     expect(snapshotTenLoanOne.status).toEqual("Active");
+
     expect(snapshotTenLoanOne.principalPaid).toEqual(getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT));
     expect(snapshotTenLoanOne.interestPaid).toEqual(getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT));
+    expect(snapshotTenLoanOne.principalPaid + snapshotTenLoanOne.interestPaid).toEqual(REPAYMENT_AMOUNT);
+
     expect(snapshotTenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotTenLoanOne.collateralClaimedValue).toEqual(0);
     expect(snapshotTenLoanOne.collateralIncome).toEqual(0);
@@ -454,6 +457,8 @@ describe("generateSnapshots", () => {
     const startDate = new Date("2023-08-01");
     const beforeDate = new Date("2023-08-13"); // Includes the remaining repayment, but not expiry
     const previousDateRecords: Snapshot | null = null;
+    const repaymentAmountTwo = LOAN_PRINCIPAL + LOAN_INTEREST - REPAYMENT_AMOUNT;
+
     const subgraphData = getSampleData();
     subgraphData.repaymentEvents["2023-08-12"] = [
       {
@@ -465,7 +470,7 @@ describe("generateSnapshots", () => {
         interestPayable: 1000, // Unused
         blockTimestamp: 1691654400,
         secondsToExpiry: 1694332800 - 1691654400,
-        amountPaid: LOAN_PRINCIPAL + LOAN_INTEREST - REPAYMENT_AMOUNT,
+        amountPaid: repaymentAmountTwo,
         collateralDeposited: 0,
         loan: getLoanData(),
       },
@@ -491,8 +496,13 @@ describe("generateSnapshots", () => {
     expect(snapshotTenLoanOne.secondsToExpiry).toEqual(
       getSecondsToExpiry(snapshotTwelve.date, snapshotTenLoanOne.expiryTimestamp),
     );
+
     expect(snapshotTenLoanOne.principalPaid).toEqual(LOAN_PRINCIPAL);
     expect(snapshotTenLoanOne.interestPaid).toEqual(LOAN_INTEREST);
+    expect(snapshotTenLoanOne.principalPaid + snapshotTenLoanOne.interestPaid).toEqual(
+      REPAYMENT_AMOUNT + repaymentAmountTwo,
+    );
+
     expect(snapshotTenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotTenLoanOne.collateralClaimedValue).toEqual(0);
     expect(snapshotTenLoanOne.collateralIncome).toEqual(0);
@@ -707,9 +717,11 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiryLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
+
     expect(snapshotDayOfExpiryLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotDayOfExpiryLoanOne.collateralClaimedValue).toEqual(0);
     expect(snapshotDayOfExpiryLoanOne.collateralIncome).toEqual(0);
+
     expect(snapshotDayOfExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.repaymentEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.defaultedClaimEvents.length).toEqual(0);
@@ -781,14 +793,10 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiryLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
+
     expect(snapshotDayOfExpiryLoanOne.collateralClaimedQuantity).toEqual(COLLATERAL_CLAIM_QUANTITY); // From default
     expect(snapshotDayOfExpiryLoanOne.collateralClaimedValue).toEqual(COLLATERAL_CLAIM_VALUE); // From default
-
-    const snapshotDayOfExpiryLoanOneInterestPayable =
-      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
-    expect(snapshotDayOfExpiryLoanOne.collateralIncome).toEqual(
-      COLLATERAL_CLAIM_VALUE - snapshotDayOfExpiryLoanOneInterestPayable,
-    );
+    expect(snapshotDayOfExpiryLoanOne.collateralIncome).toEqual(COLLATERAL_CLAIM_VALUE);
 
     expect(snapshotDayOfExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayOfExpiry.repaymentEvents.length).toEqual(0);
@@ -818,14 +826,10 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiryLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
+
     expect(snapshotDayAfterExpiryLoanOne.collateralClaimedQuantity).toEqual(COLLATERAL_CLAIM_QUANTITY); // From default
     expect(snapshotDayAfterExpiryLoanOne.collateralClaimedValue).toEqual(COLLATERAL_CLAIM_VALUE); // From default
-
-    const snapshotDayAfterExpiryLoanOneInterestPayable =
-      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
-    expect(snapshotDayAfterExpiryLoanOne.collateralIncome).toEqual(
-      COLLATERAL_CLAIM_VALUE - snapshotDayAfterExpiryLoanOneInterestPayable,
-    );
+    expect(snapshotDayAfterExpiryLoanOne.collateralIncome).toEqual(COLLATERAL_CLAIM_VALUE);
 
     expect(snapshotDayAfterExpiry.creationEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.repaymentEvents.length).toEqual(0);

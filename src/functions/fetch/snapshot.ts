@@ -236,7 +236,7 @@ export const generateSnapshots = (
       loan.collateralDeposited = 0;
 
       // Calculate the income from the collateral claim
-      loan.collateralIncome += defaultedClaimEvent.collateralValueClaimed - interestPayable;
+      loan.collateralIncome += defaultedClaimEvent.collateralValueClaimed;
 
       // Remove the loan payable from the receivables
       currentSnapshot.interestReceivables -= interestPayable;
