@@ -1,4 +1,4 @@
-import { Firestore, Timestamp } from "@google-cloud/firestore";
+import { DocumentData, Firestore, QueryDocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 
 import { Snapshot } from "../types/snapshot";
 import { getISO8601DateString } from "./dateHelper";
@@ -10,13 +10,13 @@ const getClient = () => {
 };
 
 const SnapshotConverter = {
-  toFirestore(snapshot: Snapshot): FirebaseFirestore.DocumentData {
+  toFirestore(snapshot: Snapshot): DocumentData {
     return {
       ...snapshot.defaultedClaimEvents,
       date: Timestamp.fromDate(snapshot.date),
     };
   },
-  fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot): Snapshot {
+  fromFirestore(snapshot: QueryDocumentSnapshot): Snapshot {
     const data = snapshot.data();
     return {
       ...data,
