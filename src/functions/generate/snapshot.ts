@@ -3,8 +3,10 @@ import { Snapshot } from "../../types/snapshot";
 import { SubgraphData } from "../../types/subgraph";
 
 const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
+  const FUNC = "createSnapshot";
   // If there is no previous snapshot, return a new one
   if (!previousSnapshot) {
+    console.log(`${FUNC}: No previous snapshot found for ${getISO8601DateString(currentDate)}`);
     return {
       date: currentDate,
       principalReceivables: 0,
@@ -29,6 +31,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   }
 
   // Otherwise, return a new one based on the previous one
+  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(currentDate)} found. Copying.`);
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date

@@ -1,7 +1,7 @@
 import { Firestore } from "@google-cloud/firestore";
 
-import { Snapshot } from "../snapshot";
-import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../storage";
+import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../../../helpers/storage";
+import { Snapshot } from "../../../types/snapshot";
 
 // Set up the firestore emulator
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
@@ -126,8 +126,10 @@ describe("writeSnapshots", () => {
 
     const snapshotOne = await getSnapshot(new Date("2020-01-01"));
     expect(snapshotOne?.date).toEqual(new Date("2020-01-01"));
+    expect(snapshotOne?.clearinghouse.daiBalance).toEqual(0);
 
     const snapshotTwo = await getSnapshot(new Date("2020-01-02"));
     expect(snapshotTwo?.date).toEqual(new Date("2020-01-02"));
+    expect(snapshotTwo?.clearinghouse.daiBalance).toEqual(0);
   }, 10000);
 });

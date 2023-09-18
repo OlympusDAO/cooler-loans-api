@@ -12,7 +12,7 @@ const getClient = () => {
 const SnapshotConverter = {
   toFirestore(snapshot: Snapshot): DocumentData {
     return {
-      ...snapshot.defaultedClaimEvents,
+      ...snapshot,
       date: Timestamp.fromDate(snapshot.date),
     };
   },

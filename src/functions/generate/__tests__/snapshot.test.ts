@@ -586,6 +586,29 @@ describe("generateSnapshots", () => {
     expect(snapshotTwentyOne.clearinghouseEvents.length).toEqual(0);
   });
 
+  it("should handle no previous snapshot", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-02");
+    const subgraphData = {
+      clearinghouseSnapshots: {},
+      creationEvents: {},
+      defaultedClaimEvents: {},
+      repaymentEvents: {},
+      extendEvents: {},
+    };
+
+    const snapshots = generateSnapshots(startDate, beforeDate, null, subgraphData);
+
+    expect(snapshots).toHaveLength(1);
+
+    const snapshotOne = snapshots[0];
+    expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
+    expect(snapshotOne.principalReceivables).toEqual(0);
+    expect(snapshotOne.interestReceivables).toEqual(0);
+
+    expect(Object.keys(snapshotOne.loans)).toHaveLength(0);
+  });
+
   it("should use the previous day records", () => {
     const previousDateSnapshot: Snapshot = {
       date: new Date("2023-08-01"),

@@ -4,7 +4,13 @@
 
 This repository contains the source code for middleware that will provide time-series data related to Cooler Loans.
 
-## Setup Environment
+## Design
+
+TODO
+
+## Developer
+
+### Environment
 
 - Install JDK 11+, which is required for the firestore emulator
   - On Mac:
@@ -14,7 +20,11 @@ This repository contains the source code for middleware that will provide time-s
 - Install the firebase emulator
   - `gcloud emulators firestore start`
 
-## Testing
+### Testing
 
 - Run the firestore emulator: `yarn firestore:start`
 - `yarn test`
+
+### Rebuild Snapshots
+
+If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the snapshot structure), simply delete the `snapshots` collection in the GCP project's Firestore section.
