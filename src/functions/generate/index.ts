@@ -1,5 +1,6 @@
 import { adjustDate, setMidnight } from "../../helpers/dateHelper";
-import { generateSnapshots, Snapshot } from "./snapshot";
+import { Snapshot } from "../../types/snapshot";
+import { generateSnapshots } from "./snapshot";
 import { getLatestCachedDate, getSnapshot, writeSnapshots } from "./storage";
 import { getData } from "./subgraph";
 
