@@ -1,3 +1,4 @@
 config:
   gcp:project: cooler-loans-api-dev
-  gcp:region: us-east1
+  # Don't change this - required for Cloud Functions + Firebase hosting to work in tandem
+  gcp:region: us-central1
