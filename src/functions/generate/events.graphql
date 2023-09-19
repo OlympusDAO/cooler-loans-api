@@ -75,6 +75,9 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
       fundCadence
       interestRate
       loanToCollateral
+      coolerFactoryAddress
+      collateralAddress
+      debtAddress
     }
     date
     id
@@ -127,6 +130,9 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
       fundCadence
       interestRate
       loanToCollateral
+      coolerFactoryAddress
+      collateralAddress
+      debtAddress
     }
     date
     id

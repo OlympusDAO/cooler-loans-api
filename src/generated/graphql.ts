@@ -364,8 +364,11 @@ export type ClearinghouseSnapshot = {
   blockNumber: Scalars["BigInt"]["output"];
   blockTimestamp: Scalars["BigInt"]["output"];
   clearinghouse: Scalars["Bytes"]["output"];
+  collateralAddress: Scalars["Bytes"]["output"];
+  coolerFactoryAddress: Scalars["Bytes"]["output"];
   daiBalance: Scalars["BigDecimal"]["output"];
   date: Scalars["String"]["output"];
+  debtAddress: Scalars["Bytes"]["output"];
   defundEvents: Array<DefundEvent>;
   duration: Scalars["BigInt"]["output"];
   fundAmount: Scalars["BigDecimal"]["output"];
@@ -431,6 +434,26 @@ export type ClearinghouseSnapshot_Filter = {
   clearinghouse_not?: InputMaybe<Scalars["Bytes"]["input"]>;
   clearinghouse_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
   clearinghouse_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  collateralAddress?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_gt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_gte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  collateralAddress_lt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_lte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_not?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  collateralAddress_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  coolerFactoryAddress?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_gt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_gte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  coolerFactoryAddress_lt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_lte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_not?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  coolerFactoryAddress_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
   daiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   daiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   daiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
@@ -459,6 +482,16 @@ export type ClearinghouseSnapshot_Filter = {
   date_not_starts_with_nocase?: InputMaybe<Scalars["String"]["input"]>;
   date_starts_with?: InputMaybe<Scalars["String"]["input"]>;
   date_starts_with_nocase?: InputMaybe<Scalars["String"]["input"]>;
+  debtAddress?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_gt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_gte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  debtAddress_lt?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_lte?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_not?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
+  debtAddress_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
   defundEvents_?: InputMaybe<DefundEvent_Filter>;
   duration?: InputMaybe<Scalars["BigInt"]["input"]>;
   duration_gt?: InputMaybe<Scalars["BigInt"]["input"]>;
@@ -596,8 +629,11 @@ export enum ClearinghouseSnapshot_OrderBy {
   BlockNumber = "blockNumber",
   BlockTimestamp = "blockTimestamp",
   Clearinghouse = "clearinghouse",
+  CollateralAddress = "collateralAddress",
+  CoolerFactoryAddress = "coolerFactoryAddress",
   DaiBalance = "daiBalance",
   Date = "date",
+  DebtAddress = "debtAddress",
   DefundEvents = "defundEvents",
   Duration = "duration",
   FundAmount = "fundAmount",
@@ -1228,8 +1264,11 @@ export enum DefundEvent_OrderBy {
   ClearinghouseSnapshotBlockNumber = "clearinghouseSnapshot__blockNumber",
   ClearinghouseSnapshotBlockTimestamp = "clearinghouseSnapshot__blockTimestamp",
   ClearinghouseSnapshotClearinghouse = "clearinghouseSnapshot__clearinghouse",
+  ClearinghouseSnapshotCollateralAddress = "clearinghouseSnapshot__collateralAddress",
+  ClearinghouseSnapshotCoolerFactoryAddress = "clearinghouseSnapshot__coolerFactoryAddress",
   ClearinghouseSnapshotDaiBalance = "clearinghouseSnapshot__daiBalance",
   ClearinghouseSnapshotDate = "clearinghouseSnapshot__date",
+  ClearinghouseSnapshotDebtAddress = "clearinghouseSnapshot__debtAddress",
   ClearinghouseSnapshotDuration = "clearinghouseSnapshot__duration",
   ClearinghouseSnapshotFundAmount = "clearinghouseSnapshot__fundAmount",
   ClearinghouseSnapshotFundCadence = "clearinghouseSnapshot__fundCadence",
@@ -1752,8 +1791,11 @@ export enum RebalanceEvent_OrderBy {
   ClearinghouseSnapshotBlockNumber = "clearinghouseSnapshot__blockNumber",
   ClearinghouseSnapshotBlockTimestamp = "clearinghouseSnapshot__blockTimestamp",
   ClearinghouseSnapshotClearinghouse = "clearinghouseSnapshot__clearinghouse",
+  ClearinghouseSnapshotCollateralAddress = "clearinghouseSnapshot__collateralAddress",
+  ClearinghouseSnapshotCoolerFactoryAddress = "clearinghouseSnapshot__coolerFactoryAddress",
   ClearinghouseSnapshotDaiBalance = "clearinghouseSnapshot__daiBalance",
   ClearinghouseSnapshotDate = "clearinghouseSnapshot__date",
+  ClearinghouseSnapshotDebtAddress = "clearinghouseSnapshot__debtAddress",
   ClearinghouseSnapshotDuration = "clearinghouseSnapshot__duration",
   ClearinghouseSnapshotFundAmount = "clearinghouseSnapshot__fundAmount",
   ClearinghouseSnapshotFundCadence = "clearinghouseSnapshot__fundCadence",
@@ -2513,6 +2555,9 @@ export type CoolerLoanEventsQuery = {
       fundCadence: number;
       interestRate: number;
       loanToCollateral: number;
+      coolerFactoryAddress: string;
+      collateralAddress: string;
+      debtAddress: string;
     };
   }>;
   extendLoanEvents: Array<{
@@ -2555,6 +2600,9 @@ export type CoolerLoanEventsQuery = {
       fundCadence: number;
       interestRate: number;
       loanToCollateral: number;
+      coolerFactoryAddress: string;
+      collateralAddress: string;
+      debtAddress: string;
     };
   }>;
   repayLoanEvents: Array<{
@@ -2787,6 +2835,9 @@ export const CoolerLoanEventsDocument = {
                       { kind: "Field", name: { kind: "Name", value: "fundCadence" } },
                       { kind: "Field", name: { kind: "Name", value: "interestRate" } },
                       { kind: "Field", name: { kind: "Name", value: "loanToCollateral" } },
+                      { kind: "Field", name: { kind: "Name", value: "coolerFactoryAddress" } },
+                      { kind: "Field", name: { kind: "Name", value: "collateralAddress" } },
+                      { kind: "Field", name: { kind: "Name", value: "debtAddress" } },
                     ],
                   },
                 },
@@ -2919,6 +2970,9 @@ export const CoolerLoanEventsDocument = {
                       { kind: "Field", name: { kind: "Name", value: "fundCadence" } },
                       { kind: "Field", name: { kind: "Name", value: "interestRate" } },
                       { kind: "Field", name: { kind: "Name", value: "loanToCollateral" } },
+                      { kind: "Field", name: { kind: "Name", value: "coolerFactoryAddress" } },
+                      { kind: "Field", name: { kind: "Name", value: "collateralAddress" } },
+                      { kind: "Field", name: { kind: "Name", value: "debtAddress" } },
                     ],
                   },
                 },

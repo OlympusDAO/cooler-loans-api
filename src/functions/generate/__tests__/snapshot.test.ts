@@ -22,6 +22,9 @@ const CLEARINGHOUSE_INTEREST_RATE = 0.005;
 const CLEARINGHOUSE_LOAN_TO_COLLATERAL = 3000;
 const CLEARINGHOUSE_FUND_AMOUNT = 18000000;
 const CLEARINGHOUSE_FUND_CADENCE = 7 * 24 * 60 * 60;
+const CLEARINGHOUSE_COOLER_FACTORY_ADDRESS = "0x00000";
+const CLEARINGHOUSE_COLLATERAL_ADDRESS = "0x00001";
+const CLEARINGHOUSE_DEBT_ADDRESS = "0x00002";
 
 const TREASURY_DAI_BALANCE = 1000;
 const TREASURY_SDAI_BALANCE = 1500;
@@ -85,6 +88,9 @@ const getSampleData = (): SubgraphData => {
           loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
           fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
           fundCadence: CLEARINGHOUSE_FUND_CADENCE,
+          coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
+          collateralAddress: CLEARINGHOUSE_COLLATERAL_ADDRESS,
+          debtAddress: CLEARINGHOUSE_DEBT_ADDRESS,
         },
       ],
       "2023-08-20": [
@@ -109,6 +115,9 @@ const getSampleData = (): SubgraphData => {
           loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
           fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
           fundCadence: CLEARINGHOUSE_FUND_CADENCE,
+          coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
+          collateralAddress: CLEARINGHOUSE_COLLATERAL_ADDRESS,
+          debtAddress: CLEARINGHOUSE_DEBT_ADDRESS,
         },
       ],
     },
@@ -251,6 +260,9 @@ describe("generateSnapshots", () => {
     expect(resultOne.clearinghouse.sDaiInDaiBalance).toEqual(0);
     expect(resultOne.clearinghouse.fundAmount).toEqual(0);
     expect(resultOne.clearinghouse.fundCadence).toEqual(0);
+    expect(resultOne.clearinghouse.coolerFactoryAddress).toEqual("");
+    expect(resultOne.clearinghouse.collateralAddress).toEqual("");
+    expect(resultOne.clearinghouse.debtAddress).toEqual("");
 
     expect(resultOne.treasury.daiBalance).toEqual(0);
     expect(resultOne.treasury.sDaiBalance).toEqual(0);
@@ -560,6 +572,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE);
     expect(snapshotOne.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
     expect(snapshotOne.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
+    expect(snapshotOne.clearinghouse.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
+    expect(snapshotOne.clearinghouse.collateralAddress).toEqual(CLEARINGHOUSE_COLLATERAL_ADDRESS);
+    expect(snapshotOne.clearinghouse.debtAddress).toEqual(CLEARINGHOUSE_DEBT_ADDRESS);
 
     expect(snapshotOne.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE);
     expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE);
@@ -582,6 +597,11 @@ describe("generateSnapshots", () => {
     expect(snapshotTwenty.clearinghouse.daiBalance).toEqual(9000000.0);
     expect(snapshotTwenty.clearinghouse.sDaiBalance).toEqual(500000.0);
     expect(snapshotTwenty.clearinghouse.sDaiInDaiBalance).toEqual(600000.01);
+    expect(snapshotTwenty.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
+    expect(snapshotTwenty.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
+    expect(snapshotTwenty.clearinghouse.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
+    expect(snapshotTwenty.clearinghouse.collateralAddress).toEqual(CLEARINGHOUSE_COLLATERAL_ADDRESS);
+    expect(snapshotTwenty.clearinghouse.debtAddress).toEqual(CLEARINGHOUSE_DEBT_ADDRESS);
 
     expect(snapshotTwenty.treasury.daiBalance).toEqual(1100);
     expect(snapshotTwenty.treasury.sDaiBalance).toEqual(1700);
@@ -606,6 +626,11 @@ describe("generateSnapshots", () => {
     expect(snapshotTwentyOne.clearinghouse.daiBalance).toEqual(9000000.0);
     expect(snapshotTwentyOne.clearinghouse.sDaiBalance).toEqual(500000.0);
     expect(snapshotTwentyOne.clearinghouse.sDaiInDaiBalance).toEqual(600000.01);
+    expect(snapshotTwentyOne.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
+    expect(snapshotTwentyOne.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
+    expect(snapshotTwentyOne.clearinghouse.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
+    expect(snapshotTwentyOne.clearinghouse.collateralAddress).toEqual(CLEARINGHOUSE_COLLATERAL_ADDRESS);
+    expect(snapshotTwentyOne.clearinghouse.debtAddress).toEqual(CLEARINGHOUSE_DEBT_ADDRESS);
 
     expect(snapshotTwentyOne.treasury.daiBalance).toEqual(1100);
     expect(snapshotTwentyOne.treasury.sDaiBalance).toEqual(1700);
@@ -671,6 +696,9 @@ describe("generateSnapshots", () => {
         sDaiInDaiBalance: 101010,
         fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
         fundCadence: CLEARINGHOUSE_FUND_CADENCE,
+        coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
+        collateralAddress: CLEARINGHOUSE_COLLATERAL_ADDRESS,
+        debtAddress: CLEARINGHOUSE_DEBT_ADDRESS,
       },
       treasury: {
         daiBalance: 111111,

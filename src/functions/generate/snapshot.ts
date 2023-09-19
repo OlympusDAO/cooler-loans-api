@@ -18,6 +18,9 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
         sDaiInDaiBalance: 0,
         fundAmount: 0,
         fundCadence: 0,
+        coolerFactoryAddress: "",
+        collateralAddress: "",
+        debtAddress: "",
       },
       terms: {
         interestRate: 0,
@@ -65,6 +68,9 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       sDaiInDaiBalance: 0,
       fundAmount: 0,
       fundCadence: 0,
+      coolerFactoryAddress: "",
+      collateralAddress: "",
+      debtAddress: "",
     };
   }
 
@@ -137,6 +143,9 @@ export const generateSnapshots = (
       currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.sDaiInDaiBalance);
       currentSnapshot.clearinghouse.fundAmount = parseNumber(clearinghouseSnapshot.fundAmount);
       currentSnapshot.clearinghouse.fundCadence = parseNumber(clearinghouseSnapshot.fundCadence);
+      currentSnapshot.clearinghouse.coolerFactoryAddress = clearinghouseSnapshot.coolerFactoryAddress;
+      currentSnapshot.clearinghouse.collateralAddress = clearinghouseSnapshot.collateralAddress;
+      currentSnapshot.clearinghouse.debtAddress = clearinghouseSnapshot.debtAddress;
 
       currentSnapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryDaiBalance);
       currentSnapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiBalance);

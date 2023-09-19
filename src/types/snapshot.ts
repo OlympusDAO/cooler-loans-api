@@ -40,6 +40,9 @@ export type Snapshot = {
     sDaiInDaiBalance: number;
     fundAmount: number;
     fundCadence: number;
+    coolerFactoryAddress: string;
+    collateralAddress: string;
+    debtAddress: string;
   };
   treasury: {
     daiBalance: number;

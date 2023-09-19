@@ -27,8 +27,11 @@
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
               "clearinghouse": { "type": "string" },
+              "collateralAddress": { "type": "string" },
+              "coolerFactoryAddress": { "type": "string" },
               "daiBalance": { "type": "number" },
               "date": { "type": "string" },
+              "debtAddress": { "type": "string" },
               "duration": { "type": "number" },
               "fundAmount": { "type": "number" },
               "fundCadence": { "type": "number" },
@@ -158,7 +161,10 @@
         {
           "properties":
             {
+              "collateralAddress": { "type": "string" },
+              "coolerFactoryAddress": { "type": "string" },
               "daiBalance": { "type": "number" },
+              "debtAddress": { "type": "string" },
               "fundAmount": { "type": "number" },
               "fundCadence": { "type": "number" },
               "sDaiBalance": { "type": "number" },
