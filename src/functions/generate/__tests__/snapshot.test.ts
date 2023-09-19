@@ -618,6 +618,25 @@ describe("generateSnapshots", () => {
     expect(snapshotTwentyOne.clearinghouseEvents.length).toEqual(0);
   });
 
+  it("clearinghouse balances as strings", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-02");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+    // @ts-ignore
+    subgraphData.clearinghouseSnapshots["2023-08-01"][0].interestRate = "0.005";
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    expect(snapshots.length).toEqual(1);
+
+    // Day 1 should have clearinghouse balances
+    const snapshotOne = snapshots[0];
+    expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
+
+    expect(snapshotOne.terms.interestRate).toEqual(CLEARINGHOUSE_INTEREST_RATE);
+  });
+
   it("should handle no previous snapshot", () => {
     const startDate = new Date("2023-08-01");
     const beforeDate = new Date("2023-08-02");
