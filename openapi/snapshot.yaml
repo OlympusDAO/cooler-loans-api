@@ -187,17 +187,36 @@
                   "borrowerAddress": { "type": "string" },
                   "collateralClaimedQuantity": { "type": "number" },
                   "collateralClaimedValue": { "type": "number" },
-                  "collateralDeposited": { "type": "number" },
+                  "collateralDeposited":
+                    {
+                      "description": "The current quantity of the collateral token that is deposited.\n\nAs the loan is repaid, this will decrease.",
+                      "type": "number",
+                    },
                   "collateralIncome": { "type": "number" },
+                  "collateralPerPeriod":
+                    {
+                      "description": "The amount of collateral required per period.\n\nAs this is fixed on the clearinghouse, it does not change.",
+                      "type": "number",
+                    },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "type": "number" },
                   "expiryTimestamp": { "type": "number" },
-                  "id": { "description": "cooler-loanId", "type": "string" },
-                  "interest": { "type": "number" },
+                  "id":
+                    {
+                      "description": "Loan id unique across the clearinghouse and its coolers\n\nFormat: cooler-loanId",
+                      "type": "string",
+                    },
+                  "interest":
+                    {
+                      "description": "The interest charged on the loan.\n\nWhen the loan is extended, this number will be incremented.",
+                      "type": "number",
+                    },
                   "interestPaid": { "type": "number" },
+                  "interestPerPeriod":
+                    { "description": "The amount of interest charged per period.", "type": "number" },
                   "lenderAddress": { "type": "string" },
-                  "loanId": { "type": "number" },
-                  "principal": { "type": "number" },
+                  "loanId": { "description": "Loan id unique to the cooler", "type": "number" },
+                  "principal": { "description": "The loan principal", "type": "number" },
                   "principalPaid": { "type": "number" },
                   "secondsToExpiry": { "type": "number" },
                   "status": { "enum": ["Active", "Expired", "Reclaimed", "Repaid"], "type": "string" },

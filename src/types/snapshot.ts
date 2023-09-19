@@ -8,16 +8,44 @@ import {
 
 export type Loan = {
   /**
-   * cooler-loanId
+   * Loan id unique across the clearinghouse and its coolers
+   *
+   * Format: cooler-loanId
    */
   id: string;
+  /**
+   * Loan id unique to the cooler
+   */
   loanId: number;
   createdTimestamp: number;
   coolerAddress: string;
   borrowerAddress: string;
   lenderAddress: string;
+  /**
+   * The amount of interest charged per period.
+   */
+  interestPerPeriod: number;
+  /**
+   * The amount of collateral required per period.
+   *
+   * As this is fixed on the clearinghouse, it does not change.
+   */
+  collateralPerPeriod: number;
+  /**
+   * The loan principal
+   */
   principal: number;
+  /**
+   * The interest charged on the loan.
+   *
+   * When the loan is extended, this number will be incremented.
+   */
   interest: number;
+  /**
+   * The current quantity of the collateral token that is deposited.
+   *
+   * As the loan is repaid, this will decrease.
+   */
   collateralDeposited: number;
   expiryTimestamp: number;
   secondsToExpiry: number;
