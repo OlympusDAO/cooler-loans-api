@@ -16,6 +16,13 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
         daiBalance: 0,
         sDaiBalance: 0,
         sDaiInDaiBalance: 0,
+        fundAmount: 0,
+        fundCadence: 0,
+      },
+      terms: {
+        interestRate: 0,
+        duration: 0,
+        loanToCollateral: 0,
       },
       treasury: {
         daiBalance: 0,
@@ -56,6 +63,17 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       daiBalance: 0,
       sDaiBalance: 0,
       sDaiInDaiBalance: 0,
+      fundAmount: 0,
+      fundCadence: 0,
+    };
+  }
+
+  // Ensure the terms has a value
+  if (!newSnapshot.terms) {
+    newSnapshot.terms = {
+      interestRate: 0,
+      duration: 0,
+      loanToCollateral: 0,
     };
   }
 
@@ -117,9 +135,16 @@ export const generateSnapshots = (
       currentSnapshot.clearinghouse.daiBalance = parseNumber(clearinghouseSnapshot.daiBalance);
       currentSnapshot.clearinghouse.sDaiBalance = parseNumber(clearinghouseSnapshot.sDaiBalance);
       currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.sDaiInDaiBalance);
+      currentSnapshot.clearinghouse.fundAmount = parseNumber(clearinghouseSnapshot.fundAmount);
+      currentSnapshot.clearinghouse.fundCadence = parseNumber(clearinghouseSnapshot.fundCadence);
+
       currentSnapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryDaiBalance);
       currentSnapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiBalance);
       currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiInDaiBalance);
+
+      currentSnapshot.terms.interestRate = parseNumber(clearinghouseSnapshot.interestRate);
+      currentSnapshot.terms.duration = parseNumber(clearinghouseSnapshot.duration);
+      currentSnapshot.terms.loanToCollateral = parseNumber(clearinghouseSnapshot.loanToCollateral);
 
       currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
     });

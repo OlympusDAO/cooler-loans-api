@@ -17,6 +17,11 @@ const COLLATERAL_CLAIM_VALUE = 29000;
 const CLEARINGHOUSE_DAI_BALANCE = 10000000.0;
 const CLEARINGHOUSE_SDAI_BALANCE = 500000.0;
 const CLEARINGHOUSE_SDAI_IN_DAI_BALANCE = 600000.01;
+const CLEARINGHOUSE_DURATION = 121 * 24 * 60 * 60;
+const CLEARINGHOUSE_INTEREST_RATE = 0.005;
+const CLEARINGHOUSE_LOAN_TO_COLLATERAL = 3000;
+const CLEARINGHOUSE_FUND_AMOUNT = 18000000;
+const CLEARINGHOUSE_FUND_CADENCE = 7 * 24 * 60 * 60;
 
 const TREASURY_DAI_BALANCE = 1000;
 const TREASURY_SDAI_BALANCE = 1500;
@@ -75,6 +80,11 @@ const getSampleData = (): SubgraphData => {
           treasuryDaiBalance: TREASURY_DAI_BALANCE,
           treasurySDaiBalance: TREASURY_SDAI_BALANCE,
           treasurySDaiInDaiBalance: TREASURY_SDAI_IN_DAI_BALANCE,
+          duration: CLEARINGHOUSE_DURATION,
+          interestRate: CLEARINGHOUSE_INTEREST_RATE,
+          loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
+          fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
+          fundCadence: CLEARINGHOUSE_FUND_CADENCE,
         },
       ],
       "2023-08-20": [
@@ -94,6 +104,11 @@ const getSampleData = (): SubgraphData => {
           treasuryDaiBalance: 1100,
           treasurySDaiBalance: 1700,
           treasurySDaiInDaiBalance: 1800,
+          duration: CLEARINGHOUSE_DURATION,
+          interestRate: CLEARINGHOUSE_INTEREST_RATE,
+          loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
+          fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
+          fundCadence: CLEARINGHOUSE_FUND_CADENCE,
         },
       ],
     },
@@ -230,12 +245,21 @@ describe("generateSnapshots", () => {
     expect(resultOne.date.toISOString()).toEqual("2022-01-01T23:59:59.999Z");
     expect(resultOne.principalReceivables).toEqual(0);
     expect(resultOne.interestReceivables).toEqual(0);
+
     expect(resultOne.clearinghouse.daiBalance).toEqual(0);
     expect(resultOne.clearinghouse.sDaiBalance).toEqual(0);
     expect(resultOne.clearinghouse.sDaiInDaiBalance).toEqual(0);
+    expect(resultOne.clearinghouse.fundAmount).toEqual(0);
+    expect(resultOne.clearinghouse.fundCadence).toEqual(0);
+
     expect(resultOne.treasury.daiBalance).toEqual(0);
     expect(resultOne.treasury.sDaiBalance).toEqual(0);
     expect(resultOne.treasury.sDaiInDaiBalance).toEqual(0);
+
+    expect(resultOne.terms.duration).toEqual(0);
+    expect(resultOne.terms.interestRate).toEqual(0);
+    expect(resultOne.terms.loanToCollateral).toEqual(0);
+
     expect(Object.values(resultOne.loans)).toHaveLength(0);
     expect(resultOne.creationEvents).toHaveLength(0);
     expect(resultOne.defaultedClaimEvents).toHaveLength(0);
@@ -530,12 +554,20 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
     expect(snapshotOne.principalReceivables).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOne.interestReceivables).toEqual(LOAN_INTEREST);
+
     expect(snapshotOne.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE);
     expect(snapshotOne.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE);
     expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE);
+    expect(snapshotOne.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
+    expect(snapshotOne.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
+
     expect(snapshotOne.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE);
     expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE);
     expect(snapshotOne.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE);
+
+    expect(snapshotOne.terms.duration).toEqual(CLEARINGHOUSE_DURATION);
+    expect(snapshotOne.terms.interestRate).toEqual(CLEARINGHOUSE_INTEREST_RATE);
+    expect(snapshotOne.terms.loanToCollateral).toEqual(CLEARINGHOUSE_LOAN_TO_COLLATERAL);
 
     // Day 20 should have the adjusted clearinghouse balances
     const snapshotTwenty = snapshots[19];
@@ -618,11 +650,18 @@ describe("generateSnapshots", () => {
         daiBalance: 12345,
         sDaiBalance: 56789,
         sDaiInDaiBalance: 101010,
+        fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
+        fundCadence: CLEARINGHOUSE_FUND_CADENCE,
       },
       treasury: {
         daiBalance: 111111,
         sDaiBalance: 3333,
         sDaiInDaiBalance: 4444,
+      },
+      terms: {
+        duration: CLEARINGHOUSE_DURATION,
+        interestRate: CLEARINGHOUSE_INTEREST_RATE,
+        loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
       },
       loans: {
         [LOAN_ID]: {

@@ -38,11 +38,18 @@ export type Snapshot = {
     daiBalance: number;
     sDaiBalance: number;
     sDaiInDaiBalance: number;
+    fundAmount: number;
+    fundCadence: number;
   };
   treasury: {
     daiBalance: number;
     sDaiBalance: number;
     sDaiInDaiBalance: number;
+  };
+  terms: {
+    interestRate: number;
+    duration: number;
+    loanToCollateral: number;
   };
   /**
    * Dictionary of the loans that had been created by this date.

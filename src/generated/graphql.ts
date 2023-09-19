@@ -2508,6 +2508,11 @@ export type CoolerLoanEventsQuery = {
       treasuryDaiBalance: number;
       treasurySDaiBalance: number;
       treasurySDaiInDaiBalance: number;
+      duration: number;
+      fundAmount: number;
+      fundCadence: number;
+      interestRate: number;
+      loanToCollateral: number;
     };
   }>;
   extendLoanEvents: Array<{
@@ -2545,6 +2550,11 @@ export type CoolerLoanEventsQuery = {
       treasuryDaiBalance: number;
       treasurySDaiBalance: number;
       treasurySDaiInDaiBalance: number;
+      duration: number;
+      fundAmount: number;
+      fundCadence: number;
+      interestRate: number;
+      loanToCollateral: number;
     };
   }>;
   repayLoanEvents: Array<{
@@ -2772,6 +2782,11 @@ export const CoolerLoanEventsDocument = {
                       { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
                       { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
                       { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
+                      { kind: "Field", name: { kind: "Name", value: "duration" } },
+                      { kind: "Field", name: { kind: "Name", value: "fundAmount" } },
+                      { kind: "Field", name: { kind: "Name", value: "fundCadence" } },
+                      { kind: "Field", name: { kind: "Name", value: "interestRate" } },
+                      { kind: "Field", name: { kind: "Name", value: "loanToCollateral" } },
                     ],
                   },
                 },
@@ -2899,6 +2914,11 @@ export const CoolerLoanEventsDocument = {
                       { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
                       { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
                       { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
+                      { kind: "Field", name: { kind: "Name", value: "duration" } },
+                      { kind: "Field", name: { kind: "Name", value: "fundAmount" } },
+                      { kind: "Field", name: { kind: "Name", value: "fundCadence" } },
+                      { kind: "Field", name: { kind: "Name", value: "interestRate" } },
+                      { kind: "Field", name: { kind: "Name", value: "loanToCollateral" } },
                     ],
                   },
                 },
