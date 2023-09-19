@@ -41,4 +41,4 @@ If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the sn
 
 ### OpenAPI
 
-REST API clients can utilise the `openapi.yml` file to generate typings. The schema, contained in `snapshot.jsonschema` is regenerated with the `yarn codegen` command.
+REST API clients can utilise the `openapi/openapi.yml` file to generate typings. The schema, contained in `openapi/snapshot.yaml` is regenerated with the `yarn codegen` command.

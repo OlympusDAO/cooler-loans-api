@@ -6,6 +6,29 @@ import {
   RepayLoanEventOptional,
 } from "./subgraph";
 
+export type Loan = {
+  /**
+   * cooler-loanId
+   */
+  id: string;
+  loanId: number;
+  createdTimestamp: number;
+  coolerAddress: string;
+  borrowerAddress: string;
+  lenderAddress: string;
+  principal: number;
+  interest: number;
+  collateralDeposited: number;
+  expiryTimestamp: number;
+  secondsToExpiry: number;
+  status: "Active" | "Expired" | "Reclaimed" | "Repaid";
+  principalPaid: number;
+  interestPaid: number;
+  collateralIncome: number;
+  collateralClaimedQuantity: number;
+  collateralClaimedValue: number;
+};
+
 export type Snapshot = {
   date: Date;
   // Top-level summary
@@ -27,31 +50,9 @@ export type Snapshot = {
    * Key: `cooler address`-`loanId`
    * Value: Loan record
    */
-  loans: Record<
-    string,
-    {
-      /**
-       * cooler-loanId
-       */
-      id: string;
-      loanId: number;
-      createdTimestamp: number;
-      coolerAddress: string;
-      borrowerAddress: string;
-      lenderAddress: string;
-      principal: number;
-      interest: number;
-      collateralDeposited: number;
-      expiryTimestamp: number;
-      secondsToExpiry: number;
-      status: "Active" | "Expired" | "Reclaimed" | "Repaid";
-      principalPaid: number;
-      interestPaid: number;
-      collateralIncome: number;
-      collateralClaimedQuantity: number;
-      collateralClaimedValue: number;
-    }
-  >;
+  loans: {
+    [key: string]: Loan;
+  };
   creationEvents: ClearLoanRequestEventOptional[];
   defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
   repaymentEvents: RepayLoanEventOptional[];

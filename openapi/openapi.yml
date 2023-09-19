@@ -35,4 +35,4 @@ paths:
                   records:
                     type: array
                     items:
-                      $ref: "https://raw.githubusercontent.com/OlympusDAO/cooler-loans-api/main/snapshot.jsonschema"
+                      $ref: "snapshot.yaml"

@@ -1,0 +1,211 @@
+{
+  "definitions":
+    {
+      "ClaimDefaultedLoanEventOptional":
+        {
+          "allOf":
+            [
+              { "$ref": '#/definitions/Omit<ClaimDefaultedLoanEvent,"loan">' },
+              {
+                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "type": "object",
+              },
+            ],
+        },
+      "ClearLoanRequestEventOptional":
+        {
+          "allOf":
+            [
+              { "$ref": '#/definitions/Omit<ClearLoanRequestEvent,"loan"|"request">' },
+              { "properties": { "loan": { "$ref": "#/definitions/CoolerLoanOptional" } }, "type": "object" },
+            ],
+        },
+      "ClearinghouseSnapshotOptional":
+        {
+          "properties":
+            {
+              "blockNumber": { "type": "number" },
+              "blockTimestamp": { "type": "number" },
+              "clearinghouse": { "type": "string" },
+              "daiBalance": { "type": "number" },
+              "date": { "type": "string" },
+              "id": { "type": "string" },
+              "interestReceivables": { "type": "number" },
+              "isActive": { "type": "boolean" },
+              "nextRebalanceTimestamp": { "type": "number" },
+              "principalReceivables": { "type": "number" },
+              "sDaiBalance": { "type": "number" },
+              "sDaiInDaiBalance": { "type": "number" },
+              "treasuryDaiBalance": { "type": "number" },
+              "treasurySDaiBalance": { "type": "number" },
+              "treasurySDaiInDaiBalance": { "type": "number" },
+            },
+          "type": "object",
+        },
+      "CoolerLoanOptional":
+        {
+          "properties":
+            {
+              "borrower": { "type": "string" },
+              "collateral": { "type": "number" },
+              "collateralToken": { "type": "string" },
+              "cooler": { "type": "string" },
+              "createdBlock": { "type": "number" },
+              "createdTimestamp": { "type": "number" },
+              "createdTransaction": { "type": "string" },
+              "debtToken": { "type": "string" },
+              "expiryTimestamp": { "type": "number" },
+              "hasCallback": { "type": "boolean" },
+              "id": { "type": "string" },
+              "interest": { "type": "number" },
+              "lender": { "type": "string" },
+              "loanId": { "type": "number" },
+              "principal": { "type": "number" },
+            },
+          "type": "object",
+        },
+      "ExtendLoanEventOptional":
+        {
+          "allOf":
+            [
+              { "$ref": '#/definitions/Omit<ExtendLoanEvent,"loan">' },
+              {
+                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "type": "object",
+              },
+            ],
+        },
+      'Omit<ClaimDefaultedLoanEvent,"loan">':
+        {
+          "properties":
+            {
+              "blockNumber": { "type": "number" },
+              "blockTimestamp": { "type": "number" },
+              "collateralPrice": { "type": "number" },
+              "collateralQuantityClaimed": { "type": "number" },
+              "collateralValueClaimed": { "type": "number" },
+              "date": { "type": "string" },
+              "id": { "type": "string" },
+              "secondsSinceExpiry": { "type": "number" },
+              "transactionHash": { "type": "string" },
+            },
+          "type": "object",
+        },
+      'Omit<ClearLoanRequestEvent,"loan"|"request">':
+        {
+          "properties":
+            {
+              "blockNumber": { "type": "number" },
+              "blockTimestamp": { "type": "number" },
+              "date": { "type": "string" },
+              "id": { "type": "string" },
+              "transactionHash": { "type": "string" },
+            },
+          "type": "object",
+        },
+      'Omit<ExtendLoanEvent,"loan">':
+        {
+          "properties":
+            {
+              "blockNumber": { "type": "number" },
+              "blockTimestamp": { "type": "number" },
+              "date": { "type": "string" },
+              "expiryTimestamp": { "type": "number" },
+              "id": { "type": "string" },
+              "interestDue": { "type": "number" },
+              "periods": { "type": "number" },
+              "transactionHash": { "type": "string" },
+            },
+          "type": "object",
+        },
+      'Omit<RepayLoanEvent,"loan">':
+        {
+          "properties":
+            {
+              "amountPaid": { "type": "number" },
+              "blockNumber": { "type": "number" },
+              "blockTimestamp": { "type": "number" },
+              "collateralDeposited": { "type": "number" },
+              "date": { "type": "string" },
+              "id": { "type": "string" },
+              "interestPayable": { "type": "number" },
+              "principalPayable": { "type": "number" },
+              "secondsToExpiry": { "type": "number" },
+              "transactionHash": { "type": "string" },
+            },
+          "type": "object",
+        },
+      "RepayLoanEventOptional":
+        {
+          "allOf":
+            [
+              { "$ref": '#/definitions/Omit<RepayLoanEvent,"loan">' },
+              {
+                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "type": "object",
+              },
+            ],
+        },
+    },
+  "properties":
+    {
+      "clearinghouse":
+        {
+          "properties":
+            {
+              "daiBalance": { "type": "number" },
+              "sDaiBalance": { "type": "number" },
+              "sDaiInDaiBalance": { "type": "number" },
+            },
+          "type": "object",
+        },
+      "clearinghouseEvents": { "items": { "$ref": "#/definitions/ClearinghouseSnapshotOptional" }, "type": "array" },
+      "creationEvents": { "items": { "$ref": "#/definitions/ClearLoanRequestEventOptional" }, "type": "array" },
+      "date": { "format": "date-time", "type": "string" },
+      "defaultedClaimEvents": { "items": { "$ref": "#/definitions/ClaimDefaultedLoanEventOptional" }, "type": "array" },
+      "extendEvents": { "items": { "$ref": "#/definitions/ExtendLoanEventOptional" }, "type": "array" },
+      "interestReceivables": { "type": "number" },
+      "loans":
+        {
+          "additionalProperties":
+            {
+              "properties":
+                {
+                  "borrowerAddress": { "type": "string" },
+                  "collateralClaimedQuantity": { "type": "number" },
+                  "collateralClaimedValue": { "type": "number" },
+                  "collateralDeposited": { "type": "number" },
+                  "collateralIncome": { "type": "number" },
+                  "coolerAddress": { "type": "string" },
+                  "createdTimestamp": { "type": "number" },
+                  "expiryTimestamp": { "type": "number" },
+                  "id": { "description": "cooler-loanId", "type": "string" },
+                  "interest": { "type": "number" },
+                  "interestPaid": { "type": "number" },
+                  "lenderAddress": { "type": "string" },
+                  "loanId": { "type": "number" },
+                  "principal": { "type": "number" },
+                  "principalPaid": { "type": "number" },
+                  "secondsToExpiry": { "type": "number" },
+                  "status": { "enum": ["Active", "Expired", "Reclaimed", "Repaid"], "type": "string" },
+                },
+              "type": "object",
+            },
+          "description": "Dictionary of the loans that had been created by this date.\n\nKey: `cooler address`-`loanId`\nValue: Loan record",
+          "type": "object",
+        },
+      "principalReceivables": { "type": "number" },
+      "repaymentEvents": { "items": { "$ref": "#/definitions/RepayLoanEventOptional" }, "type": "array" },
+      "treasury":
+        {
+          "properties":
+            {
+              "daiBalance": { "type": "number" },
+              "sDaiBalance": { "type": "number" },
+              "sDaiInDaiBalance": { "type": "number" },
+            },
+          "type": "object",
+        },
+    },
+  "type": "object",
+}
