@@ -159,6 +159,8 @@
           "properties":
             {
               "daiBalance": { "type": "number" },
+              "fundAmount": { "type": "number" },
+              "fundCadence": { "type": "number" },
               "sDaiBalance": { "type": "number" },
               "sDaiInDaiBalance": { "type": "number" },
             },
@@ -201,6 +203,16 @@
         },
       "principalReceivables": { "type": "number" },
       "repaymentEvents": { "items": { "$ref": "#/definitions/RepayLoanEventOptional" }, "type": "array" },
+      "terms":
+        {
+          "properties":
+            {
+              "duration": { "type": "number" },
+              "interestRate": { "type": "number" },
+              "loanToCollateral": { "type": "number" },
+            },
+          "type": "object",
+        },
       "treasury":
         {
           "properties":
