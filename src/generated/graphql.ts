@@ -367,9 +367,14 @@ export type ClearinghouseSnapshot = {
   daiBalance: Scalars["BigDecimal"]["output"];
   date: Scalars["String"]["output"];
   defundEvents: Array<DefundEvent>;
+  duration: Scalars["BigInt"]["output"];
+  fundAmount: Scalars["BigDecimal"]["output"];
+  fundCadence: Scalars["BigInt"]["output"];
   id: Scalars["String"]["output"];
+  interestRate: Scalars["BigDecimal"]["output"];
   interestReceivables: Scalars["BigDecimal"]["output"];
   isActive: Scalars["Boolean"]["output"];
+  loanToCollateral: Scalars["BigDecimal"]["output"];
   nextRebalanceTimestamp: Scalars["BigInt"]["output"];
   principalReceivables: Scalars["BigDecimal"]["output"];
   rebalanceEvents: Array<RebalanceEvent>;
@@ -455,6 +460,30 @@ export type ClearinghouseSnapshot_Filter = {
   date_starts_with?: InputMaybe<Scalars["String"]["input"]>;
   date_starts_with_nocase?: InputMaybe<Scalars["String"]["input"]>;
   defundEvents_?: InputMaybe<DefundEvent_Filter>;
+  duration?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_gt?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_gte?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  duration_lt?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_lte?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_not?: InputMaybe<Scalars["BigInt"]["input"]>;
+  duration_not_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  fundAmount?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  fundAmount_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  fundAmount_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  fundCadence?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_gt?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_gte?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  fundCadence_lt?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_lte?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_not?: InputMaybe<Scalars["BigInt"]["input"]>;
+  fundCadence_not_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
   id?: InputMaybe<Scalars["String"]["input"]>;
   id_contains?: InputMaybe<Scalars["String"]["input"]>;
   id_contains_nocase?: InputMaybe<Scalars["String"]["input"]>;
@@ -475,6 +504,14 @@ export type ClearinghouseSnapshot_Filter = {
   id_not_starts_with_nocase?: InputMaybe<Scalars["String"]["input"]>;
   id_starts_with?: InputMaybe<Scalars["String"]["input"]>;
   id_starts_with_nocase?: InputMaybe<Scalars["String"]["input"]>;
+  interestRate?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  interestRate_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  interestRate_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
   interestReceivables?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   interestReceivables_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   interestReceivables_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
@@ -487,6 +524,14 @@ export type ClearinghouseSnapshot_Filter = {
   isActive_in?: InputMaybe<Array<Scalars["Boolean"]["input"]>>;
   isActive_not?: InputMaybe<Scalars["Boolean"]["input"]>;
   isActive_not_in?: InputMaybe<Array<Scalars["Boolean"]["input"]>>;
+  loanToCollateral?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  loanToCollateral_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  loanToCollateral_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
   nextRebalanceTimestamp?: InputMaybe<Scalars["BigInt"]["input"]>;
   nextRebalanceTimestamp_gt?: InputMaybe<Scalars["BigInt"]["input"]>;
   nextRebalanceTimestamp_gte?: InputMaybe<Scalars["BigInt"]["input"]>;
@@ -554,9 +599,14 @@ export enum ClearinghouseSnapshot_OrderBy {
   DaiBalance = "daiBalance",
   Date = "date",
   DefundEvents = "defundEvents",
+  Duration = "duration",
+  FundAmount = "fundAmount",
+  FundCadence = "fundCadence",
   Id = "id",
+  InterestRate = "interestRate",
   InterestReceivables = "interestReceivables",
   IsActive = "isActive",
+  LoanToCollateral = "loanToCollateral",
   NextRebalanceTimestamp = "nextRebalanceTimestamp",
   PrincipalReceivables = "principalReceivables",
   RebalanceEvents = "rebalanceEvents",
@@ -1180,9 +1230,14 @@ export enum DefundEvent_OrderBy {
   ClearinghouseSnapshotClearinghouse = "clearinghouseSnapshot__clearinghouse",
   ClearinghouseSnapshotDaiBalance = "clearinghouseSnapshot__daiBalance",
   ClearinghouseSnapshotDate = "clearinghouseSnapshot__date",
+  ClearinghouseSnapshotDuration = "clearinghouseSnapshot__duration",
+  ClearinghouseSnapshotFundAmount = "clearinghouseSnapshot__fundAmount",
+  ClearinghouseSnapshotFundCadence = "clearinghouseSnapshot__fundCadence",
   ClearinghouseSnapshotId = "clearinghouseSnapshot__id",
+  ClearinghouseSnapshotInterestRate = "clearinghouseSnapshot__interestRate",
   ClearinghouseSnapshotInterestReceivables = "clearinghouseSnapshot__interestReceivables",
   ClearinghouseSnapshotIsActive = "clearinghouseSnapshot__isActive",
+  ClearinghouseSnapshotLoanToCollateral = "clearinghouseSnapshot__loanToCollateral",
   ClearinghouseSnapshotNextRebalanceTimestamp = "clearinghouseSnapshot__nextRebalanceTimestamp",
   ClearinghouseSnapshotPrincipalReceivables = "clearinghouseSnapshot__principalReceivables",
   ClearinghouseSnapshotSDaiBalance = "clearinghouseSnapshot__sDaiBalance",
@@ -1699,9 +1754,14 @@ export enum RebalanceEvent_OrderBy {
   ClearinghouseSnapshotClearinghouse = "clearinghouseSnapshot__clearinghouse",
   ClearinghouseSnapshotDaiBalance = "clearinghouseSnapshot__daiBalance",
   ClearinghouseSnapshotDate = "clearinghouseSnapshot__date",
+  ClearinghouseSnapshotDuration = "clearinghouseSnapshot__duration",
+  ClearinghouseSnapshotFundAmount = "clearinghouseSnapshot__fundAmount",
+  ClearinghouseSnapshotFundCadence = "clearinghouseSnapshot__fundCadence",
   ClearinghouseSnapshotId = "clearinghouseSnapshot__id",
+  ClearinghouseSnapshotInterestRate = "clearinghouseSnapshot__interestRate",
   ClearinghouseSnapshotInterestReceivables = "clearinghouseSnapshot__interestReceivables",
   ClearinghouseSnapshotIsActive = "clearinghouseSnapshot__isActive",
+  ClearinghouseSnapshotLoanToCollateral = "clearinghouseSnapshot__loanToCollateral",
   ClearinghouseSnapshotNextRebalanceTimestamp = "clearinghouseSnapshot__nextRebalanceTimestamp",
   ClearinghouseSnapshotPrincipalReceivables = "clearinghouseSnapshot__principalReceivables",
   ClearinghouseSnapshotSDaiBalance = "clearinghouseSnapshot__sDaiBalance",
