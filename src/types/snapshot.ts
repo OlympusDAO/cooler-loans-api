@@ -17,6 +17,9 @@ export type Loan = {
    * Loan id unique to the cooler
    */
   loanId: number;
+  /**
+   * Timestamp of the loan creation, in seconds
+   */
   createdTimestamp: number;
   coolerAddress: string;
   borrowerAddress: string;
@@ -47,9 +50,19 @@ export type Loan = {
    * As the loan is repaid, this will decrease.
    */
   collateralDeposited: number;
+  /**
+   * Timestamp of the expected loan expiry, in seconds
+   */
   expiryTimestamp: number;
   secondsToExpiry: number;
+  /**
+   * Status of the loan
+   */
   status: "Active" | "Expired" | "Reclaimed" | "Repaid";
+  /**
+   * Status of the loan, with additional information for loans that are active.
+   */
+  expiryStatus: "Active" | "Expired" | "< 1 Day" | "< 7 Days" | "< 14 Days" | "Reclaimed" | "Repaid";
   /**
    * Cumulative principal paid on the loan.
    */
@@ -61,6 +74,10 @@ export type Loan = {
   collateralIncome: number;
   collateralClaimedQuantity: number;
   collateralClaimedValue: number;
+};
+
+type SnapshotLoanMap = {
+  [key: string]: Loan;
 };
 
 export type Snapshot = {
@@ -115,9 +132,7 @@ export type Snapshot = {
    * Key: `cooler address`-`loanId`
    * Value: Loan record
    */
-  loans: {
-    [key: string]: Loan;
-  };
+  loans: SnapshotLoanMap;
   creationEvents: ClearLoanRequestEventOptional[];
   defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
   repaymentEvents: RepayLoanEventOptional[];

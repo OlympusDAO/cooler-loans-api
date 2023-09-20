@@ -319,6 +319,7 @@ describe("generateSnapshots", () => {
       getSecondsToExpiry(snapshotOne.date, snapshotOneLoanOne.expiryTimestamp),
     );
     expect(snapshotOneLoanOne.status).toEqual("Active");
+    expect(snapshotOneLoanOne.expiryStatus).toEqual("Active");
     expect(snapshotOneLoanOne.principalPaid).toEqual(0);
     expect(snapshotOneLoanOne.interestPaid).toEqual(0);
     expect(snapshotOneLoanOne.collateralClaimedQuantity).toEqual(0);
@@ -563,6 +564,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelveLoanOne.collateralClaimedValue).toEqual(0);
     expect(snapshotTwelveLoanOne.collateralIncome).toEqual(0);
     expect(snapshotTwelveLoanOne.status).toEqual("Repaid");
+    expect(snapshotTwelveLoanOne.expiryStatus).toEqual("Repaid");
     expect(snapshotTwelve.creationEvents.length).toEqual(0);
     expect(snapshotTwelve.repaymentEvents.length).toEqual(1);
     expect(snapshotTwelve.defaultedClaimEvents.length).toEqual(0);
@@ -752,6 +754,7 @@ describe("generateSnapshots", () => {
           expiryTimestamp: 1694332800,
           secondsToExpiry: 1694332800 - LOAN_CREATION_TIMESTAMP,
           status: "Active",
+          expiryStatus: "Active",
           principalPaid: 999,
           interestPaid: 22,
           collateralIncome: 0,
@@ -833,6 +836,21 @@ describe("generateSnapshots", () => {
 
     expect(snapshots.length).toEqual(42); // 31 + 11
 
+    // 10 Days before expiry
+    const snapshotDayTenBeforeExpiry = snapshots[30];
+    const snapshotDayTenBeforeExpiryLoanOne = snapshotDayTenBeforeExpiry.loans[LOAN_ID];
+    expect(snapshotDayTenBeforeExpiryLoanOne.expiryStatus).toEqual("< 14 Days");
+
+    // 3 Days before expiry
+    const snapshotDayThreeBeforeExpiry = snapshots[37];
+    const snapshotDayThreeBeforeExpiryLoanOne = snapshotDayThreeBeforeExpiry.loans[LOAN_ID];
+    expect(snapshotDayThreeBeforeExpiryLoanOne.expiryStatus).toEqual("< 7 Days");
+
+    // Day before expiry
+    const snapshotDayBeforeExpiry = snapshots[39];
+    const snapshotDayBeforeExpiryLoanOne = snapshotDayBeforeExpiry.loans[LOAN_ID];
+    expect(snapshotDayBeforeExpiryLoanOne.expiryStatus).toEqual("< 1 Day");
+
     // Day of expiry
     const snapshotDayOfExpiry = snapshots[40];
     expect(snapshotDayOfExpiry.date.toISOString()).toEqual("2023-09-10T23:59:59.999Z");
@@ -859,6 +877,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiryLoanOne.expiryTimestamp).toEqual(1694332800);
     expect(snapshotDayOfExpiryLoanOne.secondsToExpiry).toEqual(0);
     expect(snapshotDayOfExpiryLoanOne.status).toEqual("Expired");
+    expect(snapshotDayOfExpiryLoanOne.expiryStatus).toEqual("Expired");
     expect(snapshotDayOfExpiryLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
@@ -891,6 +910,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiryLoanOne.expiryTimestamp).toEqual(1694332800);
     expect(snapshotDayAfterExpiryLoanOne.secondsToExpiry).toEqual(0);
     expect(snapshotDayAfterExpiryLoanOne.status).toEqual("Expired");
+    expect(snapshotDayAfterExpiryLoanOne.expiryStatus).toEqual("Expired");
     expect(snapshotDayAfterExpiryLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
@@ -938,6 +958,7 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiryLoanOne.expiryTimestamp).toEqual(1694332800);
     expect(snapshotDayOfExpiryLoanOne.secondsToExpiry).toEqual(0);
     expect(snapshotDayOfExpiryLoanOne.status).toEqual("Reclaimed");
+    expect(snapshotDayOfExpiryLoanOne.expiryStatus).toEqual("Reclaimed");
     expect(snapshotDayOfExpiryLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );

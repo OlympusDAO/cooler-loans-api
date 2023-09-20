@@ -304,8 +304,15 @@
                       "type": "number",
                     },
                   "coolerAddress": { "type": "string" },
-                  "createdTimestamp": { "type": "number" },
-                  "expiryTimestamp": { "type": "number" },
+                  "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
+                  "expiryStatus":
+                    {
+                      "description": "Status of the loan, with additional information for loans that are active.",
+                      "enum": ["< 1 Day", "< 14 Days", "< 7 Days", "Active", "Expired", "Reclaimed", "Repaid"],
+                      "type": "string",
+                    },
+                  "expiryTimestamp":
+                    { "description": "Timestamp of the expected loan expiry, in seconds", "type": "number" },
                   "id":
                     {
                       "description": "Loan id unique across the clearinghouse and its coolers\n\nFormat: cooler-loanId",
@@ -324,7 +331,12 @@
                   "principal": { "description": "The loan principal", "type": "number" },
                   "principalPaid": { "description": "Cumulative principal paid on the loan.", "type": "number" },
                   "secondsToExpiry": { "type": "number" },
-                  "status": { "enum": ["Active", "Expired", "Reclaimed", "Repaid"], "type": "string" },
+                  "status":
+                    {
+                      "description": "Status of the loan",
+                      "enum": ["Active", "Expired", "Reclaimed", "Repaid"],
+                      "type": "string",
+                    },
                 },
               "required":
                 [
@@ -336,6 +348,7 @@
                   "collateralPerPeriod",
                   "coolerAddress",
                   "createdTimestamp",
+                  "expiryStatus",
                   "expiryTimestamp",
                   "id",
                   "interest",
