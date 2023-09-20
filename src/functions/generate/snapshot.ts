@@ -12,6 +12,9 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       date: currentDate,
       principalReceivables: 0,
       interestReceivables: 0,
+      interestIncome: 0,
+      collateralIncome: 0,
+      collateralDeposited: 0,
       clearinghouse: {
         daiBalance: 0,
         sDaiBalance: 0,
@@ -54,6 +57,11 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   newSnapshot.defaultedClaimEvents = [];
   newSnapshot.extendEvents = [];
   newSnapshot.clearinghouseEvents = [];
+
+  // Some snapshot values are not carried over
+  newSnapshot.interestIncome = 0;
+  newSnapshot.collateralIncome = 0;
+  newSnapshot.collateralDeposited = 0;
 
   // Ensure the loans property has a value
   if (!newSnapshot.loans) {
@@ -221,6 +229,9 @@ export const generateSnapshots = (
       // Update overall receivables
       currentSnapshot.interestReceivables -= interestPaid;
       currentSnapshot.principalReceivables -= principalPaid;
+
+      // Set the income from the repayment
+      currentSnapshot.interestIncome += interestPaid;
     });
 
     // Update loans where there were defaulted claim events
@@ -238,18 +249,23 @@ export const generateSnapshots = (
       const interestPayable = loan.interest - loan.interestPaid;
       const principalPayable = loan.principal - loan.principalPaid;
 
+      const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
+
       // Update the loan
       loan.status = "Reclaimed";
       loan.collateralClaimedQuantity += parseNumber(defaultedClaimEvent.collateralQuantityClaimed);
-      loan.collateralClaimedValue += parseNumber(defaultedClaimEvent.collateralValueClaimed);
+      loan.collateralClaimedValue += collateralValueClaimed;
       loan.collateralDeposited = 0;
 
       // Calculate the income from the collateral claim
-      loan.collateralIncome += parseNumber(defaultedClaimEvent.collateralValueClaimed);
+      loan.collateralIncome += collateralValueClaimed;
 
       // Remove the loan payable from the receivables
       currentSnapshot.interestReceivables -= interestPayable;
       currentSnapshot.principalReceivables -= principalPayable;
+
+      // Set the income from the default claim
+      currentSnapshot.collateralIncome += collateralValueClaimed;
     });
 
     // Update loans where there were extend events
@@ -279,7 +295,11 @@ export const generateSnapshots = (
     const loans = currentSnapshot.loans ? Object.values(currentSnapshot.loans) : [];
     console.log(`${FUNC}: processing ${loans.length} loans`);
     loans.forEach(loan => {
+      // Update the seconds to expiry
       loan.secondsToExpiry = getSecondsToExpiry(currentDateBeforeMidnight, loan.expiryTimestamp);
+
+      // Update the collateral deposited
+      currentSnapshot.collateralDeposited += loan.collateralDeposited;
 
       if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
         loan.status = "Expired";

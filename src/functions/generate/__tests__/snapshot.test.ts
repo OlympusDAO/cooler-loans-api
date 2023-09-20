@@ -297,6 +297,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
     expect(snapshotOne.principalReceivables).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOne.interestReceivables).toEqual(LOAN_INTEREST);
+    expect(snapshotOne.interestIncome).toEqual(0);
+    expect(snapshotOne.collateralIncome).toEqual(0);
+    expect(snapshotOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
 
     expect(Object.values(snapshotOne.loans)).toHaveLength(1);
     const snapshotOneLoanOne = snapshotOne.loans[LOAN_ID];
@@ -404,6 +407,8 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL + loanTwoPrincipal);
     expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST + loanTwoInterest);
 
+    expect(snapshotTwo.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL + 30);
+
     // Should have 2 loans
     expect(Object.values(snapshotTwo.loans)).toHaveLength(2);
 
@@ -435,6 +440,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.interestReceivables).toEqual(
       LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
+    expect(snapshotTen.interestIncome).toEqual(getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT));
+    expect(snapshotTen.collateralIncome).toEqual(0);
+    expect(snapshotTen.collateralDeposited).toEqual(29); // Takes the value from the repayment event
 
     expect(Object.values(snapshotTen.loans)).toHaveLength(1);
     const snapshotTenLoanOne = snapshotTen.loans[LOAN_ID];
@@ -528,28 +536,31 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.date.toISOString()).toEqual("2023-08-12T23:59:59.999Z");
     expect(snapshotTwelve.principalReceivables).toEqual(0);
     expect(snapshotTwelve.interestReceivables).toEqual(0);
+    expect(snapshotTwelve.interestIncome).toEqual(getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, repaymentAmountTwo)); // For the amount paid on the day
+    expect(snapshotTwelve.collateralIncome).toEqual(0);
+    expect(snapshotTwelve.collateralDeposited).toEqual(0); // Returned to borrower
 
     expect(Object.values(snapshotTwelve.loans)).toHaveLength(1);
-    const snapshotTenLoanOne = snapshotTwelve.loans[LOAN_ID];
-    expect(snapshotTenLoanOne.loanId).toEqual(0);
-    expect(snapshotTenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTenLoanOne.interest).toEqual(LOAN_INTEREST);
-    expect(snapshotTenLoanOne.collateralDeposited).toEqual(0); // Returned to borrower
-    expect(snapshotTenLoanOne.expiryTimestamp).toEqual(1694332800);
-    expect(snapshotTenLoanOne.secondsToExpiry).toEqual(
-      getSecondsToExpiry(snapshotTwelve.date, snapshotTenLoanOne.expiryTimestamp),
+    const snapshotTwelveLoanOne = snapshotTwelve.loans[LOAN_ID];
+    expect(snapshotTwelveLoanOne.loanId).toEqual(0);
+    expect(snapshotTwelveLoanOne.principal).toEqual(LOAN_PRINCIPAL);
+    expect(snapshotTwelveLoanOne.interest).toEqual(LOAN_INTEREST);
+    expect(snapshotTwelveLoanOne.collateralDeposited).toEqual(0); // Returned to borrower
+    expect(snapshotTwelveLoanOne.expiryTimestamp).toEqual(1694332800);
+    expect(snapshotTwelveLoanOne.secondsToExpiry).toEqual(
+      getSecondsToExpiry(snapshotTwelve.date, snapshotTwelveLoanOne.expiryTimestamp),
     );
 
-    expect(snapshotTenLoanOne.principalPaid).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTenLoanOne.interestPaid).toEqual(LOAN_INTEREST);
-    expect(snapshotTenLoanOne.principalPaid + snapshotTenLoanOne.interestPaid).toEqual(
+    expect(snapshotTwelveLoanOne.principalPaid).toEqual(LOAN_PRINCIPAL); // Cumulative
+    expect(snapshotTwelveLoanOne.interestPaid).toEqual(LOAN_INTEREST); // Cumulative
+    expect(snapshotTwelveLoanOne.principalPaid + snapshotTwelveLoanOne.interestPaid).toEqual(
       REPAYMENT_AMOUNT + repaymentAmountTwo,
     );
 
-    expect(snapshotTenLoanOne.collateralClaimedQuantity).toEqual(0);
-    expect(snapshotTenLoanOne.collateralClaimedValue).toEqual(0);
-    expect(snapshotTenLoanOne.collateralIncome).toEqual(0);
-    expect(snapshotTenLoanOne.status).toEqual("Repaid");
+    expect(snapshotTwelveLoanOne.collateralClaimedQuantity).toEqual(0);
+    expect(snapshotTwelveLoanOne.collateralClaimedValue).toEqual(0);
+    expect(snapshotTwelveLoanOne.collateralIncome).toEqual(0);
+    expect(snapshotTwelveLoanOne.status).toEqual("Repaid");
     expect(snapshotTwelve.creationEvents.length).toEqual(0);
     expect(snapshotTwelve.repaymentEvents.length).toEqual(1);
     expect(snapshotTwelve.defaultedClaimEvents.length).toEqual(0);
@@ -687,6 +698,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
     expect(snapshotOne.principalReceivables).toEqual(0);
     expect(snapshotOne.interestReceivables).toEqual(0);
+    expect(snapshotOne.interestIncome).toEqual(0);
+    expect(snapshotOne.collateralIncome).toEqual(0);
+    expect(snapshotOne.collateralDeposited).toEqual(0);
 
     expect(Object.keys(snapshotOne.loans)).toHaveLength(0);
   });
@@ -696,6 +710,9 @@ describe("generateSnapshots", () => {
       date: new Date("2023-08-01"),
       principalReceivables: 55555,
       interestReceivables: 6666,
+      interestIncome: 10000,
+      collateralIncome: 1000000,
+      collateralDeposited: 1234,
       clearinghouse: {
         daiBalance: 12345,
         sDaiBalance: 56789,
@@ -764,6 +781,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
     expect(snapshotOne.principalReceivables).toEqual(55555); // Uses previous snapshot
     expect(snapshotOne.interestReceivables).toEqual(6666); // Uses previous snapshot
+    expect(snapshotOne.interestIncome).toEqual(0); // Does not carry over
+    expect(snapshotOne.collateralIncome).toEqual(0); // Does not carry over
+    expect(snapshotOne.collateralDeposited).toEqual(30); // Does not carry over
 
     expect(snapshotOne.clearinghouse.daiBalance).toEqual(12345); // Uses previous snapshot
     expect(snapshotOne.clearinghouse.sDaiBalance).toEqual(56789); // Uses previous snapshot
@@ -813,12 +833,17 @@ describe("generateSnapshots", () => {
     // Day of expiry
     const snapshotDayOfExpiry = snapshots[40];
     expect(snapshotDayOfExpiry.date.toISOString()).toEqual("2023-09-10T23:59:59.999Z");
+
     expect(snapshotDayOfExpiry.principalReceivables).toEqual(
       LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
     expect(snapshotDayOfExpiry.interestReceivables).toEqual(
       LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
+    expect(snapshotDayOfExpiry.interestIncome).toEqual(0);
+    expect(snapshotDayOfExpiry.collateralIncome).toEqual(0);
+    expect(snapshotDayOfExpiry.collateralDeposited).toEqual(29);
+
     expect(Object.values(snapshotDayOfExpiry.loans)).toHaveLength(1);
     const snapshotDayOfExpiryLoanOne = snapshotDayOfExpiry.loans[LOAN_ID];
     expect(snapshotDayOfExpiryLoanOne.loanId).toEqual(0);
@@ -894,6 +919,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.date.toISOString()).toEqual("2023-09-12T23:59:59.999Z");
     expect(snapshotDayOfExpiry.principalReceivables).toEqual(0); // Zero-ed out
     expect(snapshotDayOfExpiry.interestReceivables).toEqual(0); // Zero-ed out
+    expect(snapshotDayOfExpiry.interestIncome).toEqual(0);
+    expect(snapshotDayOfExpiry.collateralIncome).toEqual(COLLATERAL_CLAIM_VALUE);
+    expect(snapshotDayOfExpiry.collateralDeposited).toEqual(0);
 
     expect(Object.values(snapshotDayOfExpiry.loans)).toHaveLength(1);
     const snapshotDayOfExpiryLoanOne = snapshotDayOfExpiry.loans[LOAN_ID];
@@ -956,6 +984,73 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.extendEvents.length).toEqual(0);
     expect(snapshotDayAfterExpiry.clearinghouseEvents.length).toEqual(0);
+  });
+
+  it("loan default claim, multiple", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-09-14"); // includes 1 day after default claim
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+
+    // Add a second loan
+    const loanTwoPrincipal = 10000;
+    const loanTwoInterest = 500;
+    const loanTwoCollateral = 10;
+    const loanTwo = {
+      id: "0x3-1",
+      createdBlock: 12223,
+      createdTransaction: "0x0000001",
+      // 2023-08-02
+      createdTimestamp: 1690876800,
+      loanId: 1,
+      borrower: "0x01",
+      lender: "0x02",
+      cooler: "0x03",
+      interest: loanTwoInterest,
+      principal: loanTwoPrincipal,
+      collateral: loanTwoCollateral,
+      // 2023-09-11
+      expiryTimestamp: 1694246400,
+      collateralToken: "0x04",
+      debtToken: "0x05",
+      hasCallback: false,
+    };
+    subgraphData.creationEvents["2023-08-02"] = [
+      {
+        id: "0x3-1",
+        date: "2023-08-02",
+        blockTimestamp: 1690876800,
+        blockNumber: 12223,
+        transactionHash: "0x0000001",
+        loan: loanTwo,
+      },
+    ];
+
+    // Add a second default claim on the same day
+    const loanTwoCollateralClaimed = loanTwoCollateral * COLLATERAL_PRICE;
+    subgraphData.defaultedClaimEvents["2023-09-12"].push({
+      id: "0x3-1-1691654400",
+      date: "2023-09-12",
+      blockNumber: 1233455,
+      blockTimestamp: 1691654400,
+      transactionHash: "0x0000003",
+      secondsSinceExpiry: 5000,
+      collateralQuantityClaimed: loanTwoCollateral,
+      collateralPrice: COLLATERAL_PRICE,
+      collateralValueClaimed: loanTwoCollateralClaimed,
+      loan: loanTwo,
+    });
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    // Day of claim
+    const snapshotDayOfExpiry = snapshots[42];
+    expect(snapshotDayOfExpiry.date.toISOString()).toEqual("2023-09-12T23:59:59.999Z");
+    expect(snapshotDayOfExpiry.principalReceivables).toEqual(0); // Zero-ed out
+    expect(snapshotDayOfExpiry.interestReceivables).toEqual(0); // Zero-ed out
+    expect(snapshotDayOfExpiry.interestIncome).toEqual(0);
+    expect(snapshotDayOfExpiry.collateralIncome).toEqual(COLLATERAL_CLAIM_VALUE + loanTwoCollateralClaimed);
+    expect(snapshotDayOfExpiry.collateralDeposited).toEqual(0);
   });
 
   it("extend loan", () => {

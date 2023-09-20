@@ -50,7 +50,13 @@ export type Loan = {
   expiryTimestamp: number;
   secondsToExpiry: number;
   status: "Active" | "Expired" | "Reclaimed" | "Repaid";
+  /**
+   * Cumulative principal paid on the loan.
+   */
   principalPaid: number;
+  /**
+   * Cumulative interest paid on the loan.
+   */
   interestPaid: number;
   collateralIncome: number;
   collateralClaimedQuantity: number;
@@ -59,9 +65,26 @@ export type Loan = {
 
 export type Snapshot = {
   date: Date;
-  // Top-level summary
+  /**
+   * Principal receivable across all Coolers
+   */
   principalReceivables: number;
+  /**
+   * Interest receivable across all Coolers
+   */
   interestReceivables: number;
+  /**
+   * Income from interest payments made on this date.
+   */
+  interestIncome: number;
+  /**
+   * Income from collateral reclaimed on this date.
+   */
+  collateralIncome: number;
+  /**
+   * Quantity of collateral deposited across all Coolers
+   */
+  collateralDeposited: number;
   clearinghouse: {
     daiBalance: number;
     sDaiBalance: number;
