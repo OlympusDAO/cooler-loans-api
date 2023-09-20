@@ -10,6 +10,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     console.log(`${FUNC}: No previous snapshot found for ${getISO8601DateString(currentDate)}`);
     return {
       date: currentDate,
+      timestamp: currentDate.getTime(),
       principalReceivables: 0,
       interestReceivables: 0,
       interestIncome: 0,
@@ -50,6 +51,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
 
   // Set the current date
   newSnapshot.date = currentDate;
+  newSnapshot.timestamp = currentDate.getTime();
 
   // Events are not carried over
   newSnapshot.creationEvents = [];

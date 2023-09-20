@@ -66,6 +66,10 @@ export type Loan = {
 export type Snapshot = {
   date: Date;
   /**
+   * Timestamp of the snapshot, in milliseconds
+   */
+  timestamp: number;
+  /**
    * Principal receivable across all Coolers
    */
   principalReceivables: number;

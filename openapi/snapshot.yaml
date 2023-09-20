@@ -366,6 +366,7 @@
           "required": ["duration", "interestRate", "loanToCollateral"],
           "type": "object",
         },
+      "timestamp": { "description": "Timestamp of the snapshot, in milliseconds", "type": "number" },
       "treasury":
         {
           "properties":
@@ -394,6 +395,7 @@
       "principalReceivables",
       "repaymentEvents",
       "terms",
+      "timestamp",
       "treasury",
     ],
   "type": "object",

@@ -252,6 +252,7 @@ describe("generateSnapshots", () => {
 
     const resultOne = result[0];
     expect(resultOne.date.toISOString()).toEqual("2022-01-01T23:59:59.999Z");
+    expect(resultOne.timestamp).toEqual(resultOne.date.getTime());
     expect(resultOne.principalReceivables).toEqual(0);
     expect(resultOne.interestReceivables).toEqual(0);
 
@@ -295,6 +296,7 @@ describe("generateSnapshots", () => {
     // Day 1 should have the correct values
     const snapshotOne = snapshots[0];
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-01T23:59:59.999Z");
+    expect(snapshotOne.timestamp).toEqual(snapshotOne.date.getTime());
     expect(snapshotOne.principalReceivables).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOne.interestReceivables).toEqual(LOAN_INTEREST);
     expect(snapshotOne.interestIncome).toEqual(0);
@@ -708,6 +710,7 @@ describe("generateSnapshots", () => {
   it("should use the previous day records", () => {
     const previousDateSnapshot: Snapshot = {
       date: new Date("2023-08-01"),
+      timestamp: new Date("2023-08-01").getTime(),
       principalReceivables: 55555,
       interestReceivables: 6666,
       interestIncome: 10000,
