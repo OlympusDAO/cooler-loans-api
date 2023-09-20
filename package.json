@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "codegen:graphql": "graphql-code-generator",
-    "codegen:jsonschema": "yarn typescript-json-schema src/types/snapshot.ts Snapshot -o tmp/snapshot.jsonschema",
+    "codegen:jsonschema": "yarn typescript-json-schema src/types/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
     "codegen:jsonschema-to-openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
     "codegen": "yarn codegen:graphql && yarn codegen:jsonschema && yarn codegen:jsonschema-to-openapi && yarn lint:fix",
     "test": "jest",

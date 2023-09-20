@@ -7,7 +7,9 @@
             [
               { "$ref": '#/definitions/Omit<ClaimDefaultedLoanEvent,"loan">' },
               {
-                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "properties":
+                  { "loan": { "properties": { "id": { "type": "string" } }, "required": ["id"], "type": "object" } },
+                "required": ["loan"],
                 "type": "object",
               },
             ],
@@ -17,7 +19,11 @@
           "allOf":
             [
               { "$ref": '#/definitions/Omit<ClearLoanRequestEvent,"loan"|"request">' },
-              { "properties": { "loan": { "$ref": "#/definitions/CoolerLoanOptional" } }, "type": "object" },
+              {
+                "properties": { "loan": { "$ref": "#/definitions/CoolerLoanOptional" } },
+                "required": ["loan"],
+                "type": "object",
+              },
             ],
         },
       "ClearinghouseSnapshotOptional":
@@ -48,6 +54,32 @@
               "treasurySDaiBalance": { "type": "number" },
               "treasurySDaiInDaiBalance": { "type": "number" },
             },
+          "required":
+            [
+              "blockNumber",
+              "blockTimestamp",
+              "clearinghouse",
+              "collateralAddress",
+              "coolerFactoryAddress",
+              "daiBalance",
+              "date",
+              "debtAddress",
+              "duration",
+              "fundAmount",
+              "fundCadence",
+              "id",
+              "interestRate",
+              "interestReceivables",
+              "isActive",
+              "loanToCollateral",
+              "nextRebalanceTimestamp",
+              "principalReceivables",
+              "sDaiBalance",
+              "sDaiInDaiBalance",
+              "treasuryDaiBalance",
+              "treasurySDaiBalance",
+              "treasurySDaiInDaiBalance",
+            ],
           "type": "object",
         },
       "CoolerLoanOptional":
@@ -70,6 +102,24 @@
               "loanId": { "type": "number" },
               "principal": { "type": "number" },
             },
+          "required":
+            [
+              "borrower",
+              "collateral",
+              "collateralToken",
+              "cooler",
+              "createdBlock",
+              "createdTimestamp",
+              "createdTransaction",
+              "debtToken",
+              "expiryTimestamp",
+              "hasCallback",
+              "id",
+              "interest",
+              "lender",
+              "loanId",
+              "principal",
+            ],
           "type": "object",
         },
       "ExtendLoanEventOptional":
@@ -78,7 +128,9 @@
             [
               { "$ref": '#/definitions/Omit<ExtendLoanEvent,"loan">' },
               {
-                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "properties":
+                  { "loan": { "properties": { "id": { "type": "string" } }, "required": ["id"], "type": "object" } },
+                "required": ["loan"],
                 "type": "object",
               },
             ],
@@ -97,6 +149,18 @@
               "secondsSinceExpiry": { "type": "number" },
               "transactionHash": { "type": "string" },
             },
+          "required":
+            [
+              "blockNumber",
+              "blockTimestamp",
+              "collateralPrice",
+              "collateralQuantityClaimed",
+              "collateralValueClaimed",
+              "date",
+              "id",
+              "secondsSinceExpiry",
+              "transactionHash",
+            ],
           "type": "object",
         },
       'Omit<ClearLoanRequestEvent,"loan"|"request">':
@@ -109,6 +173,7 @@
               "id": { "type": "string" },
               "transactionHash": { "type": "string" },
             },
+          "required": ["blockNumber", "blockTimestamp", "date", "id", "transactionHash"],
           "type": "object",
         },
       'Omit<ExtendLoanEvent,"loan">':
@@ -124,6 +189,17 @@
               "periods": { "type": "number" },
               "transactionHash": { "type": "string" },
             },
+          "required":
+            [
+              "blockNumber",
+              "blockTimestamp",
+              "date",
+              "expiryTimestamp",
+              "id",
+              "interestDue",
+              "periods",
+              "transactionHash",
+            ],
           "type": "object",
         },
       'Omit<RepayLoanEvent,"loan">':
@@ -141,6 +217,19 @@
               "secondsToExpiry": { "type": "number" },
               "transactionHash": { "type": "string" },
             },
+          "required":
+            [
+              "amountPaid",
+              "blockNumber",
+              "blockTimestamp",
+              "collateralDeposited",
+              "date",
+              "id",
+              "interestPayable",
+              "principalPayable",
+              "secondsToExpiry",
+              "transactionHash",
+            ],
           "type": "object",
         },
       "RepayLoanEventOptional":
@@ -149,7 +238,9 @@
             [
               { "$ref": '#/definitions/Omit<RepayLoanEvent,"loan">' },
               {
-                "properties": { "loan": { "properties": { "id": { "type": "string" } }, "type": "object" } },
+                "properties":
+                  { "loan": { "properties": { "id": { "type": "string" } }, "required": ["id"], "type": "object" } },
+                "required": ["loan"],
                 "type": "object",
               },
             ],
@@ -170,6 +261,17 @@
               "sDaiBalance": { "type": "number" },
               "sDaiInDaiBalance": { "type": "number" },
             },
+          "required":
+            [
+              "collateralAddress",
+              "coolerFactoryAddress",
+              "daiBalance",
+              "debtAddress",
+              "fundAmount",
+              "fundCadence",
+              "sDaiBalance",
+              "sDaiInDaiBalance",
+            ],
           "type": "object",
         },
       "clearinghouseEvents": { "items": { "$ref": "#/definitions/ClearinghouseSnapshotOptional" }, "type": "array" },
@@ -224,6 +326,28 @@
                   "secondsToExpiry": { "type": "number" },
                   "status": { "enum": ["Active", "Expired", "Reclaimed", "Repaid"], "type": "string" },
                 },
+              "required":
+                [
+                  "borrowerAddress",
+                  "collateralClaimedQuantity",
+                  "collateralClaimedValue",
+                  "collateralDeposited",
+                  "collateralIncome",
+                  "collateralPerPeriod",
+                  "coolerAddress",
+                  "createdTimestamp",
+                  "expiryTimestamp",
+                  "id",
+                  "interest",
+                  "interestPaid",
+                  "interestPerPeriod",
+                  "lenderAddress",
+                  "loanId",
+                  "principal",
+                  "principalPaid",
+                  "secondsToExpiry",
+                  "status",
+                ],
               "type": "object",
             },
           "description": "Dictionary of the loans that had been created by this date.\n\nKey: `cooler address`-`loanId`\nValue: Loan record",
@@ -239,6 +363,7 @@
               "interestRate": { "type": "number" },
               "loanToCollateral": { "type": "number" },
             },
+          "required": ["duration", "interestRate", "loanToCollateral"],
           "type": "object",
         },
       "treasury":
@@ -249,8 +374,27 @@
               "sDaiBalance": { "type": "number" },
               "sDaiInDaiBalance": { "type": "number" },
             },
+          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
           "type": "object",
         },
     },
+  "required":
+    [
+      "clearinghouse",
+      "clearinghouseEvents",
+      "collateralDeposited",
+      "collateralIncome",
+      "creationEvents",
+      "date",
+      "defaultedClaimEvents",
+      "extendEvents",
+      "interestIncome",
+      "interestReceivables",
+      "loans",
+      "principalReceivables",
+      "repaymentEvents",
+      "terms",
+      "treasury",
+    ],
   "type": "object",
 }
