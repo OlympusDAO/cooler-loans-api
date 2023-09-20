@@ -84,7 +84,7 @@ new gcp.cloudscheduler.Job(
 /**
  * Deploy Cloud Function - Fetch
  */
-const corsOrigins = ["https://app.olympusdao.finance/", "https://staging.olympusdao.finance", "https://*.on.fleek.co"];
+const corsOrigins = ["https://app.olympusdao.finance/", "https://staging.olympusdao.finance", /\.on.fleek.co$/];
 if (pulumi.getStack() === "dev") {
   corsOrigins.push("http://localhost:5173");
 }
