@@ -252,11 +252,6 @@ export const generateSnapshots = (
       loan.interestPaid += interestRepayment;
       loan.principalPaid += principalRepayment;
 
-      // If the loan is fully repaid, update the status
-      if (loan.interestPaid >= loan.interest && loan.principalPaid >= loan.principal) {
-        loan.status = "Repaid";
-      }
-
       // Set the income from the repayment
       currentSnapshot.interestIncome += interestRepayment;
     });
@@ -325,12 +320,21 @@ export const generateSnapshots = (
       // Update the collateral deposited
       currentSnapshot.collateralDeposited += loan.collateralDeposited;
 
-      // Set the status
-      if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
+      /**
+       * Status
+       */
+      // If the loan is fully repaid, update the status
+      if (loan.interestPaid >= loan.interest && loan.principalPaid >= loan.principal) {
+        loan.status = "Repaid";
+      } else if (loan.status !== "Reclaimed" && loan.secondsToExpiry <= 0) {
         loan.status = "Expired";
       }
+      // Default status is Active, so doesn't need to be handled
 
-      // Set the receivables
+      /**
+       * Receivables
+       */
+      // If it isn't reclaimed or repaid, then the interest and principal are receivables
       if (loan.status !== "Reclaimed" && loan.status !== "Repaid") {
         currentSnapshot.interestReceivables += loan.interest - loan.interestPaid;
         currentSnapshot.principalReceivables += loan.principal - loan.principalPaid;
