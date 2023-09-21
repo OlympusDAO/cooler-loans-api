@@ -1088,7 +1088,10 @@ describe("generateSnapshots", () => {
     const snapshotTwo = snapshots[1];
     expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
     expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST + newInterest);
+    expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST); // Extension interest already paid
+
+    expect(snapshotTwo.interestIncome).toEqual(newInterest); // Should reflect the interest paid for the extension
+    expect(snapshotTwo.collateralIncome).toEqual(0);
 
     expect(Object.values(snapshotTwo.loans)).toHaveLength(1);
     const snapshotTwoLoanOne = snapshotTwo.loans[LOAN_ID];
@@ -1107,7 +1110,7 @@ describe("generateSnapshots", () => {
     );
     expect(snapshotTwoLoanOne.status).toEqual("Active");
     expect(snapshotTwoLoanOne.principalPaid).toEqual(0);
-    expect(snapshotTwoLoanOne.interestPaid).toEqual(0);
+    expect(snapshotTwoLoanOne.interestPaid).toEqual(newInterest); // Should reflect the interest paid for the extension
     expect(snapshotTwoLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotTwoLoanOne.collateralClaimedValue).toEqual(0);
     expect(snapshotTwoLoanOne.collateralIncome).toEqual(0);
@@ -1128,7 +1131,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const newPeriods = 2;
-    const newInterest = newPeriods * LOAN_INTEREST;
+    const newInterest = newPeriods * interestDue;
     const newExpiryTimestamp = 99999999999;
     subgraphData.extendEvents["2023-08-12"] = [
       {
@@ -1156,7 +1159,10 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.principalReceivables).toEqual(
       LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
-    expect(snapshotTwelve.interestReceivables).toEqual(interestDue + newInterest);
+    expect(snapshotTwelve.interestReceivables).toEqual(interestDue); // Extension interest already paid
+
+    expect(snapshotTwelve.interestIncome).toEqual(newInterest); // Should reflect the interest paid for the extension
+    expect(snapshotTwelve.collateralIncome).toEqual(0);
 
     expect(Object.values(snapshotTwelve.loans)).toHaveLength(1);
     const snapshotTwelveLoanOne = snapshotTwelve.loans[LOAN_ID];
@@ -1175,7 +1181,7 @@ describe("generateSnapshots", () => {
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
     expect(snapshotTwelveLoanOne.interestPaid).toEqual(
-      getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
+      getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) + newInterest, // Should reflect the interest paid for the extension
     );
     expect(snapshotTwelveLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotTwelveLoanOne.collateralClaimedValue).toEqual(0);
@@ -1185,5 +1191,231 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotTwelve.extendEvents.length).toEqual(1);
     expect(snapshotTwelve.clearinghouseEvents.length).toEqual(0);
+  });
+
+  it("loan repayment, extension, then repayment", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-14");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+
+    const repaymentOnePrincipalDueAfter =
+      LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
+    const repaymentOneInterestDueAfter =
+      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
+
+    // Add extension on day 12
+    const extensionOnePeriods = 2;
+    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneExpiryTimestamp = 1699999000;
+    subgraphData.extendEvents["2023-08-12"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-12",
+        blockNumber: 1233456,
+        blockTimestamp: 1691654400,
+        transactionHash: "0x0000002",
+        periods: extensionOnePeriods,
+        expiryTimestamp: extensionOneExpiryTimestamp,
+        interestDue: repaymentOneInterestDueAfter, // Interest for the extension is paid at the time, and is not reflected here. This is residual interest from before the extension.
+        loan: {
+          id: "0x3-0",
+        },
+      },
+    ];
+
+    // Add repayment on day 13
+    const repaymentTwoAmount = 1000;
+    const repaymentTwoInterestPaid = getInterestPaid(
+      repaymentOnePrincipalDueAfter,
+      repaymentOneInterestDueAfter,
+      repaymentTwoAmount,
+    );
+    const repaymentTwoPrincipalDueAfter =
+      repaymentOnePrincipalDueAfter -
+      getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount);
+    const repaymentTwoInterestDueAfter = repaymentOneInterestDueAfter - repaymentTwoInterestPaid;
+    subgraphData.repaymentEvents["2023-08-13"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-13",
+        blockNumber: 1233456,
+        transactionHash: "0x0000002",
+        principalPayable: repaymentTwoPrincipalDueAfter,
+        interestPayable: repaymentTwoInterestDueAfter,
+        blockTimestamp: 1691654400,
+        secondsToExpiry: 1694332800 - 1691654400,
+        amountPaid: repaymentTwoAmount,
+        collateralDeposited: 20,
+        loan: getLoanData(),
+      },
+    ];
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    expect(snapshots.length).toEqual(13);
+
+    // Day 13 should have the second payment
+    const snapshotThirteen = snapshots[12];
+    expect(snapshotThirteen.date.toISOString()).toEqual("2023-08-13T23:59:59.999Z");
+    expect(snapshotThirteen.principalReceivables).toEqual(repaymentTwoPrincipalDueAfter); // Updated from repayment
+    expect(snapshotThirteen.interestReceivables).toEqual(repaymentTwoInterestDueAfter); // Updated from repayment
+
+    expect(snapshotThirteen.interestIncome).toEqual(repaymentTwoInterestPaid); // Should reflect the interest paid for the repayment
+    expect(snapshotThirteen.collateralIncome).toEqual(0);
+
+    expect(Object.values(snapshotThirteen.loans)).toHaveLength(1);
+    const snapshotThirteenLoanOne = snapshotThirteen.loans[LOAN_ID];
+    expect(snapshotThirteenLoanOne.loanId).toEqual(0);
+    expect(snapshotThirteenLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
+    expect(snapshotThirteenLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
+    expect(snapshotThirteenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
+    expect(snapshotThirteenLoanOne.interest).toEqual(LOAN_INTEREST + extensionOneAdditionalInterest);
+    expect(snapshotThirteenLoanOne.collateralDeposited).toEqual(20); // From repayment
+    expect(snapshotThirteenLoanOne.expiryTimestamp).toEqual(extensionOneExpiryTimestamp);
+    expect(snapshotThirteenLoanOne.secondsToExpiry).toEqual(
+      getSecondsToExpiry(snapshotThirteen.date, snapshotThirteenLoanOne.expiryTimestamp),
+    );
+    expect(snapshotThirteenLoanOne.status).toEqual("Active");
+    expect(snapshotThirteenLoanOne.principalPaid).toEqual(
+      getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
+      getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+    );
+    expect(snapshotThirteenLoanOne.interestPaid).toEqual(
+      getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
+      extensionOneAdditionalInterest +
+      getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+    );
+    expect(snapshotThirteenLoanOne.collateralClaimedQuantity).toEqual(0);
+    expect(snapshotThirteenLoanOne.collateralClaimedValue).toEqual(0);
+    expect(snapshotThirteenLoanOne.collateralIncome).toEqual(0);
+    expect(snapshotThirteen.creationEvents.length).toEqual(0);
+    expect(snapshotThirteen.repaymentEvents.length).toEqual(1);
+    expect(snapshotThirteen.defaultedClaimEvents.length).toEqual(0);
+    expect(snapshotThirteen.extendEvents.length).toEqual(0);
+    expect(snapshotThirteen.clearinghouseEvents.length).toEqual(0);
+  });
+
+  it("loan repayment then extension x2", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-15");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+
+    const repaymentOnePrincipalDueAfter =
+      LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
+    const repaymentOneInterestDueAfter =
+      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
+
+    // Add extension on day 12
+    const extensionOnePeriods = 2;
+    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneExpiryTimestamp = 1691655000;
+    subgraphData.extendEvents["2023-08-12"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-12",
+        blockNumber: 1233456,
+        blockTimestamp: 1691654400,
+        transactionHash: "0x0000002",
+        periods: extensionOnePeriods,
+        expiryTimestamp: extensionOneExpiryTimestamp,
+        interestDue: repaymentOneInterestDueAfter, // Interest for the extension is paid at the time, and is not reflected here. This is residual interest from before the extension.
+        loan: {
+          id: "0x3-0",
+        },
+      },
+    ];
+
+    // Add repayment on day 13
+    const repaymentTwoAmount = 1000;
+    const repaymentTwoPrincipalDueAfter =
+      repaymentOnePrincipalDueAfter -
+      getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount);
+    const repaymentTwoInterestDueAfter =
+      repaymentOneInterestDueAfter -
+      getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount);
+    subgraphData.repaymentEvents["2023-08-13"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-13",
+        blockNumber: 1233456,
+        transactionHash: "0x0000002",
+        principalPayable: repaymentTwoPrincipalDueAfter,
+        interestPayable: repaymentTwoInterestDueAfter,
+        blockTimestamp: 1691654400,
+        secondsToExpiry: 1694332800 - 1691654400,
+        amountPaid: repaymentTwoAmount,
+        collateralDeposited: 20,
+        loan: getLoanData(),
+      },
+    ];
+
+    // Add extension on day 14
+    const extensionTwoPeriods = 3;
+    const extensionTwoAdditionalInterest = extensionTwoPeriods * repaymentTwoInterestDueAfter;
+    const extensionTwoExpiryTimestamp = 1699990000;
+    subgraphData.extendEvents["2023-08-14"] = [
+      {
+        id: "0x3-0-1233456",
+        date: "2023-08-14",
+        blockNumber: 1233456,
+        blockTimestamp: 169099400,
+        transactionHash: "0x0000002",
+        periods: extensionTwoPeriods,
+        expiryTimestamp: extensionTwoExpiryTimestamp,
+        interestDue: extensionTwoAdditionalInterest, // Interest for the extension is paid at the time, and is not reflected here. This is residual interest from before the extension.
+        loan: {
+          id: "0x3-0",
+        },
+      },
+    ];
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    expect(snapshots.length).toEqual(14);
+
+    // Day 14 should have the loan extended the second time
+    const snapshotFourteen = snapshots[13];
+    expect(snapshotFourteen.date.toISOString()).toEqual("2023-08-14T23:59:59.999Z");
+    expect(snapshotFourteen.principalReceivables).toEqual(repaymentTwoPrincipalDueAfter); // Extension does not change the principal due
+    expect(snapshotFourteen.interestReceivables).toEqual(repaymentTwoInterestDueAfter); // Extension interest already paid
+
+    expect(snapshotFourteen.interestIncome).toEqual(extensionTwoAdditionalInterest); // Should reflect the interest paid for the extension
+    expect(snapshotFourteen.collateralIncome).toEqual(0);
+
+    expect(Object.values(snapshotFourteen.loans)).toHaveLength(1);
+    const snapshotFourteenLoanOne = snapshotFourteen.loans[LOAN_ID];
+    expect(snapshotFourteenLoanOne.loanId).toEqual(0);
+    expect(snapshotFourteenLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
+    expect(snapshotFourteenLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
+    expect(snapshotFourteenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
+    expect(snapshotFourteenLoanOne.interest).toEqual(
+      LOAN_INTEREST + extensionOneAdditionalInterest + extensionTwoAdditionalInterest,
+    );
+    expect(snapshotFourteenLoanOne.collateralDeposited).toEqual(20); // From repayment
+    expect(snapshotFourteenLoanOne.expiryTimestamp).toEqual(extensionTwoExpiryTimestamp);
+    expect(snapshotFourteenLoanOne.secondsToExpiry).toEqual(
+      getSecondsToExpiry(snapshotFourteen.date, snapshotFourteenLoanOne.expiryTimestamp),
+    );
+    expect(snapshotFourteenLoanOne.status).toEqual("Active");
+    expect(snapshotFourteenLoanOne.principalPaid).toEqual(
+      getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
+      getPrincipalPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount),
+    );
+    expect(snapshotFourteenLoanOne.interestPaid).toEqual(
+      getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
+      getInterestPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount) +
+      extensionOneAdditionalInterest +
+      extensionTwoAdditionalInterest, // Should reflect the interest paid for the extension
+    );
+    expect(snapshotFourteenLoanOne.collateralClaimedQuantity).toEqual(0);
+    expect(snapshotFourteenLoanOne.collateralClaimedValue).toEqual(0);
+    expect(snapshotFourteenLoanOne.collateralIncome).toEqual(0);
+    expect(snapshotFourteen.creationEvents.length).toEqual(0);
+    expect(snapshotFourteen.repaymentEvents.length).toEqual(0);
+    expect(snapshotFourteen.defaultedClaimEvents.length).toEqual(0);
+    expect(snapshotFourteen.extendEvents.length).toEqual(1);
+    expect(snapshotFourteen.clearinghouseEvents.length).toEqual(0);
   });
 });

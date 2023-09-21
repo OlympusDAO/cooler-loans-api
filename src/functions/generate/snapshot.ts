@@ -1,7 +1,21 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
 import { parseNumber } from "../../helpers/numberHelper";
-import { Snapshot } from "../../types/snapshot";
+import { Loan, Snapshot } from "../../types/snapshot";
 import { SubgraphData } from "../../types/subgraph";
+
+const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
+  const interestDue = loan.interest - loan.interestPaid;
+  const principalDue = loan.principal - loan.principalPaid;
+  const totalDue = principalDue + interestDue;
+  return (repayment / totalDue) * interestDue;
+};
+
+const calculatePrincipalRepayment = (repayment: number, loan: Loan): number => {
+  const interestDue = loan.interest - loan.interestPaid;
+  const principalDue = loan.principal - loan.principalPaid;
+  const totalDue = principalDue + interestDue;
+  return (repayment / totalDue) * principalDue;
+};
 
 const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
   const FUNC = "createSnapshot";
@@ -218,10 +232,10 @@ export const generateSnapshots = (
 
       // Calculate the interest and principal paid for this payment
       const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
-      const interestPaid = (eventAmountPaid / (loan.principal + loan.interest)) * loan.interest;
-      const principalPaid = eventAmountPaid - interestPaid;
-      loan.interestPaid += interestPaid;
-      loan.principalPaid += principalPaid;
+      const interestRepayment = calculateInterestRepayment(eventAmountPaid, loan);
+      const principalRepayment = calculatePrincipalRepayment(eventAmountPaid, loan);
+      loan.interestPaid += interestRepayment;
+      loan.principalPaid += principalRepayment;
 
       // If the loan is fully repaid, update the status
       if (loan.interestPaid >= loan.interest && loan.principalPaid >= loan.principal) {
@@ -229,11 +243,11 @@ export const generateSnapshots = (
       }
 
       // Update overall receivables
-      currentSnapshot.interestReceivables -= interestPaid;
-      currentSnapshot.principalReceivables -= principalPaid;
+      currentSnapshot.interestReceivables -= interestRepayment;
+      currentSnapshot.principalReceivables -= principalRepayment;
 
       // Set the income from the repayment
-      currentSnapshot.interestIncome += interestPaid;
+      currentSnapshot.interestIncome += interestRepayment;
     });
 
     // Update loans where there were defaulted claim events
@@ -287,12 +301,14 @@ export const generateSnapshots = (
       loan.expiryTimestamp = parseNumber(extendEvent.expiryTimestamp);
 
       // Additional interest is paid at the time a loan is extended
+      // No impact on receivables
       // https://github.com/ohmzeus/Cooler/pull/63
-      const newInterest = parseNumber(extendEvent.periods) * loan.interestPerPeriod;
+      const newInterest = parseNumber(extendEvent.periods) * (loan.interest - loan.interestPaid);
       loan.interest += newInterest;
+      loan.interestPaid += newInterest;
 
-      // Update receivables
-      currentSnapshot.interestReceivables += newInterest;
+      // The interest income is updated
+      currentSnapshot.interestIncome += newInterest;
     });
 
     // Update secondsToExpiry and status for all loans
