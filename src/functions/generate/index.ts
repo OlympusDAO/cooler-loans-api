@@ -4,13 +4,13 @@ import { Snapshot } from "../../types/snapshot";
 import { generateSnapshots } from "./snapshot";
 import { getData } from "./subgraph";
 
-const INITIAL_DATE = "2023-09-01";
+const LAUNCH_DATE = "2023-09-21";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleGenerate = async (req: any, res: any) => {
   // Determine the last cached date in Firestore
   const lastCachedDate: string | null = await getLatestCachedDate();
-  const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || INITIAL_DATE), -1));
+  const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || LAUNCH_DATE), -1));
   const beforeDate: Date = setMidnight(adjustDate(new Date(), 1)); // So that all of the current day is captured
 
   const endpointUrl = process.env.GRAPHQL_ENDPOINT;
