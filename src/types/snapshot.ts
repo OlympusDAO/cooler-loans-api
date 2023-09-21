@@ -40,6 +40,8 @@ export type Loan = {
   interest: number;
   /**
    * Cumulative interest paid on the loan.
+   *
+   * Any outstanding interest is paid first, followed by principal.
    */
   interestPaid: number;
   /**

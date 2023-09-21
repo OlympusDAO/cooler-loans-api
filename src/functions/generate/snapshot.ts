@@ -4,28 +4,30 @@ import { Loan, Snapshot } from "../../types/snapshot";
 import { SubgraphData } from "../../types/subgraph";
 
 const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
+  console.log(`repayment is ${repayment}`);
   const interestDue = loan.interest - loan.interestPaid;
-  const principalDue = loan.principal - loan.principalPaid;
-  const totalDue = principalDue + interestDue;
-  if (totalDue === 0) {
-    console.warn(`calculateInterestRepayment: cannot calculate interest repayment when totalDue is 0. Returning 0.`);
-    return 0;
+  console.log(`Interest due: ${interestDue}`);
+
+  if (repayment > interestDue) {
+    return interestDue;
   }
 
-  return (repayment / totalDue) * interestDue;
+  return repayment;
 };
 
 const calculatePrincipalRepayment = (repayment: number, loan: Loan): number => {
-  console.log(`calculatePrincipalRepayment: loan: ${loan.id}`);
-  const interestDue = loan.interest - loan.interestPaid;
-  const principalDue = loan.principal - loan.principalPaid;
-  const totalDue = principalDue + interestDue;
-  if (totalDue === 0) {
-    console.warn(`calculatePrincipalRepayment: cannot calculate principal repayment when totalDue is 0. Returning 0.`);
-    return 0;
+  console.log(`repayment is ${repayment}`);
+  const interestRepayment = calculateInterestRepayment(repayment, loan);
+
+  if (interestRepayment <= 0) {
+    console.log(`No interest payment. Making full repayment of ${repayment}`);
+    return repayment;
   }
 
-  return (repayment / totalDue) * principalDue;
+  // Interest is paid first
+  const principalRepayment = repayment - interestRepayment;
+  console.log(`Principal repayment after deduction of interest is ${principalRepayment}`);
+  return principalRepayment;
 };
 
 const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
