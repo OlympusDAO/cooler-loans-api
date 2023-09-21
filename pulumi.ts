@@ -69,7 +69,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
 new gcp.cloudscheduler.Job(
   "generate",
   {
-    schedule: "0 * * * *",
+    schedule: "*/5 * * * *", // Every 5 minutes
     timeZone: "UTC",
     httpTarget: {
       uri: functionGenerate.httpsTriggerUrl,
