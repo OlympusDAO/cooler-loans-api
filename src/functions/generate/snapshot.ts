@@ -289,11 +289,13 @@ export const generateSnapshots = (
       loan.status = "Active";
       loan.expiryTimestamp = parseNumber(extendEvent.expiryTimestamp);
 
-      const incrementalInterest = parseNumber(extendEvent.interestDue) - loan.interest;
-      loan.interest += incrementalInterest;
+      // Additional interest is paid at the time a loan is extended
+      // https://github.com/ohmzeus/Cooler/pull/63
+      const newInterest = parseNumber(extendEvent.periods) * loan.interestPerPeriod;
+      loan.interest += newInterest;
 
       // Update receivables
-      currentSnapshot.interestReceivables += incrementalInterest;
+      currentSnapshot.interestReceivables += newInterest;
     });
 
     // Update secondsToExpiry and status for all loans

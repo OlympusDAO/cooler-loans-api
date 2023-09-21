@@ -1084,7 +1084,8 @@ describe("generateSnapshots", () => {
     const subgraphData = getSampleData();
 
     // Add extension on day 2
-    const newInterestDue = LOAN_INTEREST + 2 * LOAN_INTEREST;
+    const newPeriods = 2;
+    const newInterest = newPeriods * LOAN_INTEREST;
     const newExpiryTimestamp = 99999999999;
     subgraphData.extendEvents["2023-08-02"] = [
       {
@@ -1093,9 +1094,9 @@ describe("generateSnapshots", () => {
         blockNumber: 1233456,
         blockTimestamp: 1691654400,
         transactionHash: "0x0000002",
-        periods: 2,
+        periods: newPeriods,
         expiryTimestamp: newExpiryTimestamp,
-        interestDue: newInterestDue,
+        interestDue: LOAN_INTEREST, // Interest for the extension is paid at the time, and is not reflected here. This is residual interest from before the extension.
         loan: {
           id: "0x3-0",
         },
@@ -1108,7 +1109,7 @@ describe("generateSnapshots", () => {
     const snapshotTwo = snapshots[1];
     expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
     expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTwo.interestReceivables).toEqual(newInterestDue);
+    expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST + newInterest);
 
     expect(Object.values(snapshotTwo.loans)).toHaveLength(1);
     const snapshotTwoLoanOne = snapshotTwo.loans[LOAN_ID];
@@ -1119,7 +1120,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwoLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
     expect(snapshotTwoLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotTwoLoanOne.principal).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTwoLoanOne.interest).toEqual(newInterestDue);
+    expect(snapshotTwoLoanOne.interest).toEqual(LOAN_INTEREST + newInterest);
     expect(snapshotTwoLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
     expect(snapshotTwoLoanOne.expiryTimestamp).toEqual(newExpiryTimestamp);
     expect(snapshotTwoLoanOne.secondsToExpiry).toEqual(
@@ -1144,8 +1145,11 @@ describe("generateSnapshots", () => {
     const previousDateRecords: Snapshot | null = null;
     const subgraphData = getSampleData();
 
+    const interestDue = LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT);
+
     // Add extension on day 12
-    const newInterestDue = LOAN_INTEREST + 2 * LOAN_INTEREST;
+    const newPeriods = 2;
+    const newInterest = newPeriods * LOAN_INTEREST;
     const newExpiryTimestamp = 99999999999;
     subgraphData.extendEvents["2023-08-12"] = [
       {
@@ -1154,9 +1158,9 @@ describe("generateSnapshots", () => {
         blockNumber: 1233456,
         blockTimestamp: 1691654400,
         transactionHash: "0x0000002",
-        periods: 2,
+        periods: newPeriods,
         expiryTimestamp: newExpiryTimestamp,
-        interestDue: newInterestDue,
+        interestDue: interestDue, // Interest for the extension is paid at the time, and is not reflected here. This is residual interest from before the extension.
         loan: {
           id: "0x3-0",
         },
@@ -1173,9 +1177,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.principalReceivables).toEqual(
       LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
     );
-    expect(snapshotTwelve.interestReceivables).toEqual(
-      newInterestDue - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT),
-    );
+    expect(snapshotTwelve.interestReceivables).toEqual(interestDue + newInterest);
 
     expect(Object.values(snapshotTwelve.loans)).toHaveLength(1);
     const snapshotTwelveLoanOne = snapshotTwelve.loans[LOAN_ID];
@@ -1183,7 +1185,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelveLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
     expect(snapshotTwelveLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotTwelveLoanOne.principal).toEqual(LOAN_PRINCIPAL);
-    expect(snapshotTwelveLoanOne.interest).toEqual(newInterestDue);
+    expect(snapshotTwelveLoanOne.interest).toEqual(LOAN_INTEREST + newInterest);
     expect(snapshotTwelveLoanOne.collateralDeposited).toEqual(29);
     expect(snapshotTwelveLoanOne.expiryTimestamp).toEqual(newExpiryTimestamp);
     expect(snapshotTwelveLoanOne.secondsToExpiry).toEqual(
