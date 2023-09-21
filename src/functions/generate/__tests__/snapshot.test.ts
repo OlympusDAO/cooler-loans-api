@@ -805,8 +805,8 @@ describe("generateSnapshots", () => {
     expect(snapshots.length).toEqual(1);
     const snapshotOne = snapshots[0];
     expect(snapshotOne.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
-    expect(snapshotOne.principalReceivables).toEqual(55555); // Uses previous snapshot
-    expect(snapshotOne.interestReceivables).toEqual(6666); // Uses previous snapshot
+    expect(snapshotOne.principalReceivables).toEqual(LOAN_PRINCIPAL - 999); // Does not use the previous snapshot
+    expect(snapshotOne.interestReceivables).toEqual(LOAN_INTEREST - 22); // Does not use the previous snapshot
     expect(snapshotOne.interestIncome).toEqual(0); // Does not carry over
     expect(snapshotOne.collateralIncome).toEqual(0); // Does not carry over
     expect(snapshotOne.collateralDeposited).toEqual(30); // Does not carry over

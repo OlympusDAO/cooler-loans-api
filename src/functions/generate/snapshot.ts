@@ -91,6 +91,8 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   newSnapshot.interestIncome = 0;
   newSnapshot.collateralIncome = 0;
   newSnapshot.collateralDeposited = 0;
+  newSnapshot.principalReceivables = 0;
+  newSnapshot.interestReceivables = 0;
 
   // Ensure the loans property has a value
   if (!newSnapshot.loans) {
@@ -200,8 +202,6 @@ export const generateSnapshots = (
     console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
     currentCreationEvents.forEach(creationEvent => {
       console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
-      currentSnapshot.principalReceivables += parseNumber(creationEvent.loan.principal);
-      currentSnapshot.interestReceivables += parseNumber(creationEvent.loan.interest);
 
       // Add any new loans into running list
       console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
@@ -257,10 +257,6 @@ export const generateSnapshots = (
         loan.status = "Repaid";
       }
 
-      // Update overall receivables
-      currentSnapshot.interestReceivables -= interestRepayment;
-      currentSnapshot.principalReceivables -= principalRepayment;
-
       // Set the income from the repayment
       currentSnapshot.interestIncome += interestRepayment;
     });
@@ -277,9 +273,6 @@ export const generateSnapshots = (
         throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
       }
 
-      const interestPayable = loan.interest - loan.interestPaid;
-      const principalPayable = loan.principal - loan.principalPaid;
-
       const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
 
       // Update the loan
@@ -290,10 +283,6 @@ export const generateSnapshots = (
 
       // Calculate the income from the collateral claim
       loan.collateralIncome += collateralValueClaimed;
-
-      // Remove the loan payable from the receivables
-      currentSnapshot.interestReceivables -= interestPayable;
-      currentSnapshot.principalReceivables -= principalPayable;
 
       // Set the income from the default claim
       currentSnapshot.collateralIncome += collateralValueClaimed;
@@ -339,6 +328,12 @@ export const generateSnapshots = (
       // Set the status
       if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
         loan.status = "Expired";
+      }
+
+      // Set the receivables
+      if (loan.status !== "Reclaimed") {
+        currentSnapshot.interestReceivables += loan.interest - loan.interestPaid;
+        currentSnapshot.principalReceivables += loan.principal - loan.principalPaid;
       }
     });
 
