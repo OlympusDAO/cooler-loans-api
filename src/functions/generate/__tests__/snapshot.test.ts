@@ -675,6 +675,54 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.terms.interestRate).toEqual(CLEARINGHOUSE_INTEREST_RATE);
   });
 
+  it("repayment amount as strings", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-11");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+    // @ts-ignore
+    subgraphData.repaymentEvents["2023-08-10"][0].amountPaid = "1000.005";
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    expect(snapshots.length).toEqual(10);
+
+    // Check that the amount paid is interpreted correctly
+    const snapshotTen = snapshots[9];
+    expect(snapshotTen.principalReceivables).toEqual(
+      LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 1000.005),
+    );
+    expect(snapshotTen.interestReceivables).toEqual(
+      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 1000.005),
+    );
+
+    expect(snapshotTen.interestIncome).toEqual(getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 1000.005));
+  });
+
+  it("repayment amount as scientific notation strings", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-11");
+    const previousDateRecords: Snapshot | null = null;
+    const subgraphData = getSampleData();
+    // @ts-ignore
+    subgraphData.repaymentEvents["2023-08-10"][0].amountPaid = "1.26e-13";
+
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
+
+    expect(snapshots.length).toEqual(10);
+
+    // Check that the amount paid is interpreted correctly
+    const snapshotTen = snapshots[9];
+    expect(snapshotTen.principalReceivables).toEqual(
+      LOAN_PRINCIPAL - getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 0.000000000000126),
+    );
+    expect(snapshotTen.interestReceivables).toEqual(
+      LOAN_INTEREST - getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 0.000000000000126),
+    );
+
+    expect(snapshotTen.interestIncome).toEqual(getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, 0.000000000000126));
+  });
+
   it("should handle no previous snapshot", () => {
     const startDate = new Date("2023-08-01");
     const beforeDate = new Date("2023-08-02");
@@ -1263,12 +1311,12 @@ describe("generateSnapshots", () => {
     expect(snapshotThirteenLoanOne.status).toEqual("Active");
     expect(snapshotThirteenLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-        getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+      getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotThirteenLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-        extensionOneAdditionalInterest +
-        getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+      extensionOneAdditionalInterest +
+      getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotThirteenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotThirteenLoanOne.collateralClaimedValue).toEqual(0);
@@ -1383,13 +1431,13 @@ describe("generateSnapshots", () => {
     expect(snapshotFourteenLoanOne.status).toEqual("Active");
     expect(snapshotFourteenLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-        getPrincipalPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount),
+      getPrincipalPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotFourteenLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-        getInterestPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount) +
-        extensionOneAdditionalInterest +
-        extensionTwoAdditionalInterest, // Should reflect the interest paid for the extension
+      getInterestPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount) +
+      extensionOneAdditionalInterest +
+      extensionTwoAdditionalInterest, // Should reflect the interest paid for the extension
     );
     expect(snapshotFourteenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotFourteenLoanOne.collateralClaimedValue).toEqual(0);

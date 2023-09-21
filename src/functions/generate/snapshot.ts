@@ -7,13 +7,24 @@ const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
   const interestDue = loan.interest - loan.interestPaid;
   const principalDue = loan.principal - loan.principalPaid;
   const totalDue = principalDue + interestDue;
+  if (totalDue === 0) {
+    console.warn(`calculateInterestRepayment: cannot calculate interest repayment when totalDue is 0. Returning 0.`);
+    return 0;
+  }
+
   return (repayment / totalDue) * interestDue;
 };
 
 const calculatePrincipalRepayment = (repayment: number, loan: Loan): number => {
+  console.log(`calculatePrincipalRepayment: loan: ${loan.id}`);
   const interestDue = loan.interest - loan.interestPaid;
   const principalDue = loan.principal - loan.principalPaid;
   const totalDue = principalDue + interestDue;
+  if (totalDue === 0) {
+    console.warn(`calculatePrincipalRepayment: cannot calculate principal repayment when totalDue is 0. Returning 0.`);
+    return 0;
+  }
+
   return (repayment / totalDue) * principalDue;
 };
 
@@ -232,6 +243,10 @@ export const generateSnapshots = (
       const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
       const interestRepayment = calculateInterestRepayment(eventAmountPaid, loan);
       const principalRepayment = calculatePrincipalRepayment(eventAmountPaid, loan);
+      console.log(`${FUNC}: eventAmountPaid: ${eventAmountPaid}`);
+      console.log(`${FUNC}: interestRepayment: ${interestRepayment}`);
+      console.log(`${FUNC}: principalRepayment: ${principalRepayment}`);
+
       loan.interestPaid += interestRepayment;
       loan.principalPaid += principalRepayment;
 
