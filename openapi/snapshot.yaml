@@ -305,12 +305,6 @@
                     },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
-                  "expiryStatus":
-                    {
-                      "description": "Status of the loan, with additional information for loans that are active.",
-                      "enum": ["< 1 Day", "< 14 Days", "< 7 Days", "Active", "Expired", "Reclaimed", "Repaid"],
-                      "type": "string",
-                    },
                   "expiryTimestamp":
                     { "description": "Timestamp of the expected loan expiry, in seconds", "type": "number" },
                   "id":
@@ -348,7 +342,6 @@
                   "collateralPerPeriod",
                   "coolerAddress",
                   "createdTimestamp",
-                  "expiryStatus",
                   "expiryTimestamp",
                   "id",
                   "interest",

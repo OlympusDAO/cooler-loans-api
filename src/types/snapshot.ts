@@ -60,10 +60,6 @@ export type Loan = {
    */
   status: "Active" | "Expired" | "Reclaimed" | "Repaid";
   /**
-   * Status of the loan, with additional information for loans that are active.
-   */
-  expiryStatus: "Active" | "Expired" | "< 1 Day" | "< 7 Days" | "< 14 Days" | "Reclaimed" | "Repaid";
-  /**
    * Cumulative principal paid on the loan.
    */
   principalPaid: number;

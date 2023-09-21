@@ -3,8 +3,6 @@ import { parseNumber } from "../../helpers/numberHelper";
 import { Snapshot } from "../../types/snapshot";
 import { SubgraphData } from "../../types/subgraph";
 
-const SECONDS_PER_DAY = 60 * 60 * 24;
-
 const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): Snapshot => {
   const FUNC = "createSnapshot";
   // If there is no previous snapshot, return a new one
@@ -195,7 +193,6 @@ export const generateSnapshots = (
         expiryTimestamp: parseNumber(creationEvent.loan.expiryTimestamp),
         secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, parseNumber(creationEvent.loan.expiryTimestamp)),
         status: "Active",
-        expiryStatus: "Active",
         principalPaid: 0,
         interestPaid: 0,
         collateralIncome: 0,
@@ -311,19 +308,6 @@ export const generateSnapshots = (
       // Set the status
       if (loan.status === "Active" && loan.secondsToExpiry <= 0) {
         loan.status = "Expired";
-      }
-
-      // Set the expiry status
-      loan.expiryStatus = loan.status;
-      const daysToExpiry = loan.secondsToExpiry / SECONDS_PER_DAY;
-      if (loan.expiryStatus == "Active") {
-        if (daysToExpiry < 1) {
-          loan.expiryStatus = "< 1 Day";
-        } else if (daysToExpiry < 7) {
-          loan.expiryStatus = "< 7 Days";
-        } else if (daysToExpiry < 14) {
-          loan.expiryStatus = "< 14 Days";
-        }
       }
     });
 
