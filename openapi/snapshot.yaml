@@ -298,11 +298,6 @@
                       "type": "number",
                     },
                   "collateralIncome": { "type": "number" },
-                  "collateralPerPeriod":
-                    {
-                      "description": "The amount of collateral required per period.\n\nAs this is fixed on the clearinghouse, it does not change.",
-                      "type": "number",
-                    },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
                   "expiryTimestamp":
@@ -314,15 +309,14 @@
                     },
                   "interest":
                     {
-                      "description": "The interest charged on the loan.\n\nWhen the loan is extended, this number will be incremented.",
+                      "description": "The total interest charged on the loan.\n\nWhen the loan is extended, this number will be increased.",
                       "type": "number",
                     },
                   "interestPaid": { "description": "Cumulative interest paid on the loan.", "type": "number" },
-                  "interestPerPeriod":
-                    { "description": "The amount of interest charged per period.", "type": "number" },
                   "lenderAddress": { "type": "string" },
                   "loanId": { "description": "Loan id unique to the cooler", "type": "number" },
-                  "principal": { "description": "The loan principal", "type": "number" },
+                  "principal":
+                    { "description": "The loan principal. Will not change after loan creation.", "type": "number" },
                   "principalPaid": { "description": "Cumulative principal paid on the loan.", "type": "number" },
                   "secondsToExpiry": { "type": "number" },
                   "status":
@@ -339,14 +333,12 @@
                   "collateralClaimedValue",
                   "collateralDeposited",
                   "collateralIncome",
-                  "collateralPerPeriod",
                   "coolerAddress",
                   "createdTimestamp",
                   "expiryTimestamp",
                   "id",
                   "interest",
                   "interestPaid",
-                  "interestPerPeriod",
                   "lenderAddress",
                   "loanId",
                   "principal",

@@ -25,25 +25,23 @@ export type Loan = {
   borrowerAddress: string;
   lenderAddress: string;
   /**
-   * The amount of interest charged per period.
-   */
-  interestPerPeriod: number;
-  /**
-   * The amount of collateral required per period.
-   *
-   * As this is fixed on the clearinghouse, it does not change.
-   */
-  collateralPerPeriod: number;
-  /**
-   * The loan principal
+   * The loan principal. Will not change after loan creation.
    */
   principal: number;
   /**
-   * The interest charged on the loan.
+   * Cumulative principal paid on the loan.
+   */
+  principalPaid: number;
+  /**
+   * The total interest charged on the loan.
    *
-   * When the loan is extended, this number will be incremented.
+   * When the loan is extended, this number will be increased.
    */
   interest: number;
+  /**
+   * Cumulative interest paid on the loan.
+   */
+  interestPaid: number;
   /**
    * The current quantity of the collateral token that is deposited.
    *
@@ -59,14 +57,6 @@ export type Loan = {
    * Status of the loan
    */
   status: "Active" | "Expired" | "Reclaimed" | "Repaid";
-  /**
-   * Cumulative principal paid on the loan.
-   */
-  principalPaid: number;
-  /**
-   * Cumulative interest paid on the loan.
-   */
-  interestPaid: number;
   collateralIncome: number;
   collateralClaimedQuantity: number;
   collateralClaimedValue: number;

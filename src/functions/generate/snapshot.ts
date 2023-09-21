@@ -199,8 +199,6 @@ export const generateSnapshots = (
         coolerAddress: creationEvent.loan.cooler,
         borrowerAddress: creationEvent.loan.borrower,
         lenderAddress: creationEvent.loan.lender,
-        interestPerPeriod: parseNumber(creationEvent.loan.interest),
-        collateralPerPeriod: parseNumber(creationEvent.loan.collateral),
         principal: parseNumber(creationEvent.loan.principal),
         interest: parseNumber(creationEvent.loan.interest),
         collateralDeposited: parseNumber(creationEvent.loan.collateral),

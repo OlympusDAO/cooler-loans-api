@@ -309,8 +309,6 @@ describe("generateSnapshots", () => {
     expect(snapshotOneLoanOne.createdTimestamp).toEqual(LOAN_CREATION_TIMESTAMP);
     expect(snapshotOneLoanOne.borrowerAddress).toEqual("0x01");
     expect(snapshotOneLoanOne.lenderAddress).toEqual("0x02");
-    expect(snapshotOneLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST);
-    expect(snapshotOneLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL);
     expect(snapshotOneLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOneLoanOne.interest).toEqual(LOAN_INTEREST);
     expect(snapshotOneLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
@@ -341,8 +339,6 @@ describe("generateSnapshots", () => {
     expect(snapshotTwoLoanOne.createdTimestamp).toEqual(LOAN_CREATION_TIMESTAMP);
     expect(snapshotTwoLoanOne.borrowerAddress).toEqual("0x01");
     expect(snapshotTwoLoanOne.lenderAddress).toEqual("0x02");
-    expect(snapshotTwoLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST);
-    expect(snapshotTwoLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL);
     expect(snapshotTwoLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotTwoLoanOne.interest).toEqual(LOAN_INTEREST);
     expect(snapshotTwoLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
@@ -449,8 +445,6 @@ describe("generateSnapshots", () => {
     expect(Object.values(snapshotTen.loans)).toHaveLength(1);
     const snapshotTenLoanOne = snapshotTen.loans[LOAN_ID];
     expect(snapshotTenLoanOne.loanId).toEqual(0);
-    expect(snapshotTenLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
-    expect(snapshotTenLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotTenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotTenLoanOne.interest).toEqual(LOAN_INTEREST);
     expect(snapshotTenLoanOne.collateralDeposited).toEqual(29);
@@ -744,8 +738,6 @@ describe("generateSnapshots", () => {
           borrowerAddress: "0x01",
           lenderAddress: "0x02",
           coolerAddress: "0x03",
-          interestPerPeriod: 5,
-          collateralPerPeriod: 6,
           principal: LOAN_PRINCIPAL,
           interest: LOAN_INTEREST,
           collateralDeposited: LOAN_INITIAL_COLLATERAL,
@@ -801,8 +793,6 @@ describe("generateSnapshots", () => {
     expect(snapshotOneLoanOne.createdTimestamp).toEqual(LOAN_CREATION_TIMESTAMP);
     expect(snapshotOneLoanOne.borrowerAddress).toEqual("0x01");
     expect(snapshotOneLoanOne.lenderAddress).toEqual("0x02");
-    expect(snapshotOneLoanOne.interestPerPeriod).toEqual(5);
-    expect(snapshotOneLoanOne.collateralPerPeriod).toEqual(6);
     expect(snapshotOneLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOneLoanOne.interest).toEqual(LOAN_INTEREST);
     expect(snapshotOneLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
@@ -1099,8 +1089,6 @@ describe("generateSnapshots", () => {
     expect(snapshotTwoLoanOne.createdTimestamp).toEqual(LOAN_CREATION_TIMESTAMP);
     expect(snapshotTwoLoanOne.borrowerAddress).toEqual("0x01");
     expect(snapshotTwoLoanOne.lenderAddress).toEqual("0x02");
-    expect(snapshotTwoLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
-    expect(snapshotTwoLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotTwoLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotTwoLoanOne.interest).toEqual(LOAN_INTEREST + newInterest);
     expect(snapshotTwoLoanOne.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL);
@@ -1167,8 +1155,6 @@ describe("generateSnapshots", () => {
     expect(Object.values(snapshotTwelve.loans)).toHaveLength(1);
     const snapshotTwelveLoanOne = snapshotTwelve.loans[LOAN_ID];
     expect(snapshotTwelveLoanOne.loanId).toEqual(0);
-    expect(snapshotTwelveLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
-    expect(snapshotTwelveLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotTwelveLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotTwelveLoanOne.interest).toEqual(LOAN_INTEREST + newInterest);
     expect(snapshotTwelveLoanOne.collateralDeposited).toEqual(29);
@@ -1267,8 +1253,6 @@ describe("generateSnapshots", () => {
     expect(Object.values(snapshotThirteen.loans)).toHaveLength(1);
     const snapshotThirteenLoanOne = snapshotThirteen.loans[LOAN_ID];
     expect(snapshotThirteenLoanOne.loanId).toEqual(0);
-    expect(snapshotThirteenLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
-    expect(snapshotThirteenLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotThirteenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotThirteenLoanOne.interest).toEqual(LOAN_INTEREST + extensionOneAdditionalInterest);
     expect(snapshotThirteenLoanOne.collateralDeposited).toEqual(20); // From repayment
@@ -1279,12 +1263,12 @@ describe("generateSnapshots", () => {
     expect(snapshotThirteenLoanOne.status).toEqual("Active");
     expect(snapshotThirteenLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-      getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+        getPrincipalPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotThirteenLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-      extensionOneAdditionalInterest +
-      getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
+        extensionOneAdditionalInterest +
+        getInterestPaid(repaymentOnePrincipalDueAfter, repaymentOneInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotThirteenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotThirteenLoanOne.collateralClaimedValue).toEqual(0);
@@ -1387,8 +1371,6 @@ describe("generateSnapshots", () => {
     expect(Object.values(snapshotFourteen.loans)).toHaveLength(1);
     const snapshotFourteenLoanOne = snapshotFourteen.loans[LOAN_ID];
     expect(snapshotFourteenLoanOne.loanId).toEqual(0);
-    expect(snapshotFourteenLoanOne.interestPerPeriod).toEqual(LOAN_INTEREST); // No change
-    expect(snapshotFourteenLoanOne.collateralPerPeriod).toEqual(LOAN_INITIAL_COLLATERAL); // No change
     expect(snapshotFourteenLoanOne.principal).toEqual(LOAN_PRINCIPAL);
     expect(snapshotFourteenLoanOne.interest).toEqual(
       LOAN_INTEREST + extensionOneAdditionalInterest + extensionTwoAdditionalInterest,
@@ -1401,13 +1383,13 @@ describe("generateSnapshots", () => {
     expect(snapshotFourteenLoanOne.status).toEqual("Active");
     expect(snapshotFourteenLoanOne.principalPaid).toEqual(
       getPrincipalPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-      getPrincipalPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount),
+        getPrincipalPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount),
     );
     expect(snapshotFourteenLoanOne.interestPaid).toEqual(
       getInterestPaid(LOAN_PRINCIPAL, LOAN_INTEREST, REPAYMENT_AMOUNT) +
-      getInterestPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount) +
-      extensionOneAdditionalInterest +
-      extensionTwoAdditionalInterest, // Should reflect the interest paid for the extension
+        getInterestPaid(repaymentTwoPrincipalDueAfter, repaymentTwoInterestDueAfter, repaymentTwoAmount) +
+        extensionOneAdditionalInterest +
+        extensionTwoAdditionalInterest, // Should reflect the interest paid for the extension
     );
     expect(snapshotFourteenLoanOne.collateralClaimedQuantity).toEqual(0);
     expect(snapshotFourteenLoanOne.collateralClaimedValue).toEqual(0);
