@@ -331,7 +331,7 @@ export const generateSnapshots = (
       }
 
       // Set the receivables
-      if (loan.status !== "Reclaimed") {
+      if (loan.status !== "Reclaimed" && loan.status !== "Repaid") {
         currentSnapshot.interestReceivables += loan.interest - loan.interestPaid;
         currentSnapshot.principalReceivables += loan.principal - loan.principalPaid;
       }
