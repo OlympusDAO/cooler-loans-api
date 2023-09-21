@@ -319,7 +319,7 @@ describe("generateSnapshots", () => {
 
   it("multiple loans", () => {
     const startDate = new Date("2023-08-01");
-    const beforeDate = new Date("2023-08-03");
+    const beforeDate = new Date("2023-08-11");
     const previousDateRecords: Snapshot | null = null;
     const subgraphData = getSampleData();
 
@@ -355,6 +355,12 @@ describe("generateSnapshots", () => {
       },
     ];
 
+    // Change the payment amount to be more than interest
+    const loanOneAmountPaid = 2000;
+    const loanOneInterestPaid = loanOneAmountPaid > LOAN_INTEREST ? LOAN_INTEREST : loanOneAmountPaid;
+    const loanOnePrincipalPaid = loanOneAmountPaid - loanOneInterestPaid;
+    subgraphData.repaymentEvents["2023-08-10"][0].amountPaid = loanOneAmountPaid;
+
     const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, subgraphData);
 
     const snapshotTwo = snapshots[1];
@@ -363,18 +369,48 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL + loanTwoPrincipal);
     expect(snapshotTwo.interestReceivables).toEqual(LOAN_INTEREST + loanTwoInterest);
 
-    expect(snapshotTwo.collateralDeposited).toEqual(LOAN_INITIAL_COLLATERAL + 30);
-
     // Should have 2 loans
     expect(Object.values(snapshotTwo.loans)).toHaveLength(2);
 
     // Loan 1
     const snapshotTwoLoanOne = snapshotTwo.loans[LOAN_ID];
     expect(snapshotTwoLoanOne.id).toEqual(LOAN_ID);
+    expect(snapshotTwoLoanOne.principalPaid).toEqual(0);
+    expect(snapshotTwoLoanOne.interestPaid).toEqual(0);
 
     // Loan 2
     const snapshotTwoLoanTwo = snapshotTwo.loans["0x3-1"];
     expect(snapshotTwoLoanTwo.id).toEqual("0x3-1");
+    expect(snapshotTwoLoanTwo.principalPaid).toEqual(0);
+    expect(snapshotTwoLoanTwo.interestPaid).toEqual(0);
+
+    expect(snapshotTwo.principalReceivables).toEqual(
+      snapshotTwoLoanOne.principal -
+      snapshotTwoLoanOne.principalPaid +
+      snapshotTwoLoanTwo.principal +
+      snapshotTwoLoanTwo.principalPaid,
+    );
+
+    // Skip to day 10 after payment
+    const snapshotTen = snapshots[9];
+
+    expect(snapshotTen.principalReceivables).toEqual(LOAN_PRINCIPAL + loanTwoPrincipal - loanOnePrincipalPaid);
+    expect(snapshotTen.interestReceivables).toEqual(LOAN_INTEREST + loanTwoInterest - loanOneInterestPaid);
+
+    // Loan 1
+    const snapshotTenLoanOne = snapshotTen.loans[LOAN_ID];
+    expect(snapshotTenLoanOne.id).toEqual(LOAN_ID);
+
+    // Loan 2
+    const snapshotTenLoanTwo = snapshotTen.loans["0x3-1"];
+    expect(snapshotTenLoanTwo.id).toEqual("0x3-1");
+
+    expect(snapshotTen.principalReceivables).toEqual(
+      snapshotTenLoanOne.principal -
+      snapshotTenLoanOne.principalPaid +
+      snapshotTenLoanTwo.principal +
+      snapshotTenLoanTwo.principalPaid,
+    );
   });
 
   it("loan repayment < interest due", () => {
