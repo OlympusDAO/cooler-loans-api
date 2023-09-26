@@ -5,13 +5,19 @@ import { generateSnapshots } from "./snapshot";
 import { getData } from "./subgraph";
 
 const LAUNCH_DATE = "2023-09-21";
+// So that the next 4 months of income can be projected
+const DAYS_AFTER = 121;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleGenerate = async (req: any, res: any) => {
   // Determine the last cached date in Firestore
   const lastCachedDate: string | null = await getLatestCachedDate();
-  const startDate: Date = setMidnight(adjustDate(new Date(lastCachedDate || LAUNCH_DATE), -1));
-  const beforeDate: Date = setMidnight(adjustDate(new Date(), 1)); // So that all of the current day is captured
+  const startDate: Date = setMidnight(
+    lastCachedDate
+      ? adjustDate(new Date(lastCachedDate), -1) // If there is a cached date, use the day before to catch anything in between
+      : new Date(LAUNCH_DATE), // Otherwise, use the launch date
+  );
+  const beforeDate: Date = setMidnight(adjustDate(new Date(), DAYS_AFTER));
 
   const endpointUrl = process.env.GRAPHQL_ENDPOINT;
   if (!endpointUrl) {
