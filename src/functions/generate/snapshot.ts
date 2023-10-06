@@ -428,6 +428,11 @@ export const generateSnapshots = (
         // https://github.com/ohmzeus/Cooler/pull/63
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
+        console.log(
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
+            loan.principal - loan.principalPaid
+          }: ${interestPerPeriod}`,
+        );
         const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
         loan.interest += newInterest;
         loan.interestPaid += newInterest;
