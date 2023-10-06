@@ -320,6 +320,7 @@
                   "collateralIncome": { "type": "number" },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
+                  "durationSeconds": { "description": "The loan duration, in seconds.", "type": "number" },
                   "expiryTimestamp":
                     { "description": "Timestamp of the expected loan expiry, in seconds", "type": "number" },
                   "id":
@@ -337,6 +338,8 @@
                       "description": "Cumulative interest paid on the loan.\n\nAny outstanding interest is paid first, followed by principal.",
                       "type": "number",
                     },
+                  "interestRate":
+                    { "description": "The interest rate, stored as a decimal.\n\ne.g. 0.5% = 0.005", "type": "number" },
                   "lenderAddress": { "type": "string" },
                   "loanId": { "description": "Loan id unique to the cooler", "type": "number" },
                   "principal":
@@ -359,10 +362,12 @@
                   "collateralIncome",
                   "coolerAddress",
                   "createdTimestamp",
+                  "durationSeconds",
                   "expiryTimestamp",
                   "id",
                   "interest",
                   "interestPaid",
+                  "interestRate",
                   "lenderAddress",
                   "loanId",
                   "principal",

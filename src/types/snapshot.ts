@@ -25,6 +25,10 @@ export type Loan = {
   borrowerAddress: string;
   lenderAddress: string;
   /**
+   * The loan duration, in seconds.
+   */
+  durationSeconds: number;
+  /**
    * The loan principal. Will not change after loan creation.
    */
   principal: number;
@@ -32,6 +36,12 @@ export type Loan = {
    * Cumulative principal paid on the loan.
    */
   principalPaid: number;
+  /**
+   * The interest rate, stored as a decimal.
+   *
+   * e.g. 0.5% = 0.005
+   */
+  interestRate: number;
   /**
    * The total interest charged on the loan.
    *

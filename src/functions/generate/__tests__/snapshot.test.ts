@@ -21,7 +21,8 @@ const COLLATERAL_CLAIM_VALUE = 29000;
 const CLEARINGHOUSE_DAI_BALANCE = 10000000.0;
 const CLEARINGHOUSE_SDAI_BALANCE = 500000.0;
 const CLEARINGHOUSE_SDAI_IN_DAI_BALANCE = 600000.01;
-const CLEARINGHOUSE_DURATION = 121 * 24 * 60 * 60;
+const CLEARINGHOUSE_DURATION_DAYS = 121;
+const CLEARINGHOUSE_DURATION_SECONDS = CLEARINGHOUSE_DURATION_DAYS * 24 * 60 * 60;
 const CLEARINGHOUSE_INTEREST_RATE = 0.005;
 const CLEARINGHOUSE_LOAN_TO_COLLATERAL = 3000;
 const CLEARINGHOUSE_FUND_AMOUNT = 18000000;
@@ -53,6 +54,10 @@ const getLoanData = (): CoolerLoanOptional => {
     collateralToken: "0x04",
     debtToken: "0x05",
     hasCallback: false,
+    request: {
+      interestPercentage: CLEARINGHOUSE_INTEREST_RATE,
+      durationSeconds: CLEARINGHOUSE_DURATION_SECONDS,
+    },
   };
 };
 
@@ -87,7 +92,7 @@ const getSampleData = (): SubgraphData => {
           treasuryDaiBalance: TREASURY_DAI_BALANCE,
           treasurySDaiBalance: TREASURY_SDAI_BALANCE,
           treasurySDaiInDaiBalance: TREASURY_SDAI_IN_DAI_BALANCE,
-          duration: CLEARINGHOUSE_DURATION,
+          duration: CLEARINGHOUSE_DURATION_SECONDS,
           interestRate: CLEARINGHOUSE_INTEREST_RATE,
           loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
           fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
@@ -114,7 +119,7 @@ const getSampleData = (): SubgraphData => {
           treasuryDaiBalance: 1100,
           treasurySDaiBalance: 1700,
           treasurySDaiInDaiBalance: 1800,
-          duration: CLEARINGHOUSE_DURATION,
+          duration: CLEARINGHOUSE_DURATION_SECONDS,
           interestRate: CLEARINGHOUSE_INTEREST_RATE,
           loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
           fundAmount: CLEARINGHOUSE_FUND_AMOUNT,
@@ -181,6 +186,17 @@ const getSampleData = (): SubgraphData => {
 const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number => {
   const expiryDate = new Date(expiryTimestamp * 1000);
   return Math.floor((expiryDate.getTime() - currentDate.getTime()) / 1000);
+};
+
+/**
+ * Based on: https://github.com/ohmzeus/Cooler/blob/a899201f503d74a956028ee4d8b7bc3ef71f55fa/src/Clearinghouse.sol#L455
+ */
+const getInterestForLoan = (
+  principal: number,
+  interestRate = CLEARINGHOUSE_INTEREST_RATE,
+  duration = CLEARINGHOUSE_DURATION_DAYS,
+): number => {
+  return principal * ((interestRate * duration) / 365);
 };
 
 describe("generateSnapshots", () => {
@@ -369,6 +385,10 @@ describe("generateSnapshots", () => {
           collateralToken: "0x04",
           debtToken: "0x05",
           hasCallback: false,
+          request: {
+            interestPercentage: CLEARINGHOUSE_INTEREST_RATE,
+            durationSeconds: CLEARINGHOUSE_DURATION_SECONDS,
+          },
         },
         clearinghouseSDaiBalance: loanTwoClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: loanTwoClearinghouseSDaiInDaiBalance,
@@ -404,12 +424,8 @@ describe("generateSnapshots", () => {
     expect(snapshotTwoLoanTwo.principalPaid).toEqual(0);
     expect(snapshotTwoLoanTwo.interestPaid).toEqual(0);
 
-    expect(snapshotTwo.principalReceivables).toEqual(
-      snapshotTwoLoanOne.principal -
-      snapshotTwoLoanOne.principalPaid +
-      snapshotTwoLoanTwo.principal -
-      snapshotTwoLoanTwo.principalPaid,
-    );
+    // eslint-disable-next-line prettier/prettier
+    expect(snapshotTwo.principalReceivables).toEqual(snapshotTwoLoanOne.principal - snapshotTwoLoanOne.principalPaid + snapshotTwoLoanTwo.principal - snapshotTwoLoanTwo.principalPaid);
 
     // Skip to day 10 after payment
     const snapshotTen = snapshots[9];
@@ -425,12 +441,8 @@ describe("generateSnapshots", () => {
     const snapshotTenLoanTwo = snapshotTen.loans["0x3-1"];
     expect(snapshotTenLoanTwo.id).toEqual("0x3-1");
 
-    expect(snapshotTen.principalReceivables).toEqual(
-      snapshotTenLoanOne.principal -
-      snapshotTenLoanOne.principalPaid +
-      snapshotTenLoanTwo.principal +
-      snapshotTenLoanTwo.principalPaid,
-    );
+    // eslint-disable-next-line prettier/prettier
+    expect(snapshotTen.principalReceivables).toEqual(snapshotTenLoanOne.principal - snapshotTenLoanOne.principalPaid + snapshotTenLoanTwo.principal + snapshotTenLoanTwo.principalPaid);
   });
 
   it("loan repayment < interest due", () => {
@@ -631,7 +643,7 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE);
     expect(snapshotOne.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE);
 
-    expect(snapshotOne.terms.duration).toEqual(CLEARINGHOUSE_DURATION);
+    expect(snapshotOne.terms.duration).toEqual(CLEARINGHOUSE_DURATION_SECONDS);
     expect(snapshotOne.terms.interestRate).toEqual(CLEARINGHOUSE_INTEREST_RATE);
     expect(snapshotOne.terms.loanToCollateral).toEqual(CLEARINGHOUSE_LOAN_TO_COLLATERAL);
 
@@ -800,7 +812,7 @@ describe("generateSnapshots", () => {
         sDaiInDaiBalance: 4444,
       },
       terms: {
-        duration: CLEARINGHOUSE_DURATION,
+        duration: CLEARINGHOUSE_DURATION_SECONDS,
         interestRate: CLEARINGHOUSE_INTEREST_RATE,
         loanToCollateral: CLEARINGHOUSE_LOAN_TO_COLLATERAL,
       },
@@ -823,6 +835,8 @@ describe("generateSnapshots", () => {
           collateralIncome: 0,
           collateralClaimedQuantity: 0,
           collateralClaimedValue: 0,
+          durationSeconds: CLEARINGHOUSE_DURATION_SECONDS,
+          interestRate: CLEARINGHOUSE_INTEREST_RATE,
         },
       },
       creationEvents: [],
@@ -1065,6 +1079,10 @@ describe("generateSnapshots", () => {
       collateralToken: "0x04",
       debtToken: "0x05",
       hasCallback: false,
+      request: {
+        interestPercentage: CLEARINGHOUSE_INTEREST_RATE,
+        durationSeconds: CLEARINGHOUSE_DURATION_SECONDS,
+      },
     };
     subgraphData.creationEvents["2023-08-02"] = [
       {
@@ -1114,7 +1132,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 2
     const newPeriods = 2;
-    const newInterest = newPeriods * LOAN_INTEREST;
+    const newInterest = newPeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const newExpiryTimestamp = 99999999999;
     const newClearinghouseSDaiBalance = 200.1;
     const newClearinghouseSDaiInDaiBalance = 200.2;
@@ -1190,7 +1208,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const newPeriods = 2;
-    const newInterest = newPeriods * interestDue;
+    const newInterest = newPeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const newExpiryTimestamp = 99999999999;
     const newClearinghouseSDaiBalance = 200.1;
     const newClearinghouseSDaiInDaiBalance = 200.2;
@@ -1258,7 +1276,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const extensionOnePeriods = 2;
-    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1699999000;
     const extensionClearinghouseSDaiBalance = 200.1;
     const extensionClearinghouseSDaiInDaiBalance = 200.2;
@@ -1354,7 +1372,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const extensionOnePeriods = 2;
-    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1691655000;
     const extensionOneClearinghouseSDaiBalance = 200.1;
     const extensionOneClearinghouseSDaiInDaiBalance = 200.2;
@@ -1404,7 +1422,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 14
     const extensionTwoPeriods = 3;
-    const extensionTwoAdditionalInterest = extensionTwoPeriods * repaymentTwoInterestDueAfter;
+    const extensionTwoAdditionalInterest = extensionTwoPeriods * getInterestForLoan(repaymentTwoPrincipalDueAfter);
     const extensionTwoExpiryTimestamp = 1699990000;
     const extensionTwoClearinghouseSDaiBalance = 200.3;
     const extensionTwoClearinghouseSDaiInDaiBalance = 200.4;
@@ -1476,7 +1494,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const extensionOnePeriods = 2;
-    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1699999000;
     const extensionClearinghouseSDaiBalance = 200.1;
     const extensionClearinghouseSDaiInDaiBalance = 200.2;
@@ -1602,7 +1620,7 @@ describe("generateSnapshots", () => {
 
     // Add extension on day 12
     const extensionOnePeriods = 2;
-    const extensionOneAdditionalInterest = extensionOnePeriods * repaymentOneInterestDueAfter;
+    const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(repaymentTwoPrincipalDueAfter);
     const extensionOneExpiryTimestamp = 1699999000;
     const extensionClearinghouseSDaiBalance = 200.1;
     const extensionClearinghouseSDaiInDaiBalance = 200.2;

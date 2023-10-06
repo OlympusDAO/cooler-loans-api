@@ -13,7 +13,12 @@ import {
 export type CoolerLoanOptional = Omit<
   CoolerLoan,
   "creationEvents" | "repaymentEvents" | "defaultedClaimEvents" | "extendEvents" | "request"
->;
+> & {
+  request: {
+    interestPercentage: number;
+    durationSeconds: number;
+  };
+};
 export type ClearinghouseSnapshotOptional = Omit<ClearinghouseSnapshot, "rebalanceEvents" | "defundEvents">;
 export type ClearLoanRequestEventOptional = Omit<ClearLoanRequestEvent, "request" | "loan"> & {
   loan: CoolerLoanOptional;

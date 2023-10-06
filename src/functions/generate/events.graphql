@@ -43,6 +43,10 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
       lender
       loanId
       principal
+      request {
+        interestPercentage
+        durationSeconds
+      }
     }
     clearinghouseSDaiBalance
     clearinghouseSDaiInDaiBalance

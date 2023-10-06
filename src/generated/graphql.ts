@@ -2586,6 +2586,7 @@ export type CoolerLoanEventsQuery = {
       lender: string;
       loanId: number;
       principal: number;
+      request: { interestPercentage: number; durationSeconds: number };
     };
   }>;
   defundEvents: Array<{
@@ -2828,6 +2829,17 @@ export const CoolerLoanEventsDocument = {
                       { kind: "Field", name: { kind: "Name", value: "lender" } },
                       { kind: "Field", name: { kind: "Name", value: "loanId" } },
                       { kind: "Field", name: { kind: "Name", value: "principal" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "request" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "interestPercentage" } },
+                            { kind: "Field", name: { kind: "Name", value: "durationSeconds" } },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },

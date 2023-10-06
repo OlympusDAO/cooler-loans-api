@@ -337,6 +337,8 @@ export const generateSnapshots = (
           collateralIncome: 0,
           collateralClaimedQuantity: 0,
           collateralClaimedValue: 0,
+          interestRate: creationEvent.loan.request.interestPercentage,
+          durationSeconds: creationEvent.loan.request.durationSeconds,
         };
 
         // Adjust the clearinghouse balance to reflect the value at the time of the event
@@ -424,7 +426,9 @@ export const generateSnapshots = (
         // Additional interest is paid at the time a loan is extended
         // No impact on receivables
         // https://github.com/ohmzeus/Cooler/pull/63
-        const newInterest = parseNumber(extendEvent.periods) * (loan.interest - loan.interestPaid);
+        const interestPerPeriod =
+          ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
+        const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
         loan.interest += newInterest;
         loan.interestPaid += newInterest;
 
