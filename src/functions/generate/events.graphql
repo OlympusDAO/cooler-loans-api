@@ -44,6 +44,8 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
       loanId
       principal
     }
+    clearinghouseSDaiBalance
+    clearinghouseSDaiInDaiBalance
   }
   defundEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -99,6 +101,8 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     loan {
       id
     }
+    clearinghouseSDaiBalance
+    clearinghouseSDaiInDaiBalance
   }
   rebalanceEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -156,5 +160,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     loan {
       id
     }
+    clearinghouseSDaiBalance
+    clearinghouseSDaiInDaiBalance
   }
 }

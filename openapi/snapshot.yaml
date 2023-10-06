@@ -169,11 +169,22 @@
             {
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "date": { "type": "string" },
               "id": { "type": "string" },
               "transactionHash": { "type": "string" },
             },
-          "required": ["blockNumber", "blockTimestamp", "date", "id", "transactionHash"],
+          "required":
+            [
+              "blockNumber",
+              "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
+              "date",
+              "id",
+              "transactionHash",
+            ],
           "type": "object",
         },
       'Omit<ExtendLoanEvent,"loan">':
@@ -182,6 +193,8 @@
             {
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "date": { "type": "string" },
               "expiryTimestamp": { "type": "number" },
               "id": { "type": "string" },
@@ -193,6 +206,8 @@
             [
               "blockNumber",
               "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
               "date",
               "expiryTimestamp",
               "id",
@@ -209,6 +224,8 @@
               "amountPaid": { "type": "number" },
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "collateralDeposited": { "type": "number" },
               "date": { "type": "string" },
               "id": { "type": "string" },
@@ -222,6 +239,8 @@
               "amountPaid",
               "blockNumber",
               "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
               "collateralDeposited",
               "date",
               "id",
@@ -250,6 +269,7 @@
     {
       "clearinghouse":
         {
+          "description": "Represents the state of the Clearinghouse at the time of the snapshot.",
           "properties":
             {
               "collateralAddress": { "type": "string" },
@@ -312,7 +332,11 @@
                       "description": "The total interest charged on the loan.\n\nWhen the loan is extended, this number will be increased.",
                       "type": "number",
                     },
-                  "interestPaid": { "description": "Cumulative interest paid on the loan.", "type": "number" },
+                  "interestPaid":
+                    {
+                      "description": "Cumulative interest paid on the loan.\n\nAny outstanding interest is paid first, followed by principal.",
+                      "type": "number",
+                    },
                   "lenderAddress": { "type": "string" },
                   "loanId": { "description": "Loan id unique to the cooler", "type": "number" },
                   "principal":
@@ -367,6 +391,7 @@
       "timestamp": { "description": "Timestamp of the snapshot, in milliseconds", "type": "number" },
       "treasury":
         {
+          "description": "Represents the state of the Treasury at the time of the snapshot.",
           "properties":
             {
               "daiBalance": { "type": "number" },

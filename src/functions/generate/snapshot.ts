@@ -225,8 +225,9 @@ export const generateSnapshots = (
         collateralClaimedValue: 0,
       };
 
-      // Adjust the clearinghouse balance to reflect the principal transferred out
-      currentSnapshot.clearinghouse.sDaiInDaiBalance -= parseNumber(creationEvent.loan.principal);
+      // Adjust the clearinghouse balance to reflect the value at the time of the event
+      currentSnapshot.clearinghouse.sDaiBalance = parseNumber(creationEvent.clearinghouseSDaiBalance);
+      currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(creationEvent.clearinghouseSDaiInDaiBalance);
     });
 
     // Update loans where there were repayment events
@@ -258,8 +259,9 @@ export const generateSnapshots = (
       // Set the income from the repayment
       currentSnapshot.interestIncome += interestRepayment;
 
-      // Adjust the clearinghouse balance to reflect the principal+interest transferred in
-      currentSnapshot.clearinghouse.sDaiInDaiBalance += interestRepayment + principalRepayment;
+      // Adjust the clearinghouse balance to reflect the value at the time of the event
+      currentSnapshot.clearinghouse.sDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiBalance);
+      currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiInDaiBalance);
     });
 
     // Update loans where there were defaulted claim events
@@ -315,8 +317,9 @@ export const generateSnapshots = (
       // The interest income is updated
       currentSnapshot.interestIncome += newInterest;
 
-      // Adjust the clearinghouse balance to reflect the principal+interest transferred in
-      currentSnapshot.clearinghouse.sDaiInDaiBalance += newInterest;
+      // Adjust the clearinghouse balance to reflect the value at the time of the event
+      currentSnapshot.clearinghouse.sDaiBalance = parseNumber(extendEvent.clearinghouseSDaiBalance);
+      currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(extendEvent.clearinghouseSDaiInDaiBalance);
     });
 
     // Update secondsToExpiry and status for all loans
