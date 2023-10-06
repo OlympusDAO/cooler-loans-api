@@ -224,6 +224,9 @@ export const generateSnapshots = (
         collateralClaimedQuantity: 0,
         collateralClaimedValue: 0,
       };
+
+      // Adjust the clearinghouse balance to reflect the principal transferred out
+      currentSnapshot.clearinghouse.sDaiInDaiBalance -= parseNumber(creationEvent.loan.principal);
     });
 
     // Update loans where there were repayment events
@@ -254,6 +257,9 @@ export const generateSnapshots = (
 
       // Set the income from the repayment
       currentSnapshot.interestIncome += interestRepayment;
+
+      // Adjust the clearinghouse balance to reflect the principal+interest transferred in
+      currentSnapshot.clearinghouse.sDaiInDaiBalance += interestRepayment + principalRepayment;
     });
 
     // Update loans where there were defaulted claim events
@@ -308,6 +314,9 @@ export const generateSnapshots = (
 
       // The interest income is updated
       currentSnapshot.interestIncome += newInterest;
+
+      // Adjust the clearinghouse balance to reflect the principal+interest transferred in
+      currentSnapshot.clearinghouse.sDaiInDaiBalance += newInterest;
     });
 
     // Update secondsToExpiry and status for all loans

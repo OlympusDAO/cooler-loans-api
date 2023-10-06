@@ -286,6 +286,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.extendEvents.length).toEqual(0);
     expect(snapshotOne.clearinghouseEvents.length).toEqual(1);
 
+    // Clearinghouse balance should have the new loan amount deducted
+    expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE - LOAN_PRINCIPAL);
+
     const snapshotTwo = snapshots[1];
     expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
     expect(snapshotTwo.principalReceivables).toEqual(LOAN_PRINCIPAL);
@@ -315,6 +318,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotTwo.extendEvents.length).toEqual(0);
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
+
+    // Clearinghouse balance should have the new loan amount deducted
+    expect(snapshotTwo.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE - LOAN_PRINCIPAL);
   });
 
   it("multiple loans", () => {
@@ -387,7 +393,7 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.principalReceivables).toEqual(
       snapshotTwoLoanOne.principal -
       snapshotTwoLoanOne.principalPaid +
-      snapshotTwoLoanTwo.principal +
+      snapshotTwoLoanTwo.principal -
       snapshotTwoLoanTwo.principalPaid,
     );
 
@@ -458,6 +464,11 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotTen.extendEvents.length).toEqual(0);
     expect(snapshotTen.clearinghouseEvents.length).toEqual(0);
+
+    // Repayment of interest should be reflected in the clearinghouse
+    expect(snapshotTen.clearinghouse.sDaiInDaiBalance).toEqual(
+      CLEARINGHOUSE_SDAI_IN_DAI_BALANCE - LOAN_PRINCIPAL + REPAYMENT_AMOUNT,
+    );
 
     // Day after should be the same
     const snapshotEleven = snapshots[10];
@@ -561,6 +572,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotTwelve.extendEvents.length).toEqual(0);
     expect(snapshotTwelve.clearinghouseEvents.length).toEqual(0);
+
+    // Repayment of principal and interest should be reflected in the clearinghouse
+    expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE + LOAN_INTEREST);
   });
 
   it("clearinghouse balances", () => {
@@ -581,7 +595,7 @@ describe("generateSnapshots", () => {
 
     expect(snapshotOne.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE);
     expect(snapshotOne.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE);
-    expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE);
+    expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE - LOAN_PRINCIPAL);
     expect(snapshotOne.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
     expect(snapshotOne.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
     expect(snapshotOne.clearinghouse.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
@@ -1123,6 +1137,11 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.defaultedClaimEvents.length).toEqual(0);
     expect(snapshotTwo.extendEvents.length).toEqual(1);
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
+
+    // Income from extension reflected in the clearinghouse balances
+    expect(snapshotTwo.clearinghouse.sDaiInDaiBalance).toEqual(
+      CLEARINGHOUSE_SDAI_IN_DAI_BALANCE - LOAN_PRINCIPAL + newInterest,
+    );
   });
 
   it("loan repayment then extension", () => {

@@ -94,6 +94,9 @@ export type Snapshot = {
    * Quantity of collateral deposited across all Coolers
    */
   collateralDeposited: number;
+  /**
+   * Represents the state of the Clearinghouse at the time of the snapshot.
+   */
   clearinghouse: {
     daiBalance: number;
     sDaiBalance: number;
@@ -104,6 +107,9 @@ export type Snapshot = {
     collateralAddress: string;
     debtAddress: string;
   };
+  /**
+   * Represents the state of the Treasury at the time of the snapshot.
+   */
   treasury: {
     daiBalance: number;
     sDaiBalance: number;
