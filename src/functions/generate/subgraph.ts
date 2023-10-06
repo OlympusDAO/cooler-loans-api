@@ -14,7 +14,9 @@ import {
 } from "../../types/subgraph";
 
 export const getData = async (endpointUrl: string, startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
+  const FUNC = "getData";
   // Fetch events
+  console.log(`${FUNC}: Fetching events from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
   const eventData: CoolerLoanEventsQuery = await request({
     url: endpointUrl,
     document: CoolerLoanEventsDocument,
@@ -64,6 +66,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
         accumulator[dateString] = [];
       }
 
+      console.log(`${FUNC}: Adding creation event with id ${currentValue.id} on date ${currentValue.date}`);
       accumulator[dateString].push(currentValue);
       return accumulator;
     },
@@ -88,6 +91,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
     },
     {} as { [key: string]: RepayLoanEventOptional[] },
   );
+  console.log(`${FUNC}: Found ${Object.keys(repaymentEvents).length} repayment events`);
 
   /**
    * Claim Default Events
@@ -107,6 +111,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
     },
     {} as { [key: string]: ClaimDefaultedLoanEventOptional[] },
   );
+  console.log(`${FUNC}: Found ${Object.keys(claimDefaultedEvents).length} default claim events`);
 
   /**
    * Extend Events
@@ -126,6 +131,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
     },
     {} as { [key: string]: ExtendLoanEventOptional[] },
   );
+  console.log(`${FUNC}: Found ${Object.keys(extendEvents).length} extension events`);
 
   return {
     clearinghouseSnapshots: clearinghouseSnapshots,

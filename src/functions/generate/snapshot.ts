@@ -34,7 +34,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   const FUNC = "createSnapshot";
   // If there is no previous snapshot, return a new one
   if (!previousSnapshot) {
-    console.log(`${FUNC}: No previous snapshot found for ${getISO8601DateString(currentDate)}`);
+    console.log(`${FUNC}: No previous snapshot found`);
     return {
       date: currentDate,
       timestamp: currentDate.getTime(),
@@ -72,8 +72,8 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     };
   }
 
-  // Otherwise, return a new one based on the previous one
-  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(currentDate)} found. Copying.`);
+  // Otherwise, return a new one based on the previous day
+  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(previousSnapshot.date)} found. Copying.`);
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date
