@@ -1,7 +1,14 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
 import { parseNumber } from "../../helpers/numberHelper";
 import { Loan, Snapshot } from "../../types/snapshot";
-import { SubgraphData } from "../../types/subgraph";
+import {
+  ClaimDefaultedLoanEventOptional,
+  ClearinghouseSnapshotOptional,
+  ClearLoanRequestEventOptional,
+  ExtendLoanEventOptional,
+  RepayLoanEventOptional,
+  SubgraphData,
+} from "../../types/subgraph";
 
 const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
   console.log(`repayment is ${repayment}`);
@@ -34,7 +41,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   const FUNC = "createSnapshot";
   // If there is no previous snapshot, return a new one
   if (!previousSnapshot) {
-    console.log(`${FUNC}: No previous snapshot found for ${getISO8601DateString(currentDate)}`);
+    console.log(`${FUNC}: No previous snapshot found`);
     return {
       date: currentDate,
       timestamp: currentDate.getTime(),
@@ -72,8 +79,8 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     };
   }
 
-  // Otherwise, return a new one based on the previous one
-  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(currentDate)} found. Copying.`);
+  // Otherwise, return a new one based on the previous day
+  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(previousSnapshot.date)} found. Copying.`);
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date
@@ -144,6 +151,103 @@ const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number 
   return Math.floor(timestampDifference / 1000);
 };
 
+type EventsByTimestamp = Record<
+  number,
+  {
+    clearinghouseSnapshots: ClearinghouseSnapshotOptional[];
+    creationEvents: ClearLoanRequestEventOptional[];
+    repaymentEvents: RepayLoanEventOptional[];
+    defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
+    extendEvents: ExtendLoanEventOptional[];
+  }
+>;
+
+const populateEventsByTimestamp = (currentDateString: string, subgraphData: SubgraphData): EventsByTimestamp => {
+  const dateEventsByTimestamp: EventsByTimestamp = {};
+
+  const currentClearinghouseSnapshots = subgraphData.clearinghouseSnapshots[currentDateString] || [];
+  currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
+    const timestamp = parseNumber(clearinghouseSnapshot.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+      };
+    }
+    dateEventsByTimestamp[timestamp].clearinghouseSnapshots.push(clearinghouseSnapshot);
+  });
+
+  const currentCreationEvents = subgraphData.creationEvents[currentDateString] || [];
+  currentCreationEvents.forEach(creationEvent => {
+    const timestamp = parseNumber(creationEvent.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+      };
+    }
+    dateEventsByTimestamp[timestamp].creationEvents.push(creationEvent);
+  });
+
+  const currentRepaymentEvents = subgraphData.repaymentEvents[currentDateString] || [];
+  currentRepaymentEvents.forEach(repaymentEvent => {
+    const timestamp = parseNumber(repaymentEvent.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+      };
+    }
+    dateEventsByTimestamp[timestamp].repaymentEvents.push(repaymentEvent);
+  });
+
+  const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDateString] || [];
+  currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
+    const timestamp = parseNumber(defaultedClaimEvent.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+      };
+    }
+    dateEventsByTimestamp[timestamp].defaultedClaimEvents.push(defaultedClaimEvent);
+  });
+
+  const currentExtendEvents = subgraphData.extendEvents[currentDateString] || [];
+  currentExtendEvents.forEach(extendEvent => {
+    const timestamp = parseNumber(extendEvent.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+      };
+    }
+    dateEventsByTimestamp[timestamp].extendEvents.push(extendEvent);
+  });
+
+  // Sort the events by timestamp
+  Object.entries(dateEventsByTimestamp).sort((a, b) => {
+    return parseInt(a[0]) - parseInt(b[0]);
+  });
+
+  return dateEventsByTimestamp;
+};
+
 export const generateSnapshots = (
   startDate: Date,
   beforeDate: Date,
@@ -170,145 +274,183 @@ export const generateSnapshots = (
     // Populate a new Snapshot based on the previous one
     const currentSnapshot = createSnapshot(currentDateBeforeMidnight, previousSnapshot);
 
-    // Update clearinghouse data, if it exists
-    const currentClearinghouseSnapshots = subgraphData.clearinghouseSnapshots[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentClearinghouseSnapshots.length} clearinghouse snapshots`);
-    currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
-      console.log(`${FUNC}: processing clearinghouse snapshot ${clearinghouseSnapshot.id}`);
+    // Order all events by block timestamp
+    const currentDateEventsByTimestamp: EventsByTimestamp = populateEventsByTimestamp(currentDateString, subgraphData);
 
-      // If there are multiple snapshots in a day, successive ones will overwrite the previous values
-      currentSnapshot.clearinghouse.daiBalance = parseNumber(clearinghouseSnapshot.daiBalance);
-      currentSnapshot.clearinghouse.sDaiBalance = parseNumber(clearinghouseSnapshot.sDaiBalance);
-      currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.sDaiInDaiBalance);
-      currentSnapshot.clearinghouse.fundAmount = parseNumber(clearinghouseSnapshot.fundAmount);
-      currentSnapshot.clearinghouse.fundCadence = parseNumber(clearinghouseSnapshot.fundCadence);
-      currentSnapshot.clearinghouse.coolerFactoryAddress = clearinghouseSnapshot.coolerFactoryAddress;
-      currentSnapshot.clearinghouse.collateralAddress = clearinghouseSnapshot.collateralAddress;
-      currentSnapshot.clearinghouse.debtAddress = clearinghouseSnapshot.debtAddress;
+    // Iterate by timestamp, so that events are processed in order
+    for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
+      console.log(`${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp)))})}`);
 
-      currentSnapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryDaiBalance);
-      currentSnapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiBalance);
-      currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiInDaiBalance);
+      // Update clearinghouse data, if it exists
+      const currentClearinghouseSnapshots = records.clearinghouseSnapshots;
+      console.log(`${FUNC}: processing ${currentClearinghouseSnapshots.length} clearinghouse snapshots`);
+      currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
+        console.log(`${FUNC}: processing clearinghouse snapshot ${clearinghouseSnapshot.id}`);
 
-      currentSnapshot.terms.interestRate = parseNumber(clearinghouseSnapshot.interestRate);
-      currentSnapshot.terms.duration = parseNumber(clearinghouseSnapshot.duration);
-      currentSnapshot.terms.loanToCollateral = parseNumber(clearinghouseSnapshot.loanToCollateral);
+        // If there are multiple snapshots in a day, successive ones will overwrite the previous values
+        currentSnapshot.clearinghouse.daiBalance = parseNumber(clearinghouseSnapshot.daiBalance);
+        currentSnapshot.clearinghouse.sDaiBalance = parseNumber(clearinghouseSnapshot.sDaiBalance);
+        currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.sDaiInDaiBalance);
+        currentSnapshot.clearinghouse.fundAmount = parseNumber(clearinghouseSnapshot.fundAmount);
+        currentSnapshot.clearinghouse.fundCadence = parseNumber(clearinghouseSnapshot.fundCadence);
+        currentSnapshot.clearinghouse.coolerFactoryAddress = clearinghouseSnapshot.coolerFactoryAddress;
+        currentSnapshot.clearinghouse.collateralAddress = clearinghouseSnapshot.collateralAddress;
+        currentSnapshot.clearinghouse.debtAddress = clearinghouseSnapshot.debtAddress;
 
-      currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
-    });
+        currentSnapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryDaiBalance);
+        currentSnapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiBalance);
+        currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.treasurySDaiInDaiBalance);
 
-    // Create loans where there were creation events
-    const currentCreationEvents = subgraphData.creationEvents[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
-    currentCreationEvents.forEach(creationEvent => {
-      console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
+        currentSnapshot.terms.interestRate = parseNumber(clearinghouseSnapshot.interestRate);
+        currentSnapshot.terms.duration = parseNumber(clearinghouseSnapshot.duration);
+        currentSnapshot.terms.loanToCollateral = parseNumber(clearinghouseSnapshot.loanToCollateral);
 
-      // Add any new loans into running list
-      console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
-      currentSnapshot.loans[creationEvent.loan.id] = {
-        id: creationEvent.loan.id,
-        loanId: parseNumber(creationEvent.loan.loanId),
-        createdTimestamp: parseNumber(creationEvent.blockTimestamp),
-        coolerAddress: creationEvent.loan.cooler,
-        borrowerAddress: creationEvent.loan.borrower,
-        lenderAddress: creationEvent.loan.lender,
-        principal: parseNumber(creationEvent.loan.principal),
-        interest: parseNumber(creationEvent.loan.interest),
-        collateralDeposited: parseNumber(creationEvent.loan.collateral),
-        expiryTimestamp: parseNumber(creationEvent.loan.expiryTimestamp),
-        secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, parseNumber(creationEvent.loan.expiryTimestamp)),
-        status: "Active",
-        principalPaid: 0,
-        interestPaid: 0,
-        collateralIncome: 0,
-        collateralClaimedQuantity: 0,
-        collateralClaimedValue: 0,
-      };
-    });
+        currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
+      });
 
-    // Update loans where there were repayment events
-    const currentRepaymentEvents = subgraphData.repaymentEvents[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
-    currentRepaymentEvents.forEach(repaymentEvent => {
-      console.log(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
+      // Create loans where there were creation events
+      const currentCreationEvents = records.creationEvents;
+      console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
+      currentCreationEvents.forEach(creationEvent => {
+        console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
 
-      // Find the loan
-      const loan = currentSnapshot.loans[repaymentEvent.loan.id];
-      if (!loan) {
-        throw new Error(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
-      }
+        // Add any new loans into running list
+        console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
+        currentSnapshot.loans[creationEvent.loan.id] = {
+          id: creationEvent.loan.id,
+          loanId: parseNumber(creationEvent.loan.loanId),
+          createdTimestamp: parseNumber(creationEvent.blockTimestamp),
+          coolerAddress: creationEvent.loan.cooler,
+          borrowerAddress: creationEvent.loan.borrower,
+          lenderAddress: creationEvent.loan.lender,
+          principal: parseNumber(creationEvent.loan.principal),
+          interest: parseNumber(creationEvent.loan.interest),
+          collateralDeposited: parseNumber(creationEvent.loan.collateral),
+          expiryTimestamp: parseNumber(creationEvent.loan.expiryTimestamp),
+          secondsToExpiry: getSecondsToExpiry(
+            currentDateBeforeMidnight,
+            parseNumber(creationEvent.loan.expiryTimestamp),
+          ),
+          status: "Active",
+          principalPaid: 0,
+          interestPaid: 0,
+          collateralIncome: 0,
+          collateralClaimedQuantity: 0,
+          collateralClaimedValue: 0,
+          interestRate: creationEvent.loan.request.interestPercentage,
+          durationSeconds: creationEvent.loan.request.durationSeconds,
+        };
 
-      // Update the loan state
-      loan.collateralDeposited = parseNumber(repaymentEvent.collateralDeposited);
+        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.sDaiBalance = parseNumber(creationEvent.clearinghouseSDaiBalance);
+        currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(creationEvent.clearinghouseSDaiInDaiBalance);
+      });
 
-      // Calculate the interest and principal paid for this payment
-      const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
-      const interestRepayment = calculateInterestRepayment(eventAmountPaid, loan);
-      const principalRepayment = calculatePrincipalRepayment(eventAmountPaid, loan);
-      console.log(`${FUNC}: eventAmountPaid: ${eventAmountPaid}`);
-      console.log(`${FUNC}: interestRepayment: ${interestRepayment}`);
-      console.log(`${FUNC}: principalRepayment: ${principalRepayment}`);
+      // Update loans where there were repayment events
+      const currentRepaymentEvents = records.repaymentEvents;
+      console.log(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
+      currentRepaymentEvents.forEach(repaymentEvent => {
+        console.log(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
 
-      loan.interestPaid += interestRepayment;
-      loan.principalPaid += principalRepayment;
+        // Find the loan
+        const loan = currentSnapshot.loans[repaymentEvent.loan.id];
+        if (!loan) {
+          throw new Error(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
+        }
 
-      // Set the income from the repayment
-      currentSnapshot.interestIncome += interestRepayment;
-    });
+        // Update the loan state
+        loan.collateralDeposited = parseNumber(repaymentEvent.collateralDeposited);
 
-    // Update loans where there were defaulted claim events
-    const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
-    currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
-      console.log(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
+        // Calculate the interest and principal paid for this payment
+        const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
+        const interestRepayment = calculateInterestRepayment(eventAmountPaid, loan);
+        const principalRepayment = calculatePrincipalRepayment(eventAmountPaid, loan);
+        console.log(`${FUNC}: eventAmountPaid: ${eventAmountPaid}`);
+        console.log(`${FUNC}: interestRepayment: ${interestRepayment}`);
+        console.log(`${FUNC}: principalRepayment: ${principalRepayment}`);
 
-      // Find the loan
-      const loan = currentSnapshot.loans[defaultedClaimEvent.loan.id];
-      if (!loan) {
-        throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
-      }
+        loan.interestPaid += interestRepayment;
+        loan.principalPaid += principalRepayment;
 
-      const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
+        // Set the income from the repayment
+        currentSnapshot.interestIncome += interestRepayment;
 
-      // Update the loan
-      loan.status = "Reclaimed";
-      loan.collateralClaimedQuantity += parseNumber(defaultedClaimEvent.collateralQuantityClaimed);
-      loan.collateralClaimedValue += collateralValueClaimed;
-      loan.collateralDeposited = 0;
+        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.sDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiBalance);
+        currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiInDaiBalance);
+      });
 
-      // Calculate the income from the collateral claim
-      loan.collateralIncome += collateralValueClaimed;
+      // Update loans where there were defaulted claim events
+      const currentDefaultedClaimEvents = records.defaultedClaimEvents;
+      console.log(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
+      currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
+        console.log(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
 
-      // Set the income from the default claim
-      currentSnapshot.collateralIncome += collateralValueClaimed;
-    });
+        // Find the loan
+        const loan = currentSnapshot.loans[defaultedClaimEvent.loan.id];
+        if (!loan) {
+          throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
+        }
 
-    // Update loans where there were extend events
-    const currentExtendEvents = subgraphData.extendEvents[currentDateString] || [];
-    console.log(`${FUNC}: processing ${currentExtendEvents.length} extend events`);
-    currentExtendEvents.forEach(extendEvent => {
-      console.log(`${FUNC}: processing extend event ${extendEvent.id}`);
+        const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
 
-      // Find the loan
-      const loan = currentSnapshot.loans[extendEvent.loan.id];
-      if (!loan) {
-        throw new Error(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
-      }
+        // Update the loan
+        loan.status = "Reclaimed";
+        loan.collateralClaimedQuantity += parseNumber(defaultedClaimEvent.collateralQuantityClaimed);
+        loan.collateralClaimedValue += collateralValueClaimed;
+        loan.collateralDeposited = 0;
 
-      // Update the loan
-      loan.status = "Active";
-      loan.expiryTimestamp = parseNumber(extendEvent.expiryTimestamp);
+        // Calculate the income from the collateral claim
+        loan.collateralIncome += collateralValueClaimed;
 
-      // Additional interest is paid at the time a loan is extended
-      // No impact on receivables
-      // https://github.com/ohmzeus/Cooler/pull/63
-      const newInterest = parseNumber(extendEvent.periods) * (loan.interest - loan.interestPaid);
-      loan.interest += newInterest;
-      loan.interestPaid += newInterest;
+        // Set the income from the default claim
+        currentSnapshot.collateralIncome += collateralValueClaimed;
+      });
 
-      // The interest income is updated
-      currentSnapshot.interestIncome += newInterest;
-    });
+      // Update loans where there were extend events
+      const currentExtendEvents = records.extendEvents;
+      console.log(`${FUNC}: processing ${currentExtendEvents.length} extend events`);
+      currentExtendEvents.forEach(extendEvent => {
+        console.log(`${FUNC}: processing extend event ${extendEvent.id}`);
+
+        // Find the loan
+        const loan = currentSnapshot.loans[extendEvent.loan.id];
+        if (!loan) {
+          throw new Error(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
+        }
+
+        // Update the loan
+        loan.status = "Active";
+        loan.expiryTimestamp = parseNumber(extendEvent.expiryTimestamp);
+
+        // Additional interest is paid at the time a loan is extended
+        // No impact on receivables
+        // https://github.com/ohmzeus/Cooler/pull/63
+        const interestPerPeriod =
+          ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
+        console.log(
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
+            loan.principal - loan.principalPaid
+          }: ${interestPerPeriod}`,
+        );
+        const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
+        loan.interest += newInterest;
+        loan.interestPaid += newInterest;
+
+        // The interest income is updated
+        currentSnapshot.interestIncome += newInterest;
+
+        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.sDaiBalance = parseNumber(extendEvent.clearinghouseSDaiBalance);
+        currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(extendEvent.clearinghouseSDaiInDaiBalance);
+      });
+
+      // Add all events
+      currentSnapshot.creationEvents.push(...currentCreationEvents);
+      currentSnapshot.repaymentEvents.push(...currentRepaymentEvents);
+      currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
+      currentSnapshot.extendEvents.push(...currentExtendEvents);
+    }
 
     // Update secondsToExpiry and status for all loans
     const loans = currentSnapshot.loans ? Object.values(currentSnapshot.loans) : [];
@@ -340,12 +482,6 @@ export const generateSnapshots = (
         currentSnapshot.principalReceivables += loan.principal - loan.principalPaid;
       }
     });
-
-    // Add all events
-    currentSnapshot.creationEvents.push(...currentCreationEvents);
-    currentSnapshot.repaymentEvents.push(...currentRepaymentEvents);
-    currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
-    currentSnapshot.extendEvents.push(...currentExtendEvents);
 
     snapshots.push(currentSnapshot);
 

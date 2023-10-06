@@ -84,43 +84,26 @@
         },
       "CoolerLoanOptional":
         {
-          "properties":
-            {
-              "borrower": { "type": "string" },
-              "collateral": { "type": "number" },
-              "collateralToken": { "type": "string" },
-              "cooler": { "type": "string" },
-              "createdBlock": { "type": "number" },
-              "createdTimestamp": { "type": "number" },
-              "createdTransaction": { "type": "string" },
-              "debtToken": { "type": "string" },
-              "expiryTimestamp": { "type": "number" },
-              "hasCallback": { "type": "boolean" },
-              "id": { "type": "string" },
-              "interest": { "type": "number" },
-              "lender": { "type": "string" },
-              "loanId": { "type": "number" },
-              "principal": { "type": "number" },
-            },
-          "required":
+          "allOf":
             [
-              "borrower",
-              "collateral",
-              "collateralToken",
-              "cooler",
-              "createdBlock",
-              "createdTimestamp",
-              "createdTransaction",
-              "debtToken",
-              "expiryTimestamp",
-              "hasCallback",
-              "id",
-              "interest",
-              "lender",
-              "loanId",
-              "principal",
+              {
+                "$ref": '#/definitions/Omit<CoolerLoan,"request"|"creationEvents"|"defaultedClaimEvents"|"extendEvents"|"repaymentEvents">',
+              },
+              {
+                "properties":
+                  {
+                    "request":
+                      {
+                        "properties":
+                          { "durationSeconds": { "type": "number" }, "interestPercentage": { "type": "number" } },
+                        "required": ["durationSeconds", "interestPercentage"],
+                        "type": "object",
+                      },
+                  },
+                "required": ["request"],
+                "type": "object",
+              },
             ],
-          "type": "object",
         },
       "ExtendLoanEventOptional":
         {
@@ -169,11 +152,62 @@
             {
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "date": { "type": "string" },
               "id": { "type": "string" },
               "transactionHash": { "type": "string" },
             },
-          "required": ["blockNumber", "blockTimestamp", "date", "id", "transactionHash"],
+          "required":
+            [
+              "blockNumber",
+              "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
+              "date",
+              "id",
+              "transactionHash",
+            ],
+          "type": "object",
+        },
+      'Omit<CoolerLoan,"request"|"creationEvents"|"defaultedClaimEvents"|"extendEvents"|"repaymentEvents">':
+        {
+          "properties":
+            {
+              "borrower": { "type": "string" },
+              "collateral": { "type": "number" },
+              "collateralToken": { "type": "string" },
+              "cooler": { "type": "string" },
+              "createdBlock": { "type": "number" },
+              "createdTimestamp": { "type": "number" },
+              "createdTransaction": { "type": "string" },
+              "debtToken": { "type": "string" },
+              "expiryTimestamp": { "type": "number" },
+              "hasCallback": { "type": "boolean" },
+              "id": { "type": "string" },
+              "interest": { "type": "number" },
+              "lender": { "type": "string" },
+              "loanId": { "type": "number" },
+              "principal": { "type": "number" },
+            },
+          "required":
+            [
+              "borrower",
+              "collateral",
+              "collateralToken",
+              "cooler",
+              "createdBlock",
+              "createdTimestamp",
+              "createdTransaction",
+              "debtToken",
+              "expiryTimestamp",
+              "hasCallback",
+              "id",
+              "interest",
+              "lender",
+              "loanId",
+              "principal",
+            ],
           "type": "object",
         },
       'Omit<ExtendLoanEvent,"loan">':
@@ -182,6 +216,8 @@
             {
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "date": { "type": "string" },
               "expiryTimestamp": { "type": "number" },
               "id": { "type": "string" },
@@ -193,6 +229,8 @@
             [
               "blockNumber",
               "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
               "date",
               "expiryTimestamp",
               "id",
@@ -209,6 +247,8 @@
               "amountPaid": { "type": "number" },
               "blockNumber": { "type": "number" },
               "blockTimestamp": { "type": "number" },
+              "clearinghouseSDaiBalance": { "type": "number" },
+              "clearinghouseSDaiInDaiBalance": { "type": "number" },
               "collateralDeposited": { "type": "number" },
               "date": { "type": "string" },
               "id": { "type": "string" },
@@ -222,6 +262,8 @@
               "amountPaid",
               "blockNumber",
               "blockTimestamp",
+              "clearinghouseSDaiBalance",
+              "clearinghouseSDaiInDaiBalance",
               "collateralDeposited",
               "date",
               "id",
@@ -250,6 +292,7 @@
     {
       "clearinghouse":
         {
+          "description": "Represents the state of the Clearinghouse at the time of the snapshot.",
           "properties":
             {
               "collateralAddress": { "type": "string" },
@@ -300,6 +343,7 @@
                   "collateralIncome": { "type": "number" },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
+                  "durationSeconds": { "description": "The loan duration, in seconds.", "type": "number" },
                   "expiryTimestamp":
                     { "description": "Timestamp of the expected loan expiry, in seconds", "type": "number" },
                   "id":
@@ -312,7 +356,13 @@
                       "description": "The total interest charged on the loan.\n\nWhen the loan is extended, this number will be increased.",
                       "type": "number",
                     },
-                  "interestPaid": { "description": "Cumulative interest paid on the loan.", "type": "number" },
+                  "interestPaid":
+                    {
+                      "description": "Cumulative interest paid on the loan.\n\nAny outstanding interest is paid first, followed by principal.",
+                      "type": "number",
+                    },
+                  "interestRate":
+                    { "description": "The interest rate, stored as a decimal.\n\ne.g. 0.5% = 0.005", "type": "number" },
                   "lenderAddress": { "type": "string" },
                   "loanId": { "description": "Loan id unique to the cooler", "type": "number" },
                   "principal":
@@ -335,10 +385,12 @@
                   "collateralIncome",
                   "coolerAddress",
                   "createdTimestamp",
+                  "durationSeconds",
                   "expiryTimestamp",
                   "id",
                   "interest",
                   "interestPaid",
+                  "interestRate",
                   "lenderAddress",
                   "loanId",
                   "principal",
@@ -367,6 +419,7 @@
       "timestamp": { "description": "Timestamp of the snapshot, in milliseconds", "type": "number" },
       "treasury":
         {
+          "description": "Represents the state of the Treasury at the time of the snapshot.",
           "properties":
             {
               "daiBalance": { "type": "number" },

@@ -77,17 +77,28 @@ describe("writeSnapshots", () => {
     const snapshots: Snapshot[] = [
       {
         date: new Date("2020-01-01"),
+        timestamp: new Date("2020-01-01").getTime(),
         principalReceivables: 0,
         interestReceivables: 0,
         clearinghouse: {
           daiBalance: 0,
           sDaiBalance: 0,
           sDaiInDaiBalance: 0,
+          fundAmount: 0,
+          fundCadence: 0,
+          coolerFactoryAddress: "",
+          collateralAddress: "",
+          debtAddress: "",
         },
         treasury: {
           daiBalance: 0,
           sDaiBalance: 0,
           sDaiInDaiBalance: 0,
+        },
+        terms: {
+          interestRate: 0,
+          duration: 0,
+          loanToCollateral: 0,
         },
         loans: {},
         creationEvents: [],
@@ -95,20 +106,34 @@ describe("writeSnapshots", () => {
         repaymentEvents: [],
         extendEvents: [],
         clearinghouseEvents: [],
+        interestIncome: 0,
+        collateralIncome: 0,
+        collateralDeposited: 0,
       },
       {
         date: new Date("2020-01-02"),
+        timestamp: new Date("2020-01-02").getTime(),
         principalReceivables: 0,
         interestReceivables: 0,
         clearinghouse: {
           daiBalance: 0,
           sDaiBalance: 0,
           sDaiInDaiBalance: 0,
+          fundAmount: 0,
+          fundCadence: 0,
+          coolerFactoryAddress: "",
+          collateralAddress: "",
+          debtAddress: "",
         },
         treasury: {
           daiBalance: 0,
           sDaiBalance: 0,
           sDaiInDaiBalance: 0,
+        },
+        terms: {
+          interestRate: 0,
+          duration: 0,
+          loanToCollateral: 0,
         },
         loans: {},
         creationEvents: [],
@@ -116,6 +141,9 @@ describe("writeSnapshots", () => {
         repaymentEvents: [],
         extendEvents: [],
         clearinghouseEvents: [],
+        interestIncome: 0,
+        collateralIncome: 0,
+        collateralDeposited: 0,
       },
     ];
 

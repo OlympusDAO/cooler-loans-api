@@ -14,7 +14,9 @@ import {
 } from "../../types/subgraph";
 
 export const getData = async (endpointUrl: string, startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
+  const FUNC = "getData";
   // Fetch events
+  console.log(`${FUNC}: Fetching events from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
   const eventData: CoolerLoanEventsQuery = await request({
     url: endpointUrl,
     document: CoolerLoanEventsDocument,
