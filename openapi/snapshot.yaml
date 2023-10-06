@@ -84,43 +84,26 @@
         },
       "CoolerLoanOptional":
         {
-          "properties":
-            {
-              "borrower": { "type": "string" },
-              "collateral": { "type": "number" },
-              "collateralToken": { "type": "string" },
-              "cooler": { "type": "string" },
-              "createdBlock": { "type": "number" },
-              "createdTimestamp": { "type": "number" },
-              "createdTransaction": { "type": "string" },
-              "debtToken": { "type": "string" },
-              "expiryTimestamp": { "type": "number" },
-              "hasCallback": { "type": "boolean" },
-              "id": { "type": "string" },
-              "interest": { "type": "number" },
-              "lender": { "type": "string" },
-              "loanId": { "type": "number" },
-              "principal": { "type": "number" },
-            },
-          "required":
+          "allOf":
             [
-              "borrower",
-              "collateral",
-              "collateralToken",
-              "cooler",
-              "createdBlock",
-              "createdTimestamp",
-              "createdTransaction",
-              "debtToken",
-              "expiryTimestamp",
-              "hasCallback",
-              "id",
-              "interest",
-              "lender",
-              "loanId",
-              "principal",
+              {
+                "$ref": '#/definitions/Omit<CoolerLoan,"request"|"creationEvents"|"defaultedClaimEvents"|"extendEvents"|"repaymentEvents">',
+              },
+              {
+                "properties":
+                  {
+                    "request":
+                      {
+                        "properties":
+                          { "durationSeconds": { "type": "number" }, "interestPercentage": { "type": "number" } },
+                        "required": ["durationSeconds", "interestPercentage"],
+                        "type": "object",
+                      },
+                  },
+                "required": ["request"],
+                "type": "object",
+              },
             ],
-          "type": "object",
         },
       "ExtendLoanEventOptional":
         {
@@ -184,6 +167,46 @@
               "date",
               "id",
               "transactionHash",
+            ],
+          "type": "object",
+        },
+      'Omit<CoolerLoan,"request"|"creationEvents"|"defaultedClaimEvents"|"extendEvents"|"repaymentEvents">':
+        {
+          "properties":
+            {
+              "borrower": { "type": "string" },
+              "collateral": { "type": "number" },
+              "collateralToken": { "type": "string" },
+              "cooler": { "type": "string" },
+              "createdBlock": { "type": "number" },
+              "createdTimestamp": { "type": "number" },
+              "createdTransaction": { "type": "string" },
+              "debtToken": { "type": "string" },
+              "expiryTimestamp": { "type": "number" },
+              "hasCallback": { "type": "boolean" },
+              "id": { "type": "string" },
+              "interest": { "type": "number" },
+              "lender": { "type": "string" },
+              "loanId": { "type": "number" },
+              "principal": { "type": "number" },
+            },
+          "required":
+            [
+              "borrower",
+              "collateral",
+              "collateralToken",
+              "cooler",
+              "createdBlock",
+              "createdTimestamp",
+              "createdTransaction",
+              "debtToken",
+              "expiryTimestamp",
+              "hasCallback",
+              "id",
+              "interest",
+              "lender",
+              "loanId",
+              "principal",
             ],
           "type": "object",
         },

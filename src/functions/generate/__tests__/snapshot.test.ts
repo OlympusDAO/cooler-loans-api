@@ -425,7 +425,12 @@ describe("generateSnapshots", () => {
     expect(snapshotTwoLoanTwo.interestPaid).toEqual(0);
 
     // eslint-disable-next-line prettier/prettier
-    expect(snapshotTwo.principalReceivables).toEqual(snapshotTwoLoanOne.principal - snapshotTwoLoanOne.principalPaid + snapshotTwoLoanTwo.principal - snapshotTwoLoanTwo.principalPaid);
+    expect(snapshotTwo.principalReceivables).toEqual(
+      snapshotTwoLoanOne.principal -
+        snapshotTwoLoanOne.principalPaid +
+        snapshotTwoLoanTwo.principal -
+        snapshotTwoLoanTwo.principalPaid,
+    );
 
     // Skip to day 10 after payment
     const snapshotTen = snapshots[9];
@@ -442,7 +447,12 @@ describe("generateSnapshots", () => {
     expect(snapshotTenLoanTwo.id).toEqual("0x3-1");
 
     // eslint-disable-next-line prettier/prettier
-    expect(snapshotTen.principalReceivables).toEqual(snapshotTenLoanOne.principal - snapshotTenLoanOne.principalPaid + snapshotTenLoanTwo.principal + snapshotTenLoanTwo.principalPaid);
+    expect(snapshotTen.principalReceivables).toEqual(
+      snapshotTenLoanOne.principal -
+        snapshotTenLoanOne.principalPaid +
+        snapshotTenLoanTwo.principal +
+        snapshotTenLoanTwo.principalPaid,
+    );
   });
 
   it("loan repayment < interest due", () => {
