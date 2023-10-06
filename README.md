@@ -39,6 +39,10 @@ This repository deploys two API endpoints:
 
 If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the snapshot structure), simply delete the `snapshots` collection in the GCP project's Firestore section.
 
+This can alternatively be achieved using the `firebase` CLI:
+
+`firebase firestore:delete --recursive "/snapshots" -P <GCP PROJECT>`
+
 ### OpenAPI
 
 REST API clients can utilise the `openapi/openapi.yml` file to generate typings. The schema, contained in `openapi/snapshot.yaml` is regenerated with the `yarn codegen` command.
