@@ -199,6 +199,7 @@ export enum ClaimDefaultedLoanEvent_OrderBy {
 export type ClearLoanRequestEvent = {
   blockNumber: Scalars["BigInt"]["output"];
   blockTimestamp: Scalars["BigInt"]["output"];
+  clearinghouseDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiInDaiBalance: Scalars["BigDecimal"]["output"];
   date: Scalars["String"]["output"];
@@ -206,6 +207,9 @@ export type ClearLoanRequestEvent = {
   loan: CoolerLoan;
   request: CoolerLoanRequest;
   transactionHash: Scalars["Bytes"]["output"];
+  treasuryDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiInDaiBalance: Scalars["BigDecimal"]["output"];
 };
 
 export type ClearLoanRequestEvent_Filter = {
@@ -228,6 +232,14 @@ export type ClearLoanRequestEvent_Filter = {
   blockTimestamp_lte?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  clearinghouseDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  clearinghouseDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
   clearinghouseSDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
@@ -337,11 +349,36 @@ export type ClearLoanRequestEvent_Filter = {
   transactionHash_not?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  treasuryDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasuryDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
 };
 
 export enum ClearLoanRequestEvent_OrderBy {
   BlockNumber = "blockNumber",
   BlockTimestamp = "blockTimestamp",
+  ClearinghouseDaiBalance = "clearinghouseDaiBalance",
   ClearinghouseSDaiBalance = "clearinghouseSDaiBalance",
   ClearinghouseSDaiInDaiBalance = "clearinghouseSDaiInDaiBalance",
   Date = "date",
@@ -378,6 +415,9 @@ export enum ClearLoanRequestEvent_OrderBy {
   RequestLoanToCollateralRatio = "request__loanToCollateralRatio",
   RequestRequestId = "request__requestId",
   TransactionHash = "transactionHash",
+  TreasuryDaiBalance = "treasuryDaiBalance",
+  TreasurySDaiBalance = "treasurySDaiBalance",
+  TreasurySDaiInDaiBalance = "treasurySDaiInDaiBalance",
 }
 
 export type ClearinghouseSnapshot = {
@@ -1312,6 +1352,7 @@ export enum DefundEvent_OrderBy {
 export type ExtendLoanEvent = {
   blockNumber: Scalars["BigInt"]["output"];
   blockTimestamp: Scalars["BigInt"]["output"];
+  clearinghouseDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiInDaiBalance: Scalars["BigDecimal"]["output"];
   date: Scalars["String"]["output"];
@@ -1321,6 +1362,9 @@ export type ExtendLoanEvent = {
   loan: CoolerLoan;
   periods: Scalars["Int"]["output"];
   transactionHash: Scalars["Bytes"]["output"];
+  treasuryDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiInDaiBalance: Scalars["BigDecimal"]["output"];
 };
 
 export type ExtendLoanEvent_Filter = {
@@ -1343,6 +1387,14 @@ export type ExtendLoanEvent_Filter = {
   blockTimestamp_lte?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  clearinghouseDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  clearinghouseDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
   clearinghouseSDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
@@ -1455,11 +1507,36 @@ export type ExtendLoanEvent_Filter = {
   transactionHash_not?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  treasuryDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasuryDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
 };
 
 export enum ExtendLoanEvent_OrderBy {
   BlockNumber = "blockNumber",
   BlockTimestamp = "blockTimestamp",
+  ClearinghouseDaiBalance = "clearinghouseDaiBalance",
   ClearinghouseSDaiBalance = "clearinghouseSDaiBalance",
   ClearinghouseSDaiInDaiBalance = "clearinghouseSDaiInDaiBalance",
   Date = "date",
@@ -1484,6 +1561,9 @@ export enum ExtendLoanEvent_OrderBy {
   LoanPrincipal = "loan__principal",
   Periods = "periods",
   TransactionHash = "transactionHash",
+  TreasuryDaiBalance = "treasuryDaiBalance",
+  TreasurySDaiBalance = "treasurySDaiBalance",
+  TreasurySDaiInDaiBalance = "treasurySDaiInDaiBalance",
 }
 
 /** Defines the order direction, either ascending or descending */
@@ -1860,6 +1940,7 @@ export type RepayLoanEvent = {
   amountPaid: Scalars["BigDecimal"]["output"];
   blockNumber: Scalars["BigInt"]["output"];
   blockTimestamp: Scalars["BigInt"]["output"];
+  clearinghouseDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiBalance: Scalars["BigDecimal"]["output"];
   clearinghouseSDaiInDaiBalance: Scalars["BigDecimal"]["output"];
   collateralDeposited: Scalars["BigDecimal"]["output"];
@@ -1870,6 +1951,9 @@ export type RepayLoanEvent = {
   principalPayable: Scalars["BigDecimal"]["output"];
   secondsToExpiry: Scalars["BigInt"]["output"];
   transactionHash: Scalars["Bytes"]["output"];
+  treasuryDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiBalance: Scalars["BigDecimal"]["output"];
+  treasurySDaiInDaiBalance: Scalars["BigDecimal"]["output"];
 };
 
 export type RepayLoanEvent_Filter = {
@@ -1900,6 +1984,14 @@ export type RepayLoanEvent_Filter = {
   blockTimestamp_lte?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not?: InputMaybe<Scalars["BigInt"]["input"]>;
   blockTimestamp_not_in?: InputMaybe<Array<Scalars["BigInt"]["input"]>>;
+  clearinghouseDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  clearinghouseDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  clearinghouseDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
   clearinghouseSDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
   clearinghouseSDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
@@ -2020,12 +2112,37 @@ export type RepayLoanEvent_Filter = {
   transactionHash_not?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_contains?: InputMaybe<Scalars["Bytes"]["input"]>;
   transactionHash_not_in?: InputMaybe<Array<Scalars["Bytes"]["input"]>>;
+  treasuryDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasuryDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasuryDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_gte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
+  treasurySDaiInDaiBalance_lt?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_lte?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not?: InputMaybe<Scalars["BigDecimal"]["input"]>;
+  treasurySDaiInDaiBalance_not_in?: InputMaybe<Array<Scalars["BigDecimal"]["input"]>>;
 };
 
 export enum RepayLoanEvent_OrderBy {
   AmountPaid = "amountPaid",
   BlockNumber = "blockNumber",
   BlockTimestamp = "blockTimestamp",
+  ClearinghouseDaiBalance = "clearinghouseDaiBalance",
   ClearinghouseSDaiBalance = "clearinghouseSDaiBalance",
   ClearinghouseSDaiInDaiBalance = "clearinghouseSDaiInDaiBalance",
   CollateralDeposited = "collateralDeposited",
@@ -2051,6 +2168,9 @@ export enum RepayLoanEvent_OrderBy {
   PrincipalPayable = "principalPayable",
   SecondsToExpiry = "secondsToExpiry",
   TransactionHash = "transactionHash",
+  TreasuryDaiBalance = "treasuryDaiBalance",
+  TreasurySDaiBalance = "treasurySDaiBalance",
+  TreasurySDaiInDaiBalance = "treasurySDaiInDaiBalance",
 }
 
 export type RequestLoanEvent = {
@@ -2568,8 +2688,12 @@ export type CoolerLoanEventsQuery = {
     date: string;
     id: string;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: {
       borrower: string;
       collateral: number;
@@ -2632,8 +2756,12 @@ export type CoolerLoanEventsQuery = {
     interestDue: number;
     periods: number;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: { id: string };
   }>;
   rebalanceEvents: Array<{
@@ -2681,8 +2809,12 @@ export type CoolerLoanEventsQuery = {
     principalPayable: number;
     secondsToExpiry: number;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: { id: string };
   }>;
 };
@@ -2843,8 +2975,12 @@ export const CoolerLoanEventsDocument = {
                     ],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },
@@ -2980,8 +3116,12 @@ export const CoolerLoanEventsDocument = {
                     selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },
@@ -3119,8 +3259,12 @@ export const CoolerLoanEventsDocument = {
                     selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },

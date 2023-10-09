@@ -48,8 +48,12 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
         durationSeconds
       }
     }
+    clearinghouseDaiBalance
     clearinghouseSDaiBalance
     clearinghouseSDaiInDaiBalance
+    treasuryDaiBalance
+    treasurySDaiBalance
+    treasurySDaiInDaiBalance
   }
   defundEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -105,8 +109,12 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     loan {
       id
     }
+    clearinghouseDaiBalance
     clearinghouseSDaiBalance
     clearinghouseSDaiInDaiBalance
+    treasuryDaiBalance
+    treasurySDaiBalance
+    treasurySDaiInDaiBalance
   }
   rebalanceEvents(
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
@@ -164,7 +172,11 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     loan {
       id
     }
+    clearinghouseDaiBalance
     clearinghouseSDaiBalance
     clearinghouseSDaiInDaiBalance
+    treasuryDaiBalance
+    treasurySDaiBalance
+    treasurySDaiInDaiBalance
   }
 }

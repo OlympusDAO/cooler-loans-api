@@ -279,7 +279,9 @@ export const generateSnapshots = (
 
     // Iterate by timestamp, so that events are processed in order
     for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
-      console.log(`${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp)))})}`);
+      console.log(
+        `${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp) * 1000))}`,
+      );
 
       // Update clearinghouse data, if it exists
       const currentClearinghouseSnapshots = records.clearinghouseSnapshots;
@@ -341,9 +343,13 @@ export const generateSnapshots = (
           durationSeconds: creationEvent.loan.request.durationSeconds,
         };
 
-        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.daiBalance = parseNumber(creationEvent.clearinghouseDaiBalance);
         currentSnapshot.clearinghouse.sDaiBalance = parseNumber(creationEvent.clearinghouseSDaiBalance);
         currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(creationEvent.clearinghouseSDaiInDaiBalance);
+        currentSnapshot.treasury.daiBalance = parseNumber(creationEvent.treasuryDaiBalance);
+        currentSnapshot.treasury.sDaiBalance = parseNumber(creationEvent.treasurySDaiBalance);
+        currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(creationEvent.treasurySDaiInDaiBalance);
       });
 
       // Update loans where there were repayment events
@@ -375,9 +381,13 @@ export const generateSnapshots = (
         // Set the income from the repayment
         currentSnapshot.interestIncome += interestRepayment;
 
-        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.daiBalance = parseNumber(repaymentEvent.clearinghouseDaiBalance);
         currentSnapshot.clearinghouse.sDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiBalance);
         currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(repaymentEvent.clearinghouseSDaiInDaiBalance);
+        currentSnapshot.treasury.daiBalance = parseNumber(repaymentEvent.treasuryDaiBalance);
+        currentSnapshot.treasury.sDaiBalance = parseNumber(repaymentEvent.treasurySDaiBalance);
+        currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(repaymentEvent.treasurySDaiInDaiBalance);
       });
 
       // Update loans where there were defaulted claim events
@@ -429,8 +439,7 @@ export const generateSnapshots = (
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
         console.log(
-          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
-            loan.principal - loan.principalPaid
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${loan.principal - loan.principalPaid
           }: ${interestPerPeriod}`,
         );
         const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
@@ -440,9 +449,13 @@ export const generateSnapshots = (
         // The interest income is updated
         currentSnapshot.interestIncome += newInterest;
 
-        // Adjust the clearinghouse balance to reflect the value at the time of the event
+        // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
+        currentSnapshot.clearinghouse.daiBalance = parseNumber(extendEvent.clearinghouseDaiBalance);
         currentSnapshot.clearinghouse.sDaiBalance = parseNumber(extendEvent.clearinghouseSDaiBalance);
         currentSnapshot.clearinghouse.sDaiInDaiBalance = parseNumber(extendEvent.clearinghouseSDaiInDaiBalance);
+        currentSnapshot.treasury.daiBalance = parseNumber(extendEvent.treasuryDaiBalance);
+        currentSnapshot.treasury.sDaiBalance = parseNumber(extendEvent.treasurySDaiBalance);
+        currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(extendEvent.treasurySDaiInDaiBalance);
       });
 
       // Add all events
