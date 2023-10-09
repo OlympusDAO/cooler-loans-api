@@ -459,9 +459,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTwo.principalReceivables).toEqual(
       snapshotTwoLoanOne.principal -
-      snapshotTwoLoanOne.principalPaid +
-      snapshotTwoLoanTwo.principal -
-      snapshotTwoLoanTwo.principalPaid,
+        snapshotTwoLoanOne.principalPaid +
+        snapshotTwoLoanTwo.principal -
+        snapshotTwoLoanTwo.principalPaid,
     );
 
     // Skip to day 10 after payment
@@ -481,9 +481,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTen.principalReceivables).toEqual(
       snapshotTenLoanOne.principal -
-      snapshotTenLoanOne.principalPaid +
-      snapshotTenLoanTwo.principal +
-      snapshotTenLoanTwo.principalPaid,
+        snapshotTenLoanOne.principalPaid +
+        snapshotTenLoanTwo.principal +
+        snapshotTenLoanTwo.principalPaid,
     );
   });
 

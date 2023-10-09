@@ -2688,8 +2688,12 @@ export type CoolerLoanEventsQuery = {
     date: string;
     id: string;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: {
       borrower: string;
       collateral: number;
@@ -2752,8 +2756,12 @@ export type CoolerLoanEventsQuery = {
     interestDue: number;
     periods: number;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: { id: string };
   }>;
   rebalanceEvents: Array<{
@@ -2801,8 +2809,12 @@ export type CoolerLoanEventsQuery = {
     principalPayable: number;
     secondsToExpiry: number;
     transactionHash: string;
+    clearinghouseDaiBalance: number;
     clearinghouseSDaiBalance: number;
     clearinghouseSDaiInDaiBalance: number;
+    treasuryDaiBalance: number;
+    treasurySDaiBalance: number;
+    treasurySDaiInDaiBalance: number;
     loan: { id: string };
   }>;
 };
@@ -2963,8 +2975,12 @@ export const CoolerLoanEventsDocument = {
                     ],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },
@@ -3100,8 +3116,12 @@ export const CoolerLoanEventsDocument = {
                     selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },
@@ -3239,8 +3259,12 @@ export const CoolerLoanEventsDocument = {
                     selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "clearinghouseDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiBalance" } },
                 { kind: "Field", name: { kind: "Name", value: "clearinghouseSDaiInDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasuryDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiBalance" } },
+                { kind: "Field", name: { kind: "Name", value: "treasurySDaiInDaiBalance" } },
               ],
             },
           },

@@ -437,7 +437,8 @@ export const generateSnapshots = (
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
         console.log(
-          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${loan.principal - loan.principalPaid
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
+            loan.principal - loan.principalPaid
           }: ${interestPerPeriod}`,
         );
         const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
