@@ -7,12 +7,20 @@ const LOAN_PRINCIPAL = 99000;
 const LOAN_INTEREST = 1000;
 const LOAN_CREATION_TIMESTAMP = 1690876800;
 const LOAN_INITIAL_COLLATERAL = 30;
+const CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION = 100.1;
 const CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION = 499900.0;
 const CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION = 499800.0;
+const TREASURY_DAI_BALANCE_AFTER_CREATION = 21.1;
+const TREASURY_SDAI_BALANCE_AFTER_CREATION = 21.2;
+const TREASURY_SDAI_IN_DAI_BALANCE_AFTER_CREATION = 21.3;
 
 const REPAYMENT_AMOUNT = 900;
+const CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT = 20.0;
 const CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT = 499800.0;
 const CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT = 499900.0;
+const TREASURY_DAI_BALANCE_AFTER_REPAYMENT = 22.1;
+const TREASURY_SDAI_BALANCE_AFTER_REPAYMENT = 22.2;
+const TREASURY_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT = 22.3;
 
 const COLLATERAL_CLAIM_QUANTITY = 29;
 const COLLATERAL_PRICE = 1000;
@@ -139,8 +147,12 @@ const getSampleData = (): SubgraphData => {
           blockNumber: 12223,
           transactionHash: "0x0000001",
           loan: getLoanData(),
+          clearinghouseDaiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION,
           clearinghouseSDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION,
           clearinghouseSDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION,
+          treasuryDaiBalance: TREASURY_DAI_BALANCE_AFTER_CREATION,
+          treasurySDaiBalance: TREASURY_SDAI_BALANCE_AFTER_CREATION,
+          treasurySDaiInDaiBalance: TREASURY_SDAI_IN_DAI_BALANCE_AFTER_CREATION,
         },
       ],
     },
@@ -158,8 +170,12 @@ const getSampleData = (): SubgraphData => {
           amountPaid: REPAYMENT_AMOUNT,
           collateralDeposited: 29,
           loan: getLoanData(),
+          clearinghouseDaiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT,
           clearinghouseSDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT,
           clearinghouseSDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
+          treasuryDaiBalance: TREASURY_DAI_BALANCE_AFTER_REPAYMENT,
+          treasurySDaiBalance: TREASURY_SDAI_BALANCE_AFTER_REPAYMENT,
+          treasurySDaiInDaiBalance: TREASURY_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
         },
       ],
     },
@@ -310,9 +326,13 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.extendEvents.length).toEqual(0);
     expect(snapshotOne.clearinghouseEvents.length).toEqual(1);
 
-    // Clearinghouse balance should have the new balance from the creation event
+    // Clearinghouse and treasury balances should have the new balance from the creation event
+    expect(snapshotOne.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION);
     expect(snapshotOne.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION);
     expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
 
     const snapshotTwo = snapshots[1];
     expect(snapshotTwo.date.toISOString()).toEqual("2023-08-02T23:59:59.999Z");
@@ -344,9 +364,13 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.extendEvents.length).toEqual(0);
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the creation event
+    // Clearinghouse and treasury balances should have the new balance from the creation event
+    expect(snapshotTwo.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION);
     expect(snapshotTwo.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION);
     expect(snapshotTwo.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotTwo.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotTwo.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE_AFTER_CREATION);
+    expect(snapshotTwo.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
   });
 
   it("multiple loans", () => {
@@ -358,8 +382,12 @@ describe("generateSnapshots", () => {
     // Add a second loan
     const loanTwoPrincipal = 10000;
     const loanTwoInterest = 500;
+    const loanTwoClearinghouseDaiBalance = 99.9;
     const loanTwoClearinghouseSDaiBalance = 100.5;
     const loanTwoClearinghouseSDaiInDaiBalance = 100.6;
+    const loanTwoTreasuryDaiBalance = 77.7;
+    const loanTwoTreasurySDaiBalance = 77.8;
+    const loanTwoTreasurySDaiInDaiBalance = 77.9;
     subgraphData.creationEvents["2023-08-02"] = [
       {
         id: "0x3-1",
@@ -390,8 +418,12 @@ describe("generateSnapshots", () => {
             durationSeconds: CLEARINGHOUSE_DURATION_SECONDS,
           },
         },
+        clearinghouseDaiBalance: loanTwoClearinghouseDaiBalance,
         clearinghouseSDaiBalance: loanTwoClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: loanTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: loanTwoTreasuryDaiBalance,
+        treasurySDaiBalance: loanTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: loanTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -427,9 +459,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTwo.principalReceivables).toEqual(
       snapshotTwoLoanOne.principal -
-        snapshotTwoLoanOne.principalPaid +
-        snapshotTwoLoanTwo.principal -
-        snapshotTwoLoanTwo.principalPaid,
+      snapshotTwoLoanOne.principalPaid +
+      snapshotTwoLoanTwo.principal -
+      snapshotTwoLoanTwo.principalPaid,
     );
 
     // Skip to day 10 after payment
@@ -449,9 +481,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTen.principalReceivables).toEqual(
       snapshotTenLoanOne.principal -
-        snapshotTenLoanOne.principalPaid +
-        snapshotTenLoanTwo.principal +
-        snapshotTenLoanTwo.principalPaid,
+      snapshotTenLoanOne.principalPaid +
+      snapshotTenLoanTwo.principal +
+      snapshotTenLoanTwo.principalPaid,
     );
   });
 
@@ -501,9 +533,13 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.extendEvents.length).toEqual(0);
     expect(snapshotTen.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the repayment event
+    // Clearinghouse and treasury balances should have the new balance from the repayment event
+    expect(snapshotTen.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT);
     expect(snapshotTen.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT);
     expect(snapshotTen.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotTen.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotTen.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotTen.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT);
 
     // Day after should be the same
     const snapshotEleven = snapshots[10];
@@ -542,9 +578,13 @@ describe("generateSnapshots", () => {
     expect(snapshotEleven.extendEvents.length).toEqual(0);
     expect(snapshotEleven.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the repayment event
+    // Clearinghouse and treasury balances should have the new balance from the repayment event
+    expect(snapshotEleven.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT);
     expect(snapshotEleven.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT);
     expect(snapshotEleven.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotEleven.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotEleven.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE_AFTER_REPAYMENT);
+    expect(snapshotEleven.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT);
   });
 
   it("loan full repayment", () => {
@@ -552,8 +592,13 @@ describe("generateSnapshots", () => {
     const beforeDate = new Date("2023-08-13"); // Includes the remaining repayment, but not expiry
     const previousDateRecords: Snapshot | null = null;
     const repaymentAmountTwo = LOAN_PRINCIPAL + LOAN_INTEREST - REPAYMENT_AMOUNT;
+
+    const clearinghouseDaiBalance = 21.0;
     const clearinghouseSDaiBalance = 22.0;
     const clearinghouseSDaiInDaiBalance = 23.0;
+    const treasuryDaiBalance = 24.0;
+    const treasurySDaiBalance = 25.0;
+    const treasurySDaiInDaiBalance = 26.0;
 
     const subgraphData = getSampleData();
     subgraphData.repaymentEvents["2023-08-12"] = [
@@ -569,8 +614,12 @@ describe("generateSnapshots", () => {
         amountPaid: repaymentAmountTwo,
         collateralDeposited: 0,
         loan: getLoanData(),
+        clearinghouseDaiBalance: clearinghouseDaiBalance,
         clearinghouseSDaiBalance: clearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: clearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: treasuryDaiBalance,
+        treasurySDaiBalance: treasurySDaiBalance,
+        treasurySDaiInDaiBalance: treasurySDaiInDaiBalance,
       },
     ];
 
@@ -617,8 +666,12 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.clearinghouseEvents.length).toEqual(0);
 
     // Repayment of principal and interest should be reflected in the clearinghouse
+    expect(snapshotTwelve.clearinghouse.daiBalance).toEqual(clearinghouseDaiBalance);
     expect(snapshotTwelve.clearinghouse.sDaiBalance).toEqual(clearinghouseSDaiBalance);
     expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(clearinghouseSDaiInDaiBalance);
+    expect(snapshotTwelve.treasury.daiBalance).toEqual(treasuryDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiBalance).toEqual(treasurySDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiInDaiBalance).toEqual(treasurySDaiInDaiBalance);
   });
 
   it("clearinghouse balances", () => {
@@ -637,21 +690,19 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.principalReceivables).toEqual(LOAN_PRINCIPAL);
     expect(snapshotOne.interestReceivables).toEqual(LOAN_INTEREST);
 
-    expect(snapshotOne.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE);
-
-    // Clearinghouse balance should have the new balance from the creation event
+    // Clearinghouse and treasury balances should have the new balance from the creation event
+    expect(snapshotOne.clearinghouse.daiBalance).toEqual(CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION);
     expect(snapshotOne.clearinghouse.sDaiBalance).toEqual(CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION);
     expect(snapshotOne.clearinghouse.sDaiInDaiBalance).toEqual(CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE_AFTER_CREATION);
+    expect(snapshotOne.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE_AFTER_CREATION);
 
     expect(snapshotOne.clearinghouse.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
     expect(snapshotOne.clearinghouse.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
     expect(snapshotOne.clearinghouse.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
     expect(snapshotOne.clearinghouse.collateralAddress).toEqual(CLEARINGHOUSE_COLLATERAL_ADDRESS);
     expect(snapshotOne.clearinghouse.debtAddress).toEqual(CLEARINGHOUSE_DEBT_ADDRESS);
-
-    expect(snapshotOne.treasury.daiBalance).toEqual(TREASURY_DAI_BALANCE);
-    expect(snapshotOne.treasury.sDaiBalance).toEqual(TREASURY_SDAI_BALANCE);
-    expect(snapshotOne.treasury.sDaiInDaiBalance).toEqual(TREASURY_SDAI_IN_DAI_BALANCE);
 
     expect(snapshotOne.terms.duration).toEqual(CLEARINGHOUSE_DURATION_SECONDS);
     expect(snapshotOne.terms.interestRate).toEqual(CLEARINGHOUSE_INTEREST_RATE);
@@ -1069,8 +1120,13 @@ describe("generateSnapshots", () => {
     const loanTwoPrincipal = 10000;
     const loanTwoInterest = 500;
     const loanTwoCollateral = 10;
+    const loanTwoClearinghouseDaiBalance = 999.9;
     const loanTwoClearinghouseSDaiBalance = 1000;
     const loanTwoClearinghouseSDaiInDaiBalance = 1000.1;
+    const loanTwoTreasuryDaiBalance = 888.1;
+    const loanTwoTreasurySDaiBalance = 888.2;
+    const loanTwoTreasurySDaiInDaiBalance = 888.3;
+
     const loanTwo = {
       id: "0x3-1",
       createdBlock: 12223,
@@ -1102,8 +1158,12 @@ describe("generateSnapshots", () => {
         blockNumber: 12223,
         transactionHash: "0x0000001",
         loan: loanTwo,
+        clearinghouseDaiBalance: loanTwoClearinghouseDaiBalance,
         clearinghouseSDaiBalance: loanTwoClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: loanTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: loanTwoTreasuryDaiBalance,
+        treasurySDaiBalance: loanTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: loanTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1144,8 +1204,12 @@ describe("generateSnapshots", () => {
     const newPeriods = 2;
     const newInterest = newPeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const newExpiryTimestamp = 99999999999;
+    const newClearinghouseDaiBalance = 200;
     const newClearinghouseSDaiBalance = 200.1;
     const newClearinghouseSDaiInDaiBalance = 200.2;
+    const newTreasuryDaiBalance = 220.1;
+    const newTreasurySDaiBalance = 220.2;
+    const newTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-02"] = [
       {
         id: "0x3-0-1233456",
@@ -1159,8 +1223,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
+        clearinghouseDaiBalance: newClearinghouseDaiBalance,
         clearinghouseSDaiBalance: newClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: newClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: newTreasuryDaiBalance,
+        treasurySDaiBalance: newTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: newTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1203,9 +1271,13 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.extendEvents.length).toEqual(1);
     expect(snapshotTwo.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the extension event
+    // Clearinghouse and treasury balances should have the new balance from the extension event
+    expect(snapshotTwo.clearinghouse.daiBalance).toEqual(newClearinghouseDaiBalance);
     expect(snapshotTwo.clearinghouse.sDaiBalance).toEqual(newClearinghouseSDaiBalance);
     expect(snapshotTwo.clearinghouse.sDaiInDaiBalance).toEqual(newClearinghouseSDaiInDaiBalance);
+    expect(snapshotTwo.treasury.daiBalance).toEqual(newTreasuryDaiBalance);
+    expect(snapshotTwo.treasury.sDaiBalance).toEqual(newTreasurySDaiBalance);
+    expect(snapshotTwo.treasury.sDaiInDaiBalance).toEqual(newTreasurySDaiInDaiBalance);
   });
 
   it("loan repayment then extension", () => {
@@ -1220,8 +1292,12 @@ describe("generateSnapshots", () => {
     const newPeriods = 2;
     const newInterest = newPeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const newExpiryTimestamp = 99999999999;
+    const newClearinghouseDaiBalance = 200;
     const newClearinghouseSDaiBalance = 200.1;
     const newClearinghouseSDaiInDaiBalance = 200.2;
+    const newTreasuryDaiBalance = 220.1;
+    const newTreasurySDaiBalance = 220.2;
+    const newTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1235,8 +1311,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
+        clearinghouseDaiBalance: newClearinghouseDaiBalance,
         clearinghouseSDaiBalance: newClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: newClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: newTreasuryDaiBalance,
+        treasurySDaiBalance: newTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: newTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1288,8 +1368,12 @@ describe("generateSnapshots", () => {
     const extensionOnePeriods = 2;
     const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1699999000;
-    const extensionClearinghouseSDaiBalance = 200.1;
-    const extensionClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneClearinghouseDaiBalance = 200;
+    const extensionOneClearinghouseSDaiBalance = 200.1;
+    const extensionOneClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneTreasuryDaiBalance = 220.1;
+    const extensionOneTreasurySDaiBalance = 220.2;
+    const extensionOneTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1303,8 +1387,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
-        clearinghouseSDaiBalance: extensionClearinghouseSDaiBalance,
-        clearinghouseSDaiInDaiBalance: extensionClearinghouseSDaiInDaiBalance,
+        clearinghouseDaiBalance: extensionOneClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: extensionOneClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: extensionOneClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: extensionOneTreasuryDaiBalance,
+        treasurySDaiBalance: extensionOneTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: extensionOneTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1314,8 +1402,12 @@ describe("generateSnapshots", () => {
     const repaymentTwoInterestDueAfter = repaymentOneInterestDueAfter - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalPaid = repaymentTwoAmount - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalDueAfter = LOAN_PRINCIPAL - repaymentTwoPrincipalPaid;
-    const repaymentTwoSDaiBalance = 200.5;
-    const repaymentTwoSDaiInDaiBalance = 200.6;
+    const repaymentTwoClearinghouseDaiBalance = 200.3;
+    const repaymentTwoClearinghouseSDaiBalance = 200.5;
+    const repaymentTwoClearinghouseSDaiInDaiBalance = 200.6;
+    const repaymentTwoTreasuryDaiBalance = 220.4;
+    const repaymentTwoTreasurySDaiBalance = 220.5;
+    const repaymentTwoTreasurySDaiInDaiBalance = 220.6;
     subgraphData.repaymentEvents["2023-08-13"] = [
       {
         id: "0x3-0-1233456",
@@ -1329,8 +1421,12 @@ describe("generateSnapshots", () => {
         amountPaid: repaymentTwoAmount,
         collateralDeposited: 20,
         loan: getLoanData(),
-        clearinghouseSDaiBalance: repaymentTwoSDaiBalance,
-        clearinghouseSDaiInDaiBalance: repaymentTwoSDaiInDaiBalance,
+        clearinghouseDaiBalance: repaymentTwoClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: repaymentTwoClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: repaymentTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: repaymentTwoTreasuryDaiBalance,
+        treasurySDaiBalance: repaymentTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: repaymentTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1384,8 +1480,12 @@ describe("generateSnapshots", () => {
     const extensionOnePeriods = 2;
     const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1691655000;
+    const extensionOneClearinghouseDaiBalance = 200;
     const extensionOneClearinghouseSDaiBalance = 200.1;
     const extensionOneClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneTreasuryDaiBalance = 220.1;
+    const extensionOneTreasurySDaiBalance = 220.2;
+    const extensionOneTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1399,8 +1499,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
+        clearinghouseDaiBalance: extensionOneClearinghouseDaiBalance,
         clearinghouseSDaiBalance: extensionOneClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: extensionOneClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: extensionOneTreasuryDaiBalance,
+        treasurySDaiBalance: extensionOneTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: extensionOneTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1410,8 +1514,12 @@ describe("generateSnapshots", () => {
     const repaymentTwoInterestDueAfter = repaymentOneInterestDueAfter - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalPaid = repaymentTwoAmount - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalDueAfter = LOAN_PRINCIPAL - repaymentTwoPrincipalPaid;
-    const repaymentTwoSDaiBalance = 200.5;
-    const repaymentTwoSDaiInDaiBalance = 200.6;
+    const repaymentTwoClearinghouseDaiBalance = 200.3;
+    const repaymentTwoClearinghouseSDaiBalance = 200.5;
+    const repaymentTwoClearinghouseSDaiInDaiBalance = 200.6;
+    const repaymentTwoTreasuryDaiBalance = 220.4;
+    const repaymentTwoTreasurySDaiBalance = 220.5;
+    const repaymentTwoTreasurySDaiInDaiBalance = 220.6;
     subgraphData.repaymentEvents["2023-08-13"] = [
       {
         id: "0x3-0-1233456",
@@ -1425,8 +1533,12 @@ describe("generateSnapshots", () => {
         amountPaid: repaymentTwoAmount,
         collateralDeposited: 20,
         loan: getLoanData(),
-        clearinghouseSDaiBalance: repaymentTwoSDaiBalance,
-        clearinghouseSDaiInDaiBalance: repaymentTwoSDaiInDaiBalance,
+        clearinghouseDaiBalance: repaymentTwoClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: repaymentTwoClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: repaymentTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: repaymentTwoTreasuryDaiBalance,
+        treasurySDaiBalance: repaymentTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: repaymentTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1434,8 +1546,12 @@ describe("generateSnapshots", () => {
     const extensionTwoPeriods = 3;
     const extensionTwoAdditionalInterest = extensionTwoPeriods * getInterestForLoan(repaymentTwoPrincipalDueAfter);
     const extensionTwoExpiryTimestamp = 1699990000;
+    const extensionTwoClearinghouseDaiBalance = 200.2;
     const extensionTwoClearinghouseSDaiBalance = 200.3;
     const extensionTwoClearinghouseSDaiInDaiBalance = 200.4;
+    const extensionTwoTreasuryDaiBalance = 220.2;
+    const extensionTwoTreasurySDaiBalance = 220.3;
+    const extensionTwoTreasurySDaiInDaiBalance = 220.4;
     subgraphData.extendEvents["2023-08-14"] = [
       {
         id: "0x3-0-1233456",
@@ -1449,8 +1565,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
+        clearinghouseDaiBalance: extensionTwoClearinghouseDaiBalance,
         clearinghouseSDaiBalance: extensionTwoClearinghouseSDaiBalance,
         clearinghouseSDaiInDaiBalance: extensionTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: extensionTwoTreasuryDaiBalance,
+        treasurySDaiBalance: extensionTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: extensionTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1506,8 +1626,12 @@ describe("generateSnapshots", () => {
     const extensionOnePeriods = 2;
     const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(LOAN_PRINCIPAL);
     const extensionOneExpiryTimestamp = 1699999000;
-    const extensionClearinghouseSDaiBalance = 200.1;
-    const extensionClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneClearinghouseDaiBalance = 200;
+    const extensionOneClearinghouseSDaiBalance = 200.1;
+    const extensionOneClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneTreasuryDaiBalance = 220.1;
+    const extensionOneTreasurySDaiBalance = 220.2;
+    const extensionOneTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1521,8 +1645,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
-        clearinghouseSDaiBalance: extensionClearinghouseSDaiBalance,
-        clearinghouseSDaiInDaiBalance: extensionClearinghouseSDaiInDaiBalance,
+        clearinghouseDaiBalance: extensionOneClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: extensionOneClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: extensionOneClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: extensionOneTreasuryDaiBalance,
+        treasurySDaiBalance: extensionOneTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: extensionOneTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1532,8 +1660,12 @@ describe("generateSnapshots", () => {
     const repaymentTwoInterestDueAfter = repaymentOneInterestDueAfter - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalPaid = repaymentTwoAmount - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalDueAfter = LOAN_PRINCIPAL - repaymentTwoPrincipalPaid;
-    const repaymentTwoSDaiBalance = 200.5;
-    const repaymentTwoSDaiInDaiBalance = 200.6;
+    const repaymentTwoClearinghouseDaiBalance = 200.3;
+    const repaymentTwoClearinghouseSDaiBalance = 200.5;
+    const repaymentTwoClearinghouseSDaiInDaiBalance = 200.6;
+    const repaymentTwoTreasuryDaiBalance = 220.4;
+    const repaymentTwoTreasurySDaiBalance = 220.5;
+    const repaymentTwoTreasurySDaiInDaiBalance = 220.6;
     subgraphData.repaymentEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1547,8 +1679,12 @@ describe("generateSnapshots", () => {
         amountPaid: repaymentTwoAmount,
         collateralDeposited: 20,
         loan: getLoanData(),
-        clearinghouseSDaiBalance: repaymentTwoSDaiBalance,
-        clearinghouseSDaiInDaiBalance: repaymentTwoSDaiInDaiBalance,
+        clearinghouseDaiBalance: repaymentTwoClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: repaymentTwoClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: repaymentTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: repaymentTwoTreasuryDaiBalance,
+        treasurySDaiBalance: repaymentTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: repaymentTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1589,9 +1725,13 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.extendEvents.length).toEqual(1);
     expect(snapshotTwelve.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the latest event in the day - repayment
-    expect(snapshotTwelve.clearinghouse.sDaiBalance).toEqual(repaymentTwoSDaiBalance);
-    expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(repaymentTwoSDaiInDaiBalance);
+    // Clearinghouse and treasury balances should have the new balance from the latest event in the day - repayment
+    expect(snapshotTwelve.clearinghouse.daiBalance).toEqual(repaymentTwoClearinghouseDaiBalance);
+    expect(snapshotTwelve.clearinghouse.sDaiBalance).toEqual(repaymentTwoClearinghouseSDaiBalance);
+    expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(repaymentTwoClearinghouseSDaiInDaiBalance);
+    expect(snapshotTwelve.treasury.daiBalance).toEqual(repaymentTwoTreasuryDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiBalance).toEqual(repaymentTwoTreasurySDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiInDaiBalance).toEqual(repaymentTwoTreasurySDaiInDaiBalance);
   });
 
   it("loan repayment then extension, same day", () => {
@@ -1608,8 +1748,12 @@ describe("generateSnapshots", () => {
     const repaymentTwoInterestDueAfter = repaymentOneInterestDueAfter - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalPaid = repaymentTwoAmount - repaymentTwoInterestPaid;
     const repaymentTwoPrincipalDueAfter = LOAN_PRINCIPAL - repaymentTwoPrincipalPaid;
-    const repaymentTwoSDaiBalance = 200.5;
-    const repaymentTwoSDaiInDaiBalance = 200.6;
+    const repaymentTwoClearinghouseDaiBalance = 200.3;
+    const repaymentTwoClearinghouseSDaiBalance = 200.5;
+    const repaymentTwoClearinghouseSDaiInDaiBalance = 200.6;
+    const repaymentTwoTreasuryDaiBalance = 220.4;
+    const repaymentTwoTreasurySDaiBalance = 220.5;
+    const repaymentTwoTreasurySDaiInDaiBalance = 220.6;
     subgraphData.repaymentEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1623,8 +1767,12 @@ describe("generateSnapshots", () => {
         amountPaid: repaymentTwoAmount,
         collateralDeposited: 20,
         loan: getLoanData(),
-        clearinghouseSDaiBalance: repaymentTwoSDaiBalance,
-        clearinghouseSDaiInDaiBalance: repaymentTwoSDaiInDaiBalance,
+        clearinghouseDaiBalance: repaymentTwoClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: repaymentTwoClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: repaymentTwoClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: repaymentTwoTreasuryDaiBalance,
+        treasurySDaiBalance: repaymentTwoTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: repaymentTwoTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1632,8 +1780,12 @@ describe("generateSnapshots", () => {
     const extensionOnePeriods = 2;
     const extensionOneAdditionalInterest = extensionOnePeriods * getInterestForLoan(repaymentTwoPrincipalDueAfter);
     const extensionOneExpiryTimestamp = 1699999000;
-    const extensionClearinghouseSDaiBalance = 200.1;
-    const extensionClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneClearinghouseDaiBalance = 200;
+    const extensionOneClearinghouseSDaiBalance = 200.1;
+    const extensionOneClearinghouseSDaiInDaiBalance = 200.2;
+    const extensionOneTreasuryDaiBalance = 220.1;
+    const extensionOneTreasurySDaiBalance = 220.2;
+    const extensionOneTreasurySDaiInDaiBalance = 220.3;
     subgraphData.extendEvents["2023-08-12"] = [
       {
         id: "0x3-0-1233456",
@@ -1647,8 +1799,12 @@ describe("generateSnapshots", () => {
         loan: {
           id: "0x3-0",
         },
-        clearinghouseSDaiBalance: extensionClearinghouseSDaiBalance,
-        clearinghouseSDaiInDaiBalance: extensionClearinghouseSDaiInDaiBalance,
+        clearinghouseDaiBalance: extensionOneClearinghouseDaiBalance,
+        clearinghouseSDaiBalance: extensionOneClearinghouseSDaiBalance,
+        clearinghouseSDaiInDaiBalance: extensionOneClearinghouseSDaiInDaiBalance,
+        treasuryDaiBalance: extensionOneTreasuryDaiBalance,
+        treasurySDaiBalance: extensionOneTreasurySDaiBalance,
+        treasurySDaiInDaiBalance: extensionOneTreasurySDaiInDaiBalance,
       },
     ];
 
@@ -1689,8 +1845,12 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.extendEvents.length).toEqual(1);
     expect(snapshotTwelve.clearinghouseEvents.length).toEqual(0);
 
-    // Clearinghouse balance should have the new balance from the latest event in the day - extension
-    expect(snapshotTwelve.clearinghouse.sDaiBalance).toEqual(extensionClearinghouseSDaiBalance);
-    expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(extensionClearinghouseSDaiInDaiBalance);
+    // Clearinghouse and treasury balances should have the new balance from the latest event in the day - extension
+    expect(snapshotTwelve.clearinghouse.daiBalance).toEqual(extensionOneClearinghouseDaiBalance);
+    expect(snapshotTwelve.clearinghouse.sDaiBalance).toEqual(extensionOneClearinghouseSDaiBalance);
+    expect(snapshotTwelve.clearinghouse.sDaiInDaiBalance).toEqual(extensionOneClearinghouseSDaiInDaiBalance);
+    expect(snapshotTwelve.treasury.daiBalance).toEqual(extensionOneTreasuryDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiBalance).toEqual(extensionOneTreasurySDaiBalance);
+    expect(snapshotTwelve.treasury.sDaiInDaiBalance).toEqual(extensionOneTreasurySDaiInDaiBalance);
   });
 });
