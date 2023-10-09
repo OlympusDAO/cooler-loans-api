@@ -279,7 +279,9 @@ export const generateSnapshots = (
 
     // Iterate by timestamp, so that events are processed in order
     for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
-      console.log(`${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp)))})}`);
+      console.log(
+        `${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp) * 1000))}`,
+      );
 
       // Update clearinghouse data, if it exists
       const currentClearinghouseSnapshots = records.clearinghouseSnapshots;
@@ -437,8 +439,7 @@ export const generateSnapshots = (
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
         console.log(
-          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
-            loan.principal - loan.principalPaid
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${loan.principal - loan.principalPaid
           }: ${interestPerPeriod}`,
         );
         const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
