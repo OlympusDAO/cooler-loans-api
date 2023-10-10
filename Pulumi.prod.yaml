@@ -1,4 +1,6 @@
 config:
+  cooler-loans-api:alertEmail:
+    secure: AAABAIn37o4Q//rFMFNoW2K9Jr7bOYYcamISp06aBJ7F2YlKGI9dsTk+3HrnOmDUzA==
   gcp:project: cooler-loans-api-prod
   # Don't change this - required for Cloud Functions + Firebase hosting to work in tandem
   gcp:region: us-central1
