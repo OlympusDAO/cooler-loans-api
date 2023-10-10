@@ -216,7 +216,7 @@ new gcp.monitoring.AlertPolicy(
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
             resource.labels.function_name = "${functionGet.function.name}" AND
-            metric.type = "run.googleapis.com/request_latencies"
+            metric.type = "cloudfunctions.googleapis.com/function/execution_times"
             `,
           aggregations: [
             {
@@ -229,7 +229,7 @@ new gcp.monitoring.AlertPolicy(
           trigger: {
             percent: 50,
           },
-          thresholdValue: 5000, // 5 seconds
+          thresholdValue: 5000000000, // 5 seconds in nanoseconds??
         },
       },
     ],
@@ -258,8 +258,8 @@ new gcp.monitoring.AlertPolicy(
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
             resource.labels.function_name = "${functionGet.function.name}" AND
-            metric.type = "run.googleapis.com/request_count" AND 
-            metric.labels.response_code_class != "2xx"
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.labels.status != "ok"
             `,
           aggregations: [
             {
@@ -301,8 +301,8 @@ new gcp.monitoring.AlertPolicy(
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
             resource.labels.function_name = "${functionGenerate.function.name}" AND
-            metric.type = "run.googleapis.com/request_count" AND 
-            metric.labels.response_code_class != "2xx"
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.labels.status != "ok"
             `,
           aggregations: [
             {
@@ -321,6 +321,71 @@ new gcp.monitoring.AlertPolicy(
       },
     ],
     alertStrategy: {
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+// Log Errors
+new gcp.monitoring.AlertPolicy(
+  "get-log-errors",
+  {
+    displayName: `${projectName} - Get - Log Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Log contains error`,
+        conditionMatchedLog: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGet.function.name}" AND
+            textPayload =~ "error"
+            `,
+        },
+      },
+    ],
+    alertStrategy: {
+      notificationRateLimit: {
+        period: "3600s",
+      },
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+new gcp.monitoring.AlertPolicy(
+  "generate-log-errors",
+  {
+    displayName: `${projectName} - Generate - Log Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Log contains error`,
+        conditionMatchedLog: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGenerate.function.name}" AND
+            textPayload =~ "error"
+            `,
+        },
+      },
+    ],
+    alertStrategy: {
+      notificationRateLimit: {
+        period: "3600s",
+      },
       autoClose: "604800s",
     },
     combiner: "OR",
