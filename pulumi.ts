@@ -7,7 +7,7 @@ import { handleGenerate } from "./src/functions/generate";
 import { handleGet } from "./src/functions/get";
 
 const gcpConfig = new pulumi.Config("gcp");
-// const pulumiConfig = new pulumi.Config("pulumi");
+const pulumiConfig = new pulumi.Config();
 const projectName = "cooler-loans-api";
 const projectStackName = `${projectName}-${pulumi.getStack()}`;
 
@@ -188,6 +188,212 @@ new gcp.firebase.HostingRelease(
   },
   {
     dependsOn: [firebaseHostingVersion],
+  },
+);
+
+/**
+ * Alerts
+ */
+// Notification channel
+const notificationEmail = new gcp.monitoring.NotificationChannel("email", {
+  displayName: "Email",
+  type: "email",
+  labels: {
+    email_address: pulumiConfig.requireSecret("alertEmail"),
+  },
+});
+
+// High Latency
+new gcp.monitoring.AlertPolicy(
+  "get-high-latency",
+  {
+    displayName: `${projectName} - Get - High Request Latency`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `50% above 5s Latency`,
+        conditionThreshold: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGet.function.name}" AND
+            metric.type = "cloudfunctions.googleapis.com/function/execution_times"
+            `,
+          aggregations: [
+            {
+              alignmentPeriod: "300s",
+              perSeriesAligner: "ALIGN_PERCENTILE_99",
+            },
+          ],
+          comparison: "COMPARISON_GT",
+          duration: "0s",
+          trigger: {
+            percent: 50,
+          },
+          thresholdValue: 5000000000, // 5 seconds in nanoseconds??
+        },
+      },
+    ],
+    alertStrategy: {
+      autoClose: "604800s",
+    },
+    combiner: "AND",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+// HTTP Errors
+new gcp.monitoring.AlertPolicy(
+  "get-http-errors",
+  {
+    displayName: `${projectName} - Get - HTTP Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Error Count`,
+        conditionThreshold: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGet.function.name}" AND
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.labels.status != "ok"
+            `,
+          aggregations: [
+            {
+              alignmentPeriod: "300s",
+              crossSeriesReducer: "REDUCE_NONE",
+              perSeriesAligner: "ALIGN_COUNT",
+            },
+          ],
+          comparison: "COMPARISON_GT",
+          duration: "0s",
+          trigger: {
+            count: 1,
+          },
+          thresholdValue: 5,
+        },
+      },
+    ],
+    alertStrategy: {
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+new gcp.monitoring.AlertPolicy(
+  "generate-http-errors",
+  {
+    displayName: `${projectName} - Generate - HTTP Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Error Count`,
+        conditionThreshold: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGenerate.function.name}" AND
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.labels.status != "ok"
+            `,
+          aggregations: [
+            {
+              alignmentPeriod: "300s",
+              crossSeriesReducer: "REDUCE_NONE",
+              perSeriesAligner: "ALIGN_COUNT",
+            },
+          ],
+          comparison: "COMPARISON_GT",
+          duration: "0s",
+          trigger: {
+            count: 1,
+          },
+          thresholdValue: 5,
+        },
+      },
+    ],
+    alertStrategy: {
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+// Log Errors
+new gcp.monitoring.AlertPolicy(
+  "get-log-errors",
+  {
+    displayName: `${projectName} - Get - Log Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Log contains error`,
+        conditionMatchedLog: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGet.function.name}" AND
+            textPayload =~ "error"
+            `,
+        },
+      },
+    ],
+    alertStrategy: {
+      notificationRateLimit: {
+        period: "3600s",
+      },
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
+  },
+);
+
+new gcp.monitoring.AlertPolicy(
+  "generate-log-errors",
+  {
+    displayName: `${projectName} - Generate - Log Errors`,
+    userLabels: {},
+    conditions: [
+      {
+        displayName: `Log contains error`,
+        conditionMatchedLog: {
+          filter: pulumi.interpolate`
+            resource.type = "cloud_function" AND
+            resource.labels.function_name = "${functionGenerate.function.name}" AND
+            textPayload =~ "error"
+            `,
+        },
+      },
+    ],
+    alertStrategy: {
+      notificationRateLimit: {
+        period: "3600s",
+      },
+      autoClose: "604800s",
+    },
+    combiner: "OR",
+    enabled: true,
+    notificationChannels: [notificationEmail.name],
+  },
+  {
+    dependsOn: [functionGet, notificationEmail],
   },
 );
 

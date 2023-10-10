@@ -16,6 +16,10 @@ export async function handleGet(req: any, res: any) {
   // Grab from Firestore
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
 
+  // Enable caching
+  // Source: https://firebase.google.com/docs/hosting/manage-cache
+  res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+
   // Required to end the function
   res
     .json({

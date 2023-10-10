@@ -10,8 +10,10 @@ This repository deploys two API endpoints:
 
 - `generate`
 
-  - Generates daily snapshots for Cooler Loans
-  - A Google Cloud Function (with a periodic trigger) determines the previous date for which the snapshot was generated, and generates from that day until the current day.
+  - Generates daily snapshots for Cooler Loans.
+    - Each snapshot is based on the previous day's snapshot (where applicable), in combination with the loan events (e.g. repayment) from that day.
+    - Loan events are processed in the order that they occur.
+  - A Google Cloud Function (with a periodic trigger) determines the previous date for which the snapshot was generated, and generates from that day onwards.
   - The snapshots are stored in Google Firestore
 
 - `get`
