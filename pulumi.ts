@@ -229,7 +229,7 @@ new gcp.monitoring.AlertPolicy(
           trigger: {
             percent: 50,
           },
-          thresholdValue: 5000000000, // 5 seconds in nanoseconds??
+          thresholdValue: 30000000000, // 30 seconds in nanoseconds??
         },
       },
     ],
