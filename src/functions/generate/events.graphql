@@ -1,5 +1,6 @@
 query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
   claimDefaultedLoanEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc
@@ -18,6 +19,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     }
   }
   clearLoanRequestEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc
@@ -56,6 +58,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     treasurySDaiInDaiBalance
   }
   defundEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc
@@ -94,6 +97,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     transactionHash
   }
   extendLoanEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc
@@ -117,6 +121,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     treasurySDaiInDaiBalance
   }
   rebalanceEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc
@@ -155,6 +160,7 @@ query CoolerLoanEvents($startTimestamp: BigInt!, $beforeTimestamp: BigInt!) {
     transactionHash
   }
   repayLoanEvents(
+    first: 1000
     where: { blockTimestamp_gte: $startTimestamp, blockTimestamp_lt: $beforeTimestamp }
     orderBy: blockTimestamp
     orderDirection: asc

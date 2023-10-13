@@ -7,6 +7,7 @@ import { getData } from "./subgraph";
 const LAUNCH_DATE = "2023-09-21";
 // So that the next 4 months of income can be projected
 const DAYS_AFTER = 121;
+const DAYS_OFFSET = 3;
 
 const run = async (startDate: Date, beforeDate: Date) => {
   console.log(`Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
@@ -38,22 +39,22 @@ export const handleGenerate = async (req: any, res: any) => {
     lastCachedDate
       ? new Date(lastCachedDate) < new Date()
         ? adjustDate(new Date(lastCachedDate), -1) // If there is a cached date, use the day before to catch anything in between
-        : new Date() // Otherwise, use the current date
+        : adjustDate(new Date(), -1) // Otherwise, use the day before
       : new Date(LAUNCH_DATE), // Otherwise, use the launch date
   );
   const beforeDate: Date = setMidnight(adjustDate(new Date(), DAYS_AFTER));
 
   let currentStartDate = new Date(startDate);
-  let currentEndDate = adjustDate(new Date(startDate), 7);
+  let currentEndDate = adjustDate(new Date(startDate), DAYS_OFFSET);
 
-  // Generate snapshots for every 7 days
+  // Generate snapshots for every `DAYS_OFFSET` days
   // This avoids having too many records in memory at once
   // and fetching too many records over GraphQL
   while (currentEndDate < beforeDate) {
     await run(currentStartDate, currentEndDate);
 
-    currentStartDate = adjustDate(currentStartDate, 7);
-    currentEndDate = adjustDate(currentEndDate, 7);
+    currentStartDate = adjustDate(currentStartDate, DAYS_OFFSET);
+    currentEndDate = adjustDate(currentEndDate, DAYS_OFFSET);
   }
 
   // Required to end the function
