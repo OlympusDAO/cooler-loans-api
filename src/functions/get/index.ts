@@ -19,7 +19,7 @@ export async function handleGet(req: any, res: any) {
 
   // Enable caching
   // Source: https://firebase.google.com/docs/hosting/manage-cache
-  res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+  res.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
 
   // Required to end the function
   res
