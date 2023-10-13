@@ -14,6 +14,7 @@ export async function handleGet(req: any, res: any) {
   }
 
   // Grab from Firestore
+  console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
 
   // Enable caching
