@@ -14,11 +14,12 @@ export async function handleGet(req: any, res: any) {
   }
 
   // Grab from Firestore
+  console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
 
   // Enable caching
   // Source: https://firebase.google.com/docs/hosting/manage-cache
-  res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+  res.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
 
   // Required to end the function
   res

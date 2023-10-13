@@ -2845,6 +2845,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "claimDefaultedLoanEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },
@@ -2902,6 +2903,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "clearLoanRequestEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },
@@ -2988,6 +2990,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "defundEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },
@@ -3067,6 +3070,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "extendLoanEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },
@@ -3129,6 +3133,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "rebalanceEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },
@@ -3208,6 +3213,7 @@ export const CoolerLoanEventsDocument = {
             kind: "Field",
             name: { kind: "Name", value: "repayLoanEvents" },
             arguments: [
+              { kind: "Argument", name: { kind: "Name", value: "first" }, value: { kind: "IntValue", value: "1000" } },
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "where" },

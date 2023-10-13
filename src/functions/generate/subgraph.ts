@@ -34,10 +34,12 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
   eventData.defundEvents.forEach((defundEvent: DefundEventOptional) => {
     clearinghouseSnapshotsArray.push(defundEvent.clearinghouseSnapshot);
   });
+  console.log(`${FUNC}: fetched ${eventData.defundEvents.length} defund events`);
 
   eventData.rebalanceEvents.forEach((rebalanceEvent: RebalanceEventOptional) => {
     clearinghouseSnapshotsArray.push(rebalanceEvent.clearinghouseSnapshot);
   });
+  console.log(`${FUNC}: fetched ${eventData.rebalanceEvents.length} rebalance events`);
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of snapshots as the values
   const clearinghouseSnapshots = clearinghouseSnapshotsArray.reduce(
@@ -57,6 +59,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
    * Creation Events
    */
   const creationEventsArray: ClearLoanRequestEventOptional[] = eventData.clearLoanRequestEvents;
+  console.log(`${FUNC}: fetched ${creationEventsArray.length} loan creation events`);
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const creationEvents = creationEventsArray.reduce(
@@ -76,6 +79,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
    * Repayment Events
    */
   const repaymentEventsArray: RepayLoanEventOptional[] = eventData.repayLoanEvents;
+  console.log(`${FUNC}: fetched ${repaymentEventsArray.length} loan repayment events`);
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const repaymentEvents = repaymentEventsArray.reduce(
@@ -95,6 +99,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
    * Claim Default Events
    */
   const claimDefaultedEventsArray: ClaimDefaultedLoanEventOptional[] = eventData.claimDefaultedLoanEvents;
+  console.log(`${FUNC}: fetched ${claimDefaultedEventsArray.length} loan default claim events`);
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const claimDefaultedEvents = claimDefaultedEventsArray.reduce(
@@ -114,6 +119,7 @@ export const getData = async (endpointUrl: string, startDate: Date, beforeDate: 
    * Extend Events
    */
   const extendEventsArray: ExtendLoanEventOptional[] = eventData.extendLoanEvents;
+  console.log(`${FUNC}: fetched ${extendEventsArray.length} loan extension events`);
 
   // Convert to a map with the date in YYYY-MM-DD format as the key and an array of events as the values
   const extendEvents = extendEventsArray.reduce(
