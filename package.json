@@ -41,7 +41,8 @@
     "ts-jest": "^29.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
-    "typescript-json-schema": "^0.61.0"
+    "typescript-json-schema": "^0.61.0",
+    "yaml": "^2.3.3"
   },
   "dependencies": {
     "@google-cloud/firestore": "^6.7.0",
