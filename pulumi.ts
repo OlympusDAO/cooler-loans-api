@@ -57,7 +57,8 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
     timeout: 540,
     callback: handleGenerate,
     environmentVariables: {
-      GRAPHQL_ENDPOINT: "https://api.studio.thegraph.com/query/46563/cooler-loans/1.4.3",
+      GRAPHQL_ENDPOINT: pulumiConfig.require("GRAPHQL_ENDPOINT"),
+      SUBGRAPH_API_KEY: pulumiConfig.requireSecret("SUBGRAPH_API_KEY"),
     },
   },
   {

@@ -9,13 +9,24 @@ const LAUNCH_DATE = "2023-09-21";
 const DAYS_AFTER = 121;
 const DAYS_OFFSET = 3;
 
-const run = async (startDate: Date, beforeDate: Date) => {
-  console.log(`Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
-
+const resolveSubgraphUrl = (): string => {
   const endpointUrl = process.env.GRAPHQL_ENDPOINT;
   if (!endpointUrl) {
     throw new Error(`The environment variable GRAPHQL_ENDPOINT must be set`);
   }
+
+  const apiKey = process.env.SUBGRAPH_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      `"SUBGRAPH_API_KEY environment variable is not set. Please set it to your Subgraph API key to query subgraphs"`,
+    );
+  }
+
+  return endpointUrl.replace("[api-key]", apiKey);
+};
+
+const run = async (endpointUrl: string, startDate: Date, beforeDate: Date) => {
+  console.log(`Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
 
   // Fetch event data
   const subgraphData = await getData(endpointUrl, startDate, beforeDate);
@@ -32,6 +43,8 @@ const run = async (startDate: Date, beforeDate: Date) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handleGenerate = async (req: any, res: any) => {
+  const endpointUrl = resolveSubgraphUrl();
+
   // Determine the last cached date in Firestore
   const lastCachedDate: string | null = await getLatestCachedDate();
   const startDate: Date = setMidnight(
@@ -51,7 +64,7 @@ export const handleGenerate = async (req: any, res: any) => {
   // This avoids having too many records in memory at once
   // and fetching too many records over GraphQL
   while (currentEndDate < beforeDate) {
-    await run(currentStartDate, currentEndDate);
+    await run(endpointUrl, currentStartDate, currentEndDate);
 
     currentStartDate = adjustDate(currentStartDate, DAYS_OFFSET);
     currentEndDate = adjustDate(currentEndDate, DAYS_OFFSET);
