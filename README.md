@@ -31,6 +31,7 @@ This repository deploys two API endpoints:
     - Switch to OpenJDK 11 by default: `/usr/libexec/java_home -v 11`
 - Install the firebase emulator
   - `gcloud emulators firestore start`
+- Copy the `.env.sample` file to `.env` and fill out the required variables
 
 ### Testing
 
