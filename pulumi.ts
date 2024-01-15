@@ -54,7 +54,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
   {
     runtime: "nodejs18",
     availableMemoryMb: 512,
-    timeout: 540,
+    timeout: 300, // This ensures that the function ends before the next scheduled run
     callback: handleGenerate,
     environmentVariables: {
       GRAPHQL_ENDPOINT: pulumiConfig.require("GRAPHQL_ENDPOINT"),
@@ -260,7 +260,7 @@ new gcp.monitoring.AlertPolicy(
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
             resource.labels.function_name = "${functionGet.function.name}" AND
-            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
             metric.labels.status != "ok"
             `,
           aggregations: [
@@ -303,7 +303,7 @@ new gcp.monitoring.AlertPolicy(
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
             resource.labels.function_name = "${functionGenerate.function.name}" AND
-            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND 
+            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
             metric.labels.status != "ok"
             `,
           aggregations: [

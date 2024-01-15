@@ -197,8 +197,6 @@ export const writeSnapshots = async (snapshots: Snapshot[]) => {
     // Delete the loans from the snapshot
     snapshot.loans = {};
 
-    console.log(`typeof snapshot.date: ${typeof snapshot.date}`);
-
     // Write the snapshot
     await client
       .collection(FIRESTORE_ROOT_COLLECTION)
