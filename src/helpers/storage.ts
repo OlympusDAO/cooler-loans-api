@@ -161,21 +161,42 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
   return snapshotRecords;
 };
 
+const FIRESTORE_BATCH_SIZE = 500;
+
 const writeLoans = async (snapshotDate: Date, loans: Loan[]) => {
   // Get the Firestore client
   const client = getClient();
+
+  let batch = client.batch();
+  let batchCount = 0;
 
   // Write the loans
   for (let i = 0; i < loans.length; i++) {
     const loan = loans[i];
 
-    await client
-      .collection(FIRESTORE_ROOT_COLLECTION)
-      .doc(getISO8601DateString(snapshotDate))
-      .collection(FIRESTORE_LOAN_COLLECTION)
-      .withConverter(LoanConverter)
-      .doc(loan.id)
-      .set(loan);
+    // Add the loan to the batch
+    batch.set(
+      client
+        .collection(FIRESTORE_ROOT_COLLECTION)
+        .doc(getISO8601DateString(snapshotDate))
+        .collection(FIRESTORE_LOAN_COLLECTION)
+        .withConverter(LoanConverter)
+        .doc(loan.id),
+      loan,
+    );
+
+    // Commit the batch if it is full
+    batchCount++;
+    if (batchCount === FIRESTORE_BATCH_SIZE) {
+      await batch.commit();
+      batch = client.batch();
+      batchCount = 0;
+    }
+  }
+
+  // Commit the final batch
+  if (batchCount > 0) {
+    await batch.commit();
   }
 };
 
