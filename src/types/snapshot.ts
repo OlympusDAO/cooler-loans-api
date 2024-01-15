@@ -74,7 +74,7 @@ export type Loan = {
   collateralClaimedValue: number;
 };
 
-type SnapshotLoanMap = {
+export type SnapshotLoanMap = {
   [key: string]: Loan;
 };
 
