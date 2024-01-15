@@ -139,6 +139,7 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
     const snapshot = snapshotRecords[i];
 
     // Get the loans
+    // TODO improve performance here
     const loans = await client
       .collection(FIRESTORE_ROOT_COLLECTION)
       .doc(getISO8601DateString(snapshot.date))
