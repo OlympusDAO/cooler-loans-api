@@ -136,7 +136,7 @@ export type Snapshot = {
    * Key: `cooler address`-`loanId`
    * Value: Loan record
    *
-   * @deprecated Will return an empty map
+   * Will only be fetched if explicitly specified.
    */
   loans: SnapshotLoanMap;
 
