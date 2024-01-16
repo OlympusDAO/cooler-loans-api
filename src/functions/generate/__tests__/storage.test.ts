@@ -127,6 +127,12 @@ describe("writeSnapshots", () => {
         loans: {
           "0x3-1": getSampleLoan("0x3-1"),
         },
+        expiryBuckets: {
+          active: 0,
+          expired: 100000,
+          "30Days": 50000,
+          "121Days": 60000,
+        },
         creationEvents: [],
         defaultedClaimEvents: [],
         repaymentEvents: [],
@@ -162,6 +168,12 @@ describe("writeSnapshots", () => {
           loanToCollateral: 0,
         },
         loans: {},
+        expiryBuckets: {
+          active: 1,
+          expired: 100001,
+          "30Days": 50001,
+          "121Days": 60001,
+        },
         creationEvents: [],
         defaultedClaimEvents: [],
         repaymentEvents: [],
@@ -190,13 +202,23 @@ describe("writeSnapshots", () => {
     const snapshotOneLoanOne = snapshotOne?.loans["0x3-1"];
     expect(snapshotOneLoanOne?.principal).toEqual(100);
 
+    expect(snapshotOne?.expiryBuckets.active).toEqual(0);
+    expect(snapshotOne?.expiryBuckets.expired).toEqual(100000);
+    expect(snapshotOne?.expiryBuckets["30Days"]).toEqual(50000);
+    expect(snapshotOne?.expiryBuckets["121Days"]).toEqual(60000);
+
     // Test getSnapshots
-    const snapshotResults = await getSnapshots(new Date("2020-01-01"), new Date("2020-01-03"));
+    const snapshotResults = await getSnapshots(new Date("2020-01-01"), new Date("2020-01-03"), true);
     expect(snapshotResults.length).toEqual(2);
 
     const snapshotResultsOne = snapshotResults[0];
     expect(snapshotResultsOne.date).toEqual(new Date("2020-01-01"));
     expect(snapshotResultsOne.clearinghouse.daiBalance).toEqual(0);
+
+    expect(snapshotResultsOne?.expiryBuckets.active).toEqual(0);
+    expect(snapshotResultsOne?.expiryBuckets.expired).toEqual(100000);
+    expect(snapshotResultsOne?.expiryBuckets["30Days"]).toEqual(50000);
+    expect(snapshotResultsOne?.expiryBuckets["121Days"]).toEqual(60000);
 
     const snapshotResultsTwo = snapshotResults[1];
     expect(snapshotResultsTwo.date).toEqual(new Date("2020-01-02"));
@@ -204,5 +226,10 @@ describe("writeSnapshots", () => {
 
     const snapshotResultsOneLoanOne = snapshotResultsOne.loans["0x3-1"];
     expect(snapshotResultsOneLoanOne?.principal).toEqual(100);
+
+    // Test getSnapshots without loans
+    const snapshotResultsWithoutLoans = await getSnapshots(new Date("2020-01-01"), new Date("2020-01-03"), false);
+    expect(snapshotResultsWithoutLoans[0].loans.length).toEqual(0);
+    expect(snapshotResultsWithoutLoans[1].loans.length).toEqual(0);
   }, 10000);
 });

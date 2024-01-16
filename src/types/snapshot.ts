@@ -135,8 +135,21 @@ export type Snapshot = {
    *
    * Key: `cooler address`-`loanId`
    * Value: Loan record
+   *
+   * @deprecated Will return an empty map
    */
   loans: SnapshotLoanMap;
+
+  /**
+   * Principal due for each expiry bucket.
+   */
+  expiryBuckets: {
+    active: number;
+    expired: number;
+    "30Days": number;
+    "121Days": number;
+  };
+
   creationEvents: ClearLoanRequestEventOptional[];
   defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
   repaymentEvents: RepayLoanEventOptional[];

@@ -119,7 +119,7 @@ export const getSnapshot = async (date: Date): Promise<Snapshot | null> => {
   return snapshotData;
 };
 
-export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<Snapshot[]> => {
+export const getSnapshots = async (startDate: Date, beforeDate: Date, includeLoans: boolean): Promise<Snapshot[]> => {
   // Get the Firestore client
   const client = getClient();
 
@@ -134,29 +134,30 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
   // If there is no snapshot, return null
   const snapshotRecords = snapshots.docs.map(snapshot => snapshot.data());
 
-  // Iterate over the snapshots
-  for (let i = 0; i < snapshotRecords.length; i++) {
-    const snapshot = snapshotRecords[i];
+  if (includeLoans === true) {
+    // Iterate over the snapshots
+    for (let i = 0; i < snapshotRecords.length; i++) {
+      const snapshot = snapshotRecords[i];
 
-    // Get the loans
-    // TODO improve performance here
-    const loans = await client
-      .collection(FIRESTORE_ROOT_COLLECTION)
-      .doc(getISO8601DateString(snapshot.date))
-      .collection(FIRESTORE_LOAN_COLLECTION)
-      .withConverter(LoanConverter)
-      .get();
-    let loanMap: SnapshotLoanMap = {};
-    if (!loans.empty) {
-      loanMap = loans.docs.reduce((accumulator, currentValue) => {
-        const loan = currentValue.data();
-        accumulator[loan.id] = loan;
-        return accumulator;
-      }, {} as SnapshotLoanMap);
+      // Get the loans
+      const loans = await client
+        .collection(FIRESTORE_ROOT_COLLECTION)
+        .doc(getISO8601DateString(snapshot.date))
+        .collection(FIRESTORE_LOAN_COLLECTION)
+        .withConverter(LoanConverter)
+        .get();
+      let loanMap: SnapshotLoanMap = {};
+      if (!loans.empty) {
+        loanMap = loans.docs.reduce((accumulator, currentValue) => {
+          const loan = currentValue.data();
+          accumulator[loan.id] = loan;
+          return accumulator;
+        }, {} as SnapshotLoanMap);
+      }
+
+      // Add the loans into the snapshot
+      snapshot.loans = loanMap;
     }
-
-    // Add the loans into the snapshot
-    snapshot.loans = loanMap;
   }
 
   return snapshotRecords;

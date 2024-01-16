@@ -71,6 +71,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
         sDaiInDaiBalance: 0,
       },
       loans: {},
+      expiryBuckets: {
+        active: 0,
+        expired: 0,
+        "30Days": 0,
+        "121Days": 0,
+      },
       creationEvents: [],
       defaultedClaimEvents: [],
       repaymentEvents: [],
@@ -100,6 +106,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   newSnapshot.collateralDeposited = 0;
   newSnapshot.principalReceivables = 0;
   newSnapshot.interestReceivables = 0;
+  newSnapshot.expiryBuckets = {
+    active: 0,
+    expired: 0,
+    "30Days": 0,
+    "121Days": 0,
+  };
 
   // Ensure the loans property has a value
   if (!newSnapshot.loans) {
@@ -439,8 +451,7 @@ export const generateSnapshots = (
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
         console.log(
-          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
-            loan.principal - loan.principalPaid
+          `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${loan.principal - loan.principalPaid
           }: ${interestPerPeriod}`,
         );
         const newInterest = parseNumber(extendEvent.periods) * interestPerPeriod;
@@ -495,6 +506,39 @@ export const generateSnapshots = (
         currentSnapshot.interestReceivables += loan.interest - loan.interestPaid;
         currentSnapshot.principalReceivables += loan.principal - loan.principalPaid;
       }
+    });
+
+    // Update the expiry buckets
+    console.log(`${FUNC}: updating expiry buckets`);
+    loans.forEach(loan => {
+      // Exclude repaid and reclaimed loans
+      if (loan.status === "Repaid" || loan.status === "Reclaimed") {
+        return;
+      }
+
+      const principalDue = loan.principal - loan.principalPaid;
+
+      // Handle expired but unclaimed loans
+      if (loan.status === "Expired") {
+        // Expired loans are bucketed into the "expired" bucket
+        currentSnapshot.expiryBuckets.expired += principalDue;
+        return;
+      }
+
+      // Expiring within 30 days
+      if (loan.secondsToExpiry <= 30 * 24 * 60 * 60) {
+        currentSnapshot.expiryBuckets["30Days"] += principalDue;
+        return;
+      }
+
+      // Expiring within 121 days
+      if (loan.secondsToExpiry <= 121 * 24 * 60 * 60) {
+        currentSnapshot.expiryBuckets["121Days"] += principalDue;
+        return;
+      }
+
+      // Otherwise active
+      currentSnapshot.expiryBuckets.active += principalDue;
     });
 
     snapshots.push(currentSnapshot);
