@@ -284,9 +284,9 @@ describe("generateSnapshots", () => {
     expect(resultOne.expiryBuckets["121Days"]).toEqual(0);
     expect(
       resultOne.expiryBuckets.active +
-      resultOne.expiryBuckets.expired +
-      resultOne.expiryBuckets["30Days"] +
-      resultOne.expiryBuckets["121Days"],
+        resultOne.expiryBuckets.expired +
+        resultOne.expiryBuckets["30Days"] +
+        resultOne.expiryBuckets["121Days"],
     ).toEqual(resultOne.principalReceivables);
 
     expect(result.length).toEqual(31);
@@ -351,9 +351,9 @@ describe("generateSnapshots", () => {
     expect(snapshotOne.expiryBuckets["121Days"]).toEqual(LOAN_PRINCIPAL);
     expect(
       snapshotOne.expiryBuckets.active +
-      snapshotOne.expiryBuckets.expired +
-      snapshotOne.expiryBuckets["30Days"] +
-      snapshotOne.expiryBuckets["121Days"],
+        snapshotOne.expiryBuckets.expired +
+        snapshotOne.expiryBuckets["30Days"] +
+        snapshotOne.expiryBuckets["121Days"],
     ).toEqual(snapshotOne.principalReceivables);
 
     const snapshotTwo = snapshots[1];
@@ -400,9 +400,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.expiryBuckets["121Days"]).toEqual(LOAN_PRINCIPAL);
     expect(
       snapshotTwo.expiryBuckets.active +
-      snapshotTwo.expiryBuckets.expired +
-      snapshotTwo.expiryBuckets["30Days"] +
-      snapshotTwo.expiryBuckets["121Days"],
+        snapshotTwo.expiryBuckets.expired +
+        snapshotTwo.expiryBuckets["30Days"] +
+        snapshotTwo.expiryBuckets["121Days"],
     ).toEqual(snapshotTwo.principalReceivables);
   });
 
@@ -503,9 +503,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTwo.principalReceivables).toEqual(
       snapshotTwoLoanOne.principal -
-      snapshotTwoLoanOne.principalPaid +
-      snapshotTwoLoanTwo.principal -
-      snapshotTwoLoanTwo.principalPaid,
+        snapshotTwoLoanOne.principalPaid +
+        snapshotTwoLoanTwo.principal -
+        snapshotTwoLoanTwo.principalPaid,
     );
 
     expect(snapshotTwo.expiryBuckets.active).toEqual(0);
@@ -513,15 +513,15 @@ describe("generateSnapshots", () => {
     expect(snapshotTwo.expiryBuckets["30Days"]).toEqual(0);
     expect(snapshotTwo.expiryBuckets["121Days"]).toEqual(
       snapshotTwoLoanOne.principal -
-      snapshotTwoLoanOne.principalPaid +
-      snapshotTwoLoanTwo.principal -
-      snapshotTwoLoanTwo.principalPaid,
+        snapshotTwoLoanOne.principalPaid +
+        snapshotTwoLoanTwo.principal -
+        snapshotTwoLoanTwo.principalPaid,
     );
     expect(
       snapshotTwo.expiryBuckets.active +
-      snapshotTwo.expiryBuckets.expired +
-      snapshotTwo.expiryBuckets["30Days"] +
-      snapshotTwo.expiryBuckets["121Days"],
+        snapshotTwo.expiryBuckets.expired +
+        snapshotTwo.expiryBuckets["30Days"] +
+        snapshotTwo.expiryBuckets["121Days"],
     ).toEqual(snapshotTwo.principalReceivables);
 
     // Skip to day 10 after payment
@@ -541,9 +541,9 @@ describe("generateSnapshots", () => {
     // eslint-disable-next-line prettier/prettier
     expect(snapshotTen.principalReceivables).toEqual(
       snapshotTenLoanOne.principal -
-      snapshotTenLoanOne.principalPaid +
-      snapshotTenLoanTwo.principal +
-      snapshotTenLoanTwo.principalPaid,
+        snapshotTenLoanOne.principalPaid +
+        snapshotTenLoanTwo.principal +
+        snapshotTenLoanTwo.principalPaid,
     );
 
     expect(snapshotTen.expiryBuckets.active).toEqual(0);
@@ -556,9 +556,9 @@ describe("generateSnapshots", () => {
     );
     expect(
       snapshotTen.expiryBuckets.active +
-      snapshotTen.expiryBuckets.expired +
-      snapshotTen.expiryBuckets["30Days"] +
-      snapshotTen.expiryBuckets["121Days"],
+        snapshotTen.expiryBuckets.expired +
+        snapshotTen.expiryBuckets["30Days"] +
+        snapshotTen.expiryBuckets["121Days"],
     ).toEqual(snapshotTen.principalReceivables);
   });
 
@@ -622,9 +622,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTen.expiryBuckets["121Days"]).toEqual(LOAN_PRINCIPAL);
     expect(
       snapshotTen.expiryBuckets.active +
-      snapshotTen.expiryBuckets.expired +
-      snapshotTen.expiryBuckets["30Days"] +
-      snapshotTen.expiryBuckets["121Days"],
+        snapshotTen.expiryBuckets.expired +
+        snapshotTen.expiryBuckets["30Days"] +
+        snapshotTen.expiryBuckets["121Days"],
     ).toEqual(snapshotTen.principalReceivables);
 
     // Day after should be the same
@@ -678,9 +678,9 @@ describe("generateSnapshots", () => {
     expect(snapshotEleven.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotEleven.expiryBuckets.active +
-      snapshotEleven.expiryBuckets.expired +
-      snapshotEleven.expiryBuckets["30Days"] +
-      snapshotEleven.expiryBuckets["121Days"],
+        snapshotEleven.expiryBuckets.expired +
+        snapshotEleven.expiryBuckets["30Days"] +
+        snapshotEleven.expiryBuckets["121Days"],
     ).toEqual(snapshotEleven.principalReceivables);
   });
 
@@ -776,9 +776,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotTwelve.expiryBuckets.active +
-      snapshotTwelve.expiryBuckets.expired +
-      snapshotTwelve.expiryBuckets["30Days"] +
-      snapshotTwelve.expiryBuckets["121Days"],
+        snapshotTwelve.expiryBuckets.expired +
+        snapshotTwelve.expiryBuckets["30Days"] +
+        snapshotTwelve.expiryBuckets["121Days"],
     ).toEqual(snapshotTwelve.principalReceivables);
   });
 
@@ -1128,9 +1128,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotDayOfExpiry.expiryBuckets.active +
-      snapshotDayOfExpiry.expiryBuckets.expired +
-      snapshotDayOfExpiry.expiryBuckets["30Days"] +
-      snapshotDayOfExpiry.expiryBuckets["121Days"],
+        snapshotDayOfExpiry.expiryBuckets.expired +
+        snapshotDayOfExpiry.expiryBuckets["30Days"] +
+        snapshotDayOfExpiry.expiryBuckets["121Days"],
     ).toEqual(snapshotDayOfExpiry.principalReceivables);
 
     // Same for the next day
@@ -1166,9 +1166,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotDayAfterExpiry.expiryBuckets.active +
-      snapshotDayAfterExpiry.expiryBuckets.expired +
-      snapshotDayAfterExpiry.expiryBuckets["30Days"] +
-      snapshotDayAfterExpiry.expiryBuckets["121Days"],
+        snapshotDayAfterExpiry.expiryBuckets.expired +
+        snapshotDayAfterExpiry.expiryBuckets["30Days"] +
+        snapshotDayAfterExpiry.expiryBuckets["121Days"],
     ).toEqual(snapshotDayAfterExpiry.principalReceivables);
   });
 
@@ -1222,9 +1222,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayOfExpiry.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotDayOfExpiry.expiryBuckets.active +
-      snapshotDayOfExpiry.expiryBuckets.expired +
-      snapshotDayOfExpiry.expiryBuckets["30Days"] +
-      snapshotDayOfExpiry.expiryBuckets["121Days"],
+        snapshotDayOfExpiry.expiryBuckets.expired +
+        snapshotDayOfExpiry.expiryBuckets["30Days"] +
+        snapshotDayOfExpiry.expiryBuckets["121Days"],
     ).toEqual(snapshotDayOfExpiry.principalReceivables);
 
     // Same for next day
@@ -1262,9 +1262,9 @@ describe("generateSnapshots", () => {
     expect(snapshotDayAfterExpiry.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotDayAfterExpiry.expiryBuckets.active +
-      snapshotDayAfterExpiry.expiryBuckets.expired +
-      snapshotDayAfterExpiry.expiryBuckets["30Days"] +
-      snapshotDayAfterExpiry.expiryBuckets["121Days"],
+        snapshotDayAfterExpiry.expiryBuckets.expired +
+        snapshotDayAfterExpiry.expiryBuckets["30Days"] +
+        snapshotDayAfterExpiry.expiryBuckets["121Days"],
     ).toEqual(snapshotDayAfterExpiry.principalReceivables);
   });
 
@@ -1519,9 +1519,9 @@ describe("generateSnapshots", () => {
     expect(snapshotTwelve.expiryBuckets["121Days"]).toEqual(0);
     expect(
       snapshotTwelve.expiryBuckets.active +
-      snapshotTwelve.expiryBuckets.expired +
-      snapshotTwelve.expiryBuckets["30Days"] +
-      snapshotTwelve.expiryBuckets["121Days"],
+        snapshotTwelve.expiryBuckets.expired +
+        snapshotTwelve.expiryBuckets["30Days"] +
+        snapshotTwelve.expiryBuckets["121Days"],
     ).toEqual(snapshotTwelve.principalReceivables);
   });
 
@@ -1642,9 +1642,9 @@ describe("generateSnapshots", () => {
     expect(snapshotThirteen.expiryBuckets["121Days"]).toEqual(repaymentTwoPrincipalDueAfter);
     expect(
       snapshotThirteen.expiryBuckets.active +
-      snapshotThirteen.expiryBuckets.expired +
-      snapshotThirteen.expiryBuckets["30Days"] +
-      snapshotThirteen.expiryBuckets["121Days"],
+        snapshotThirteen.expiryBuckets.expired +
+        snapshotThirteen.expiryBuckets["30Days"] +
+        snapshotThirteen.expiryBuckets["121Days"],
     ).toEqual(snapshotThirteen.principalReceivables);
   });
 
@@ -1799,9 +1799,9 @@ describe("generateSnapshots", () => {
     expect(snapshotFourteen.expiryBuckets["121Days"]).toEqual(repaymentTwoPrincipalDueAfter);
     expect(
       snapshotFourteen.expiryBuckets.active +
-      snapshotFourteen.expiryBuckets.expired +
-      snapshotFourteen.expiryBuckets["30Days"] +
-      snapshotFourteen.expiryBuckets["121Days"],
+        snapshotFourteen.expiryBuckets.expired +
+        snapshotFourteen.expiryBuckets["30Days"] +
+        snapshotFourteen.expiryBuckets["121Days"],
     ).toEqual(snapshotFourteen.principalReceivables);
   });
 
