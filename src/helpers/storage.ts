@@ -1,13 +1,38 @@
 import { DocumentData, Firestore, QueryDocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 
-import { Snapshot } from "../types/snapshot";
+import { Loan, Snapshot, SnapshotLoanMap } from "../types/snapshot";
 import { getISO8601DateString } from "./dateHelper";
 
 const FIRESTORE_ROOT_COLLECTION = "snapshots";
+const FIRESTORE_LOAN_COLLECTION = "loans";
 
 const getClient = () => {
   return new Firestore();
 };
+
+function deepCopy<T>(obj: T): T {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+
+  if (obj instanceof Date) {
+    return new Date((obj as Date).getTime()) as unknown as T;
+  }
+
+  if (Array.isArray(obj)) {
+    return (obj as Array<unknown>).map(deepCopy) as unknown as T;
+  }
+
+  const copy: Record<string, unknown> = {};
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      copy[key] = deepCopy((obj as Record<string, unknown>)[key]);
+    }
+  }
+
+  return copy as T;
+}
 
 const SnapshotConverter = {
   toFirestore(snapshot: Snapshot): DocumentData {
@@ -22,6 +47,16 @@ const SnapshotConverter = {
       ...data,
       date: data.date.toDate(),
     } as Snapshot;
+  },
+};
+
+const LoanConverter = {
+  toFirestore(loan: Loan): DocumentData {
+    return loan;
+  },
+  fromFirestore(loan: QueryDocumentSnapshot): Loan {
+    const data = loan.data();
+    return data as Loan;
   },
 };
 
@@ -61,11 +96,30 @@ export const getSnapshot = async (date: Date): Promise<Snapshot | null> => {
     return null;
   }
 
+  // Get the loans
+  const loans = await client
+    .collection(FIRESTORE_ROOT_COLLECTION)
+    .doc(getISO8601DateString(date))
+    .collection(FIRESTORE_LOAN_COLLECTION)
+    .withConverter(LoanConverter)
+    .get();
+  let loanMap: SnapshotLoanMap = {};
+  if (!loans.empty) {
+    loanMap = loans.docs.reduce((accumulator, currentValue) => {
+      const loan = currentValue.data();
+      accumulator[loan.id] = loan;
+      return accumulator;
+    }, {} as SnapshotLoanMap);
+  }
+
+  // Add the loans into the snapshot
+  snapshotData.loans = loanMap;
+
   // Return the snapshot
   return snapshotData;
 };
 
-export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<Snapshot[]> => {
+export const getSnapshots = async (startDate: Date, beforeDate: Date, includeLoans: boolean): Promise<Snapshot[]> => {
   // Get the Firestore client
   const client = getClient();
 
@@ -78,7 +132,74 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
     .get();
 
   // If there is no snapshot, return null
-  return snapshots.docs.map(snapshot => snapshot.data());
+  const snapshotRecords = snapshots.docs.map(snapshot => snapshot.data());
+
+  if (includeLoans === true) {
+    // Iterate over the snapshots
+    for (let i = 0; i < snapshotRecords.length; i++) {
+      const snapshot = snapshotRecords[i];
+
+      // Get the loans
+      const loans = await client
+        .collection(FIRESTORE_ROOT_COLLECTION)
+        .doc(getISO8601DateString(snapshot.date))
+        .collection(FIRESTORE_LOAN_COLLECTION)
+        .withConverter(LoanConverter)
+        .get();
+      let loanMap: SnapshotLoanMap = {};
+      if (!loans.empty) {
+        loanMap = loans.docs.reduce((accumulator, currentValue) => {
+          const loan = currentValue.data();
+          accumulator[loan.id] = loan;
+          return accumulator;
+        }, {} as SnapshotLoanMap);
+      }
+
+      // Add the loans into the snapshot
+      snapshot.loans = loanMap;
+    }
+  }
+
+  return snapshotRecords;
+};
+
+const FIRESTORE_BATCH_SIZE = 500;
+
+const writeLoans = async (snapshotDate: Date, loans: Loan[]) => {
+  // Get the Firestore client
+  const client = getClient();
+
+  let batch = client.batch();
+  let batchCount = 0;
+
+  // Write the loans
+  for (let i = 0; i < loans.length; i++) {
+    const loan = loans[i];
+
+    // Add the loan to the batch
+    batch.set(
+      client
+        .collection(FIRESTORE_ROOT_COLLECTION)
+        .doc(getISO8601DateString(snapshotDate))
+        .collection(FIRESTORE_LOAN_COLLECTION)
+        .withConverter(LoanConverter)
+        .doc(loan.id),
+      loan,
+    );
+
+    // Commit the batch if it is full
+    batchCount++;
+    if (batchCount === FIRESTORE_BATCH_SIZE) {
+      await batch.commit();
+      batch = client.batch();
+      batchCount = 0;
+    }
+  }
+
+  // Commit the final batch
+  if (batchCount > 0) {
+    await batch.commit();
+  }
 };
 
 export const writeSnapshots = async (snapshots: Snapshot[]) => {
@@ -88,12 +209,26 @@ export const writeSnapshots = async (snapshots: Snapshot[]) => {
 
   // Write the snapshots
   for (let i = 0; i < snapshots.length; i++) {
-    const snapshot = snapshots[i];
+    const currentSnapshot = snapshots[i];
+
+    // Do a deep copy of the snapshot, as it will be modified
+    const snapshot = deepCopy(currentSnapshot) as Snapshot;
+
+    // Extract the loans
+    const loans: Loan[] = Object.values(snapshot.loans);
+
+    // Delete the loans from the snapshot
+    snapshot.loans = {};
+
+    // Write the snapshot
     await client
       .collection(FIRESTORE_ROOT_COLLECTION)
       .withConverter(SnapshotConverter)
       .doc(getISO8601DateString(snapshot.date))
       .set(snapshot);
+
+    // Write the loans in a sub-collection in order to avoid hitting document limits
+    await writeLoans(snapshot.date, loans);
   }
   console.log("Finished writing snapshots");
 };

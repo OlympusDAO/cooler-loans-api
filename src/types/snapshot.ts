@@ -74,7 +74,7 @@ export type Loan = {
   collateralClaimedValue: number;
 };
 
-type SnapshotLoanMap = {
+export type SnapshotLoanMap = {
   [key: string]: Loan;
 };
 
@@ -135,8 +135,21 @@ export type Snapshot = {
    *
    * Key: `cooler address`-`loanId`
    * Value: Loan record
+   *
+   * Will only be fetched if explicitly specified.
    */
   loans: SnapshotLoanMap;
+
+  /**
+   * Principal due for each expiry bucket.
+   */
+  expiryBuckets: {
+    active: number;
+    expired: number;
+    "30Days": number;
+    "121Days": number;
+  };
+
   creationEvents: ClearLoanRequestEventOptional[];
   defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
   repaymentEvents: RepayLoanEventOptional[];
