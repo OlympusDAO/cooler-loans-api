@@ -54,7 +54,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
   {
     runtime: "nodejs18",
     availableMemoryMb: 512,
-    timeout: 600,
+    timeout: 540,
     callback: handleGenerate,
     environmentVariables: {
       GRAPHQL_ENDPOINT: pulumiConfig.require("GRAPHQL_ENDPOINT"),
