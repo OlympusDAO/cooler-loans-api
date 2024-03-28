@@ -54,7 +54,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
   {
     runtime: "nodejs18",
     availableMemoryMb: 512,
-    timeout: 300, // This ensures that the function ends before the next scheduled run
+    timeout: 600,
     callback: handleGenerate,
     environmentVariables: {
       GRAPHQL_ENDPOINT: pulumiConfig.require("GRAPHQL_ENDPOINT"),
@@ -70,7 +70,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
 new gcp.cloudscheduler.Job(
   "generate",
   {
-    schedule: "*/5 * * * *", // Every 5 minutes
+    schedule: "0 */4 * * *", // Every 4 hours
     timeZone: "UTC",
     httpTarget: {
       uri: functionGenerate.httpsTriggerUrl,
