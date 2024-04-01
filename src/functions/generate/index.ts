@@ -8,7 +8,7 @@ import { getData } from "./subgraph";
 const LAUNCH_DATE = "2023-09-21";
 // So that the next 4 months of income can be projected
 const DAYS_AFTER = 121;
-const DAYS_OFFSET = 3;
+const DAYS_OFFSET = 7;
 
 const resolveSubgraphUrl = (): string => {
   const endpointUrl = process.env.GRAPHQL_ENDPOINT;

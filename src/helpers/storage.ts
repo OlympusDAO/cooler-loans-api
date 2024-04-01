@@ -208,6 +208,7 @@ export const writeSnapshots = async (snapshots: Snapshot[]) => {
   // Get the Firestore client
   const client = getClient();
   console.log(`Writing ${snapshots.length} snapshots`);
+  // TODO this is slow - figure out how to improve the performance
 
   // Write the snapshots
   for (let i = 0; i < snapshots.length; i++) {
