@@ -30,6 +30,7 @@ export const getCachedSnapshot = async (date: Date): Promise<Snapshot | null> =>
 export const cacheSnapshots = (snapshots: Snapshot[]) => {
   console.debug("cacheSnapshots: Caching snapshots");
   for (const snapshot of snapshots) {
+    // TODO consider marking if the cache has been changed, and use that to determine what to write. On the level of individual loans?
     console.debug(getISO8601DateString(snapshot.date));
     cache[getISO8601DateString(snapshot.date)] = snapshot;
   }
