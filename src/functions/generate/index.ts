@@ -56,7 +56,9 @@ export const handleGenerate = async (req: any, res: any) => {
         : adjustDate(new Date(), -1) // Otherwise, use the day before
       : new Date(LAUNCH_DATE), // Otherwise, use the launch date
   );
-  const beforeDate: Date = setMidnight(adjustDate(new Date(), DAYS_AFTER));
+  const todayMidnight = setMidnight(new Date());
+  // Generate `DAYS_AFTER` days of snapshots if doing catch-up
+  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, DAYS_AFTER));
 
   let currentStartDate = new Date(startDate);
   let currentEndDate = adjustDate(new Date(startDate), DAYS_OFFSET);
