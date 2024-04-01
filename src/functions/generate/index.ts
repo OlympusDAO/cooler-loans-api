@@ -27,7 +27,7 @@ const resolveSubgraphUrl = (): string => {
 };
 
 const run = async (endpointUrl: string, startDate: Date, beforeDate: Date) => {
-  console.log(`Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
+  console.log(`run: Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
 
   // Fetch event data
   const subgraphData = await getData(endpointUrl, startDate, beforeDate);
@@ -56,9 +56,11 @@ export const handleGenerate = async (req: any, res: any) => {
         : adjustDate(new Date(), -1) // Otherwise, use the day before
       : new Date(LAUNCH_DATE), // Otherwise, use the launch date
   );
+  console.debug(`handleGenerate: Starting from ${startDate.toISOString()}`);
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
   const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, DAYS_AFTER));
+  console.debug(`handleGenerate: Up to ${beforeDate.toISOString()}`);
 
   let currentStartDate = new Date(startDate);
   let currentEndDate = adjustDate(new Date(startDate), DAYS_OFFSET);

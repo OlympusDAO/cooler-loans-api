@@ -73,9 +73,11 @@ export const getLatestCachedDate = async (): Promise<string | null> => {
     .get();
   // If there are no snapshots, return null
   if (snapshot.empty) {
+    console.log(`No cached date found`);
     return null;
   }
 
+  console.log(`Last cached date: ${getISO8601DateString(snapshot.docs[0].data().date)}`);
   return getISO8601DateString(snapshot.docs[0].data().date);
 };
 
