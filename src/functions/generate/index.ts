@@ -1,6 +1,7 @@
 import { adjustDate, setMidnight } from "../../helpers/dateHelper";
-import { getLatestCachedDate, getSnapshot, writeSnapshots } from "../../helpers/storage";
+import { getLatestCachedDate } from "../../helpers/storage";
 import { Snapshot } from "../../types/snapshot";
+import { cacheSnapshots, getCachedSnapshot, writeCachedSnapshots } from "./cache";
 import { generateSnapshots } from "./snapshot";
 import { getData } from "./subgraph";
 
@@ -32,13 +33,13 @@ const run = async (endpointUrl: string, startDate: Date, beforeDate: Date) => {
   const subgraphData = await getData(endpointUrl, startDate, beforeDate);
 
   // Grab the previous date's data
-  const previousSnapshot: Snapshot | null = await getSnapshot(adjustDate(startDate, -1));
+  const previousSnapshot: Snapshot | null = await getCachedSnapshot(adjustDate(startDate, -1));
 
   // Prepare snapshots
   const dateSnapshots = generateSnapshots(startDate, beforeDate, previousSnapshot, subgraphData);
 
-  // Write snapshots
-  await writeSnapshots(dateSnapshots);
+  // Update cache
+  cacheSnapshots(dateSnapshots);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +70,9 @@ export const handleGenerate = async (req: any, res: any) => {
     currentStartDate = adjustDate(currentStartDate, DAYS_OFFSET);
     currentEndDate = adjustDate(currentEndDate, DAYS_OFFSET);
   }
+
+  // Write the cache to Firestore
+  await writeCachedSnapshots();
 
   // Required to end the function
   res.send("OK").end();
