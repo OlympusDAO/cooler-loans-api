@@ -53,7 +53,7 @@ const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
   "generate",
   {
     runtime: "nodejs18",
-    availableMemoryMb: 512,
+    availableMemoryMb: 1024,
     timeout: 540,
     callback: handleGenerate,
     environmentVariables: {
