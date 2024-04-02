@@ -77,6 +77,7 @@ new gcp.cloudscheduler.Job(
       uri: functionGenerate.httpsTriggerUrl,
       httpMethod: "GET",
     },
+    attemptDeadline: "540s", // Same as the function
   },
   {
     dependsOn: [serviceCloudScheduler, functionGenerate],
