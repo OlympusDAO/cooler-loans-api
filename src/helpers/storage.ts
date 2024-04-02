@@ -73,9 +73,11 @@ export const getLatestCachedDate = async (): Promise<string | null> => {
     .get();
   // If there are no snapshots, return null
   if (snapshot.empty) {
+    console.log(`No cached date found`);
     return null;
   }
 
+  console.log(`Last cached date: ${getISO8601DateString(snapshot.docs[0].data().date)}`);
   return getISO8601DateString(snapshot.docs[0].data().date);
 };
 
@@ -206,6 +208,7 @@ export const writeSnapshots = async (snapshots: Snapshot[]) => {
   // Get the Firestore client
   const client = getClient();
   console.log(`Writing ${snapshots.length} snapshots`);
+  // TODO this is slow - figure out how to improve the performance
 
   // Write the snapshots
   for (let i = 0; i < snapshots.length; i++) {
