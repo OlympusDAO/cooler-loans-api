@@ -370,14 +370,23 @@
               "properties":
                 {
                   "borrowerAddress": { "type": "string" },
-                  "collateralClaimedQuantity": { "type": "number" },
-                  "collateralClaimedValue": { "type": "number" },
+                  "collateralClaimedQuantity":
+                    { "description": "Quantity of collateral claimed by the lender.", "type": "number" },
+                  "collateralClaimedValue":
+                    {
+                      "description": "USD value of the collateral claimed by the lender (at the time of claiming)",
+                      "type": "number",
+                    },
                   "collateralDeposited":
                     {
                       "description": "The current quantity of the collateral token that is deposited.\n\nAs the loan is repaid, this will decrease.",
                       "type": "number",
                     },
-                  "collateralIncome": { "type": "number" },
+                  "collateralIncome":
+                    {
+                      "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding",
+                      "type": "number",
+                    },
                   "coolerAddress": { "type": "string" },
                   "createdTimestamp": { "description": "Timestamp of the loan creation, in seconds", "type": "number" },
                   "durationSeconds": { "description": "The loan duration, in seconds.", "type": "number" },
@@ -405,7 +414,8 @@
                   "principal":
                     { "description": "The loan principal. Will not change after loan creation.", "type": "number" },
                   "principalPaid": { "description": "Cumulative principal paid on the loan.", "type": "number" },
-                  "secondsToExpiry": { "type": "number" },
+                  "secondsToExpiry":
+                    { "description": "The number of seconds until the loan expires.", "type": "number" },
                   "status":
                     {
                       "description": "Status of the loan",
