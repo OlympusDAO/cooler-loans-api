@@ -12,8 +12,7 @@
     "codegen:jsonschema-to-openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
     "codegen": "yarn codegen:graphql && yarn codegen:jsonschema && yarn codegen:jsonschema-to-openapi && yarn lint:fix",
     "test": "jest",
-    "lint": "eslint --config ./.eslintrc.js ./src/ --ext .jsx,.js,.tsx,.ts",
-    "lint:fix": "prettier --write ./src/ & yarn lint --fix",
+    "lint": "prettier --write . && eslint --fix --config ./.eslintrc.js . --ext .jsx,.js,.tsx,.ts",
     "firestore:start": "gcloud emulators firestore start --host-port=localhost:8080"
   },
   "devDependencies": {
