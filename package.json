@@ -52,5 +52,11 @@
     "graphql": "^16.8.0",
     "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn",
+    "yarn": ">=1.22.0 <2.0.0"
   }
 }
