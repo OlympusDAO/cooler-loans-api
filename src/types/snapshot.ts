@@ -64,13 +64,31 @@ export type Loan = {
    * Timestamp of the expected loan expiry, in seconds
    */
   expiryTimestamp: number;
+  /**
+   * The number of seconds until the loan expires.
+   */
   secondsToExpiry: number;
   /**
    * Status of the loan
    */
   status: "Active" | "Expired" | "Reclaimed" | "Repaid";
+  /**
+   * USD value of the income recognised from claiming the loan's collateral.
+   *
+   * As collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.
+   *
+   * The income is therefore calculated as:
+   *
+   * collateralValueAtClaim - principalOutstanding
+   */
   collateralIncome: number;
+  /**
+   * Quantity of collateral claimed by the lender.
+   */
   collateralClaimedQuantity: number;
+  /**
+   * USD value of the collateral claimed by the lender (at the time of claiming)
+   */
   collateralClaimedValue: number;
 };
 

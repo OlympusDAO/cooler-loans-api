@@ -35,6 +35,7 @@ const config: CodegenConfig = {
           BigInt: "number",
           Bytes: "string",
           Int8: "number",
+          Timestamp: "number",
         },
         skipTypename: true,
       },

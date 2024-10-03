@@ -423,10 +423,11 @@ export const generateSnapshots = (
         loan.collateralDeposited = 0;
 
         // Calculate the income from the collateral claim
-        loan.collateralIncome += collateralValueClaimed;
+        const collateralIncome = collateralValueClaimed - (loan.principal - loan.principalPaid);
+        loan.collateralIncome += collateralIncome;
 
         // Set the income from the default claim
-        currentSnapshot.collateralIncome += collateralValueClaimed;
+        currentSnapshot.collateralIncome += collateralIncome;
       });
 
       // Update loans where there were extend events
