@@ -2,6 +2,7 @@ import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
 import cors from "cors";
 import express from "express";
+import { readFileSync } from "fs";
 
 import { handleGenerate } from "./src/functions/generate";
 import { handleGet } from "./src/functions/get";
@@ -29,6 +30,64 @@ const serviceCloudScheduler = new gcp.projects.Service("cloudscheduler", {
 const serviceFirebase = new gcp.projects.Service("firebase", {
   service: "firebase.googleapis.com",
 });
+const serviceBigQuery = new gcp.projects.Service("bigquery", {
+  service: "bigquery.googleapis.com",
+});
+
+/**
+ * Create BigQuery dataset
+ */
+const bigQueryDataset = new gcp.bigquery.Dataset(
+  projectName,
+  {
+    datasetId: projectName,
+  },
+  {
+    dependsOn: [serviceBigQuery],
+  },
+);
+export const bigQueryDatasetId = bigQueryDataset.datasetId;
+
+/**
+ * Create BigQuery tables
+ */
+const bigQueryLoanSnapshotSchema = readFileSync("./bigquery-schemas/loanSnapshots.json", "utf-8");
+const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
+  "loanSnapshots",
+  {
+    datasetId: bigQueryDataset.datasetId,
+    tableId: "loanSnapshots",
+    schema: bigQueryLoanSnapshotSchema,
+    timePartitioning: {
+      type: "DAY",
+      field: "snapshotDate",
+      requirePartitionFilter: true,
+    },
+  },
+  {
+    dependsOn: [bigQueryDataset],
+  },
+);
+export const bigQueryLoanSnapshotTableId = bigQueryLoanSnapshotTable.tableId;
+
+const bigQuerySnapshotSchema = readFileSync("./bigquery-schemas/snapshots.json", "utf-8");
+const bigQuerySnapshotTable = new gcp.bigquery.Table(
+  "snapshots",
+  {
+    datasetId: bigQueryDataset.datasetId,
+    tableId: "snapshots",
+    schema: bigQuerySnapshotSchema,
+    timePartitioning: {
+      type: "DAY",
+      field: "snapshotDate",
+      requirePartitionFilter: true,
+    },
+  },
+  {
+    dependsOn: [bigQueryDataset],
+  },
+);
+export const bigQuerySnapshotTableId = bigQuerySnapshotTable.tableId;
 
 /**
  * Create Firestore database
