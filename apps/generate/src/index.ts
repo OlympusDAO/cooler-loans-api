@@ -2,6 +2,7 @@ import { adjustDate, setMidnight } from "@repo/shared/src/dateHelper";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/src/loanSnapshot";
 import { Snapshot } from "@repo/types/src/snapshot";
 
+import { getClearinghouseEvents } from "./helpers/clearinghouseData";
 import {
   getLatestSnapshotDate,
   getLoanSnapshots,
@@ -19,7 +20,8 @@ const DAYS_OFFSET = 7;
 const run = async (startDate: Date, beforeDate: Date) => {
   console.log(`run: Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
 
-  // TODO Fetch data from BigQuery
+  // Fetch events data from BigQuery
+  const clearinghouseEvents = await getClearinghouseEvents(startDate, beforeDate);
 
   // Grab the previous date's data
   const previousSnapshot: Snapshot | null = await getSnapshot(adjustDate(startDate, -1));
@@ -32,7 +34,13 @@ const run = async (startDate: Date, beforeDate: Date) => {
   }, {} as LoanSnapshotMap);
 
   // Prepare snapshots
-  const dateSnapshots = generateSnapshots(startDate, beforeDate, previousSnapshot, previousLoanMap, subgraphData);
+  const dateSnapshots = generateSnapshots(
+    startDate,
+    beforeDate,
+    previousSnapshot,
+    previousLoanMap,
+    clearinghouseEvents,
+  );
 
   // Write the snapshots to BigQuery
   for (const dateSnapshot of dateSnapshots) {
