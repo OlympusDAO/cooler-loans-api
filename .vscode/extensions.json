@@ -5,6 +5,8 @@
     "dbaeumer.vscode-eslint",
     "mquandalle.graphql",
     "graphql.vscode-graphql",
-    "kavod-io.vscode-jest-test-adapter"
+    "kavod-io.vscode-jest-test-adapter",
+    "rvest.vs-code-prettier-eslint",
+    "esbenp.prettier-vscode"
   ]
 }
