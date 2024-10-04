@@ -1,7 +1,7 @@
 import { request } from "graphql-request";
 
-import { CoolerLoanEventsDocument, CoolerLoanEventsQuery } from "../../generated/graphql";
-import { getISO8601DateString, getTimestampSeconds } from "../../helpers/dateHelper";
+import { getISO8601DateString, getTimestampSeconds } from "../../../../packages/shared/src/dateHelper";
+import { CoolerLoanEventsDocument, CoolerLoanEventsQuery } from "../../../generated/graphql";
 import {
   ClaimDefaultedLoanEventOptional,
   ClearinghouseSnapshotOptional,
@@ -11,7 +11,7 @@ import {
   RebalanceEventOptional,
   RepayLoanEventOptional,
   SubgraphData,
-} from "../../types/subgraph";
+} from "../../../types/subgraph";
 
 export const getData = async (endpointUrl: string, startDate: Date, beforeDate: Date): Promise<SubgraphData> => {
   const FUNC = "getData";

@@ -4,7 +4,7 @@ import cors from "cors";
 import express from "express";
 import { readFileSync } from "fs";
 
-import { handleGenerate } from "./src/functions/generate";
+import { handleGenerate } from "./apps/generate/src";
 import { handleGet } from "./src/functions/get";
 
 const gcpConfig = new pulumi.Config("gcp");

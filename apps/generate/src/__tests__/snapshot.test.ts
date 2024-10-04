@@ -1,5 +1,5 @@
-import { Snapshot } from "../../../types/snapshot";
-import { CoolerLoanOptional, SubgraphData } from "../../../types/subgraph";
+import { Snapshot } from "../../../../packages/types/src/snapshot";
+import { CoolerLoanOptional, SubgraphData } from "../../../../src/types/subgraph";
 import { generateSnapshots } from "../snapshot";
 
 const LOAN_ID = "0x3-0";

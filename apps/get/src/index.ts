@@ -1,5 +1,5 @@
-import { isISO8601DateString } from "../../helpers/dateHelper";
 import { getSnapshots } from "../../helpers/firestore";
+import { isISO8601DateString } from "./helpers/date";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function handleGet(req: any, res: any) {

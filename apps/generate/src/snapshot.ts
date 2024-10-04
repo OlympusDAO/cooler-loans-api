@@ -1,7 +1,13 @@
-import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
-import { parseNumber } from "../../helpers/numberHelper";
-import { LoanSnapshot, LoanSnapshotMap } from "../../types/loanSnapshot";
-import { Snapshot } from "../../types/snapshot";
+import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/src/loanSnapshot";
+import { Snapshot } from "@repo/types/src/snapshot";
+
+import {
+  adjustDate,
+  getISO8601DateString,
+  setBeforeMidnight,
+  setMidnight,
+} from "../../../packages/shared/src/dateHelper";
+import { parseNumber } from "../../../packages/shared/src/numberHelper";
 import {
   ClaimDefaultedLoanEventOptional,
   ClearinghouseSnapshotOptional,
@@ -9,7 +15,13 @@ import {
   ExtendLoanEventOptional,
   RepayLoanEventOptional,
   SubgraphData,
-} from "../../types/subgraph";
+} from "../../../src/types/subgraph";
+
+type DateSnapshot = {
+  date: Date;
+  snapshot: Snapshot;
+  loans: LoanSnapshot[];
+};
 
 const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): number => {
   console.log(`repayment is ${repayment}`);
@@ -247,9 +259,9 @@ export const generateSnapshots = (
   previousDateRecord: Snapshot | null,
   previousDateLoans: LoanSnapshotMap | null,
   subgraphData: SubgraphData,
-): Snapshot[] => {
+): DateSnapshot[] => {
   const FUNC = "generateSnapshots";
-  const snapshots: Snapshot[] = [];
+  const dateSnapshots: DateSnapshot[] = [];
 
   // Iterate through the dates
   let currentDate = setMidnight(startDate);
@@ -523,11 +535,15 @@ export const generateSnapshots = (
       currentSnapshot.expiryBuckets.active += principalDue;
     });
 
-    snapshots.push(currentSnapshot);
+    dateSnapshots.push({
+      date: currentDateBeforeMidnight,
+      snapshot: currentSnapshot,
+      loans: Object.values(currentLoansMap),
+    });
 
     previousSnapshot = currentSnapshot;
     currentDate = adjustDate(currentDate, 1);
   }
 
-  return snapshots;
+  return dateSnapshots;
 };

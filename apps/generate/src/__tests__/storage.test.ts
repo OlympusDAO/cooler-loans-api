@@ -1,7 +1,7 @@
 import { Firestore } from "@google-cloud/firestore";
 
-import { getLatestCachedDate, getSnapshot, getSnapshots, writeSnapshots } from "../../../helpers/firestore";
-import { Loan, Snapshot } from "../../../types/snapshot";
+import { Loan, Snapshot } from "../../../../packages/types/src/snapshot";
+import { getLatestCachedDate, getSnapshot, getSnapshots, writeSnapshots } from "../../../../src/helpers/firestore";
 
 // Set up the firestore emulator
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";

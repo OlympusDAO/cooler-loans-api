@@ -1,0 +1,13 @@
+{
+  "name": "@repo/types",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@repo/eslint-config": "*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "prettier --write . && eslint --fix ."
+  }
+}

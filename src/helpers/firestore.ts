@@ -1,7 +1,7 @@
 import { DocumentData, Firestore, QueryDocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 
-import { Loan, Snapshot, SnapshotLoanMap } from "../types/snapshot";
-import { getISO8601DateString } from "./dateHelper";
+import { Loan, Snapshot, SnapshotLoanMap } from "../../packages/types/src/snapshot";
+import { getISO8601DateString } from "../../packages/shared/src/dateHelper";
 
 const FIRESTORE_ROOT_COLLECTION = "snapshots";
 const FIRESTORE_LOAN_COLLECTION = "loans";
