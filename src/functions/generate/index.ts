@@ -1,5 +1,6 @@
 import { adjustDate, setMidnight } from "../../helpers/dateHelper";
 import { getLatestCachedDate } from "../../helpers/storage";
+import { LoanSnapshotMap } from "../../types/loanSnapshot";
 import { Snapshot } from "../../types/snapshot";
 import { cacheSnapshots, getCachedSnapshot, writeCachedSnapshots } from "./cache";
 import { generateSnapshots } from "./snapshot";
@@ -30,13 +31,19 @@ const run = async (endpointUrl: string, startDate: Date, beforeDate: Date) => {
   console.log(`run: Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
 
   // Fetch event data
+  // TODO fetch from BigQuery
   const subgraphData = await getData(endpointUrl, startDate, beforeDate);
 
   // Grab the previous date's data
   const previousSnapshot: Snapshot | null = await getCachedSnapshot(adjustDate(startDate, -1));
 
+  // Grab the previous date's loans
+  const previousLoans: LoanSnapshotMap = {};
+
   // Prepare snapshots
-  const dateSnapshots = generateSnapshots(startDate, beforeDate, previousSnapshot, subgraphData);
+  const dateSnapshots = generateSnapshots(startDate, beforeDate, previousSnapshot, previousLoans, subgraphData);
+
+  // TODO consider writing data here
 
   // Update cache
   cacheSnapshots(dateSnapshots);

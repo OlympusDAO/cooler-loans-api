@@ -1,6 +1,7 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "../../helpers/dateHelper";
 import { parseNumber } from "../../helpers/numberHelper";
-import { Loan, Snapshot } from "../../types/snapshot";
+import { LoanSnapshot, LoanSnapshotMap } from "../../types/loanSnapshot";
+import { Snapshot } from "../../types/snapshot";
 import {
   ClaimDefaultedLoanEventOptional,
   ClearinghouseSnapshotOptional,
@@ -10,7 +11,7 @@ import {
   SubgraphData,
 } from "../../types/subgraph";
 
-const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
+const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): number => {
   console.log(`repayment is ${repayment}`);
   const interestDue = loan.interest - loan.interestPaid;
   console.log(`Interest due: ${interestDue}`);
@@ -22,7 +23,7 @@ const calculateInterestRepayment = (repayment: number, loan: Loan): number => {
   return repayment;
 };
 
-const calculatePrincipalRepayment = (repayment: number, loan: Loan): number => {
+const calculatePrincipalRepayment = (repayment: number, loan: LoanSnapshot): number => {
   console.log(`repayment is ${repayment}`);
   const interestRepayment = calculateInterestRepayment(repayment, loan);
 
@@ -43,8 +44,7 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   if (!previousSnapshot) {
     console.log(`${FUNC}: No previous snapshot found`);
     return {
-      date: currentDate,
-      timestamp: currentDate.getTime(),
+      snapshotDate: currentDate,
       principalReceivables: 0,
       interestReceivables: 0,
       interestIncome: 0,
@@ -70,35 +70,21 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
         sDaiBalance: 0,
         sDaiInDaiBalance: 0,
       },
-      loans: {},
       expiryBuckets: {
         active: 0,
         expired: 0,
-        "30Days": 0,
-        "121Days": 0,
+        days30: 0,
+        days121: 0,
       },
-      creationEvents: [],
-      defaultedClaimEvents: [],
-      repaymentEvents: [],
-      extendEvents: [],
-      clearinghouseEvents: [],
     };
   }
 
   // Otherwise, return a new one based on the previous day
-  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(previousSnapshot.date)} found. Copying.`);
+  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(previousSnapshot.snapshotDate)} found. Copying.`);
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date
-  newSnapshot.date = currentDate;
-  newSnapshot.timestamp = currentDate.getTime();
-
-  // Events are not carried over
-  newSnapshot.creationEvents = [];
-  newSnapshot.repaymentEvents = [];
-  newSnapshot.defaultedClaimEvents = [];
-  newSnapshot.extendEvents = [];
-  newSnapshot.clearinghouseEvents = [];
+  newSnapshot.snapshotDate = currentDate;
 
   // Some snapshot values are not carried over
   newSnapshot.interestIncome = 0;
@@ -109,14 +95,9 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   newSnapshot.expiryBuckets = {
     active: 0,
     expired: 0,
-    "30Days": 0,
-    "121Days": 0,
+    days30: 0,
+    days121: 0,
   };
-
-  // Ensure the loans property has a value
-  if (!newSnapshot.loans) {
-    newSnapshot.loans = {};
-  }
 
   // Ensure the clearinghouse snapshot has a value
   if (!newSnapshot.clearinghouse) {
@@ -264,6 +245,7 @@ export const generateSnapshots = (
   startDate: Date,
   beforeDate: Date,
   previousDateRecord: Snapshot | null,
+  previousDateLoans: LoanSnapshotMap | null,
   subgraphData: SubgraphData,
 ): Snapshot[] => {
   const FUNC = "generateSnapshots";
@@ -277,6 +259,7 @@ export const generateSnapshots = (
   if (previousSnapshot) {
     console.log(`Previous snapshot exists`);
   }
+  const previousLoans: LoanSnapshotMap = previousDateLoans || {};
 
   while (currentDate.getTime() < endDate.getTime()) {
     const currentDateString = getISO8601DateString(currentDate);
@@ -285,6 +268,10 @@ export const generateSnapshots = (
 
     // Populate a new Snapshot based on the previous one
     const currentSnapshot = createSnapshot(currentDateBeforeMidnight, previousSnapshot);
+
+    // Populate a new LoanSnapshotMap based on a deep copy of the previous one
+    const currentLoansMap = structuredClone(previousLoans);
+    // TODO need to return loan records
 
     // Order all events by block timestamp
     const currentDateEventsByTimestamp: EventsByTimestamp = populateEventsByTimestamp(currentDateString, subgraphData);
@@ -318,8 +305,6 @@ export const generateSnapshots = (
         currentSnapshot.terms.interestRate = parseNumber(clearinghouseSnapshot.interestRate);
         currentSnapshot.terms.duration = parseNumber(clearinghouseSnapshot.duration);
         currentSnapshot.terms.loanToCollateral = parseNumber(clearinghouseSnapshot.loanToCollateral);
-
-        currentSnapshot.clearinghouseEvents.push(clearinghouseSnapshot);
       });
 
       // Create loans where there were creation events
@@ -330,7 +315,8 @@ export const generateSnapshots = (
 
         // Add any new loans into running list
         console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
-        currentSnapshot.loans[creationEvent.loan.id] = {
+        currentLoansMap[creationEvent.loan.id] = {
+          snapshotDate: currentDateBeforeMidnight,
           id: creationEvent.loan.id,
           loanId: parseNumber(creationEvent.loan.loanId),
           createdTimestamp: parseNumber(creationEvent.blockTimestamp),
@@ -371,7 +357,7 @@ export const generateSnapshots = (
         console.log(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
 
         // Find the loan
-        const loan = currentSnapshot.loans[repaymentEvent.loan.id];
+        const loan = currentLoansMap[repaymentEvent.loan.id];
         if (!loan) {
           throw new Error(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
         }
@@ -409,7 +395,7 @@ export const generateSnapshots = (
         console.log(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
 
         // Find the loan
-        const loan = currentSnapshot.loans[defaultedClaimEvent.loan.id];
+        const loan = currentLoansMap[defaultedClaimEvent.loan.id];
         if (!loan) {
           throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
         }
@@ -437,7 +423,7 @@ export const generateSnapshots = (
         console.log(`${FUNC}: processing extend event ${extendEvent.id}`);
 
         // Find the loan
-        const loan = currentSnapshot.loans[extendEvent.loan.id];
+        const loan = currentLoansMap[extendEvent.loan.id];
         if (!loan) {
           throw new Error(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
         }
@@ -471,16 +457,10 @@ export const generateSnapshots = (
         currentSnapshot.treasury.sDaiBalance = parseNumber(extendEvent.treasurySDaiBalance);
         currentSnapshot.treasury.sDaiInDaiBalance = parseNumber(extendEvent.treasurySDaiInDaiBalance);
       });
-
-      // Add all events
-      currentSnapshot.creationEvents.push(...currentCreationEvents);
-      currentSnapshot.repaymentEvents.push(...currentRepaymentEvents);
-      currentSnapshot.defaultedClaimEvents.push(...currentDefaultedClaimEvents);
-      currentSnapshot.extendEvents.push(...currentExtendEvents);
     }
 
     // Update secondsToExpiry and status for all loans
-    const loans = currentSnapshot.loans ? Object.values(currentSnapshot.loans) : [];
+    const loans = Object.values(currentLoansMap);
     console.log(`${FUNC}: processing ${loans.length} loans`);
     loans.forEach(loan => {
       // Update the seconds to expiry
@@ -529,13 +509,13 @@ export const generateSnapshots = (
 
       // Expiring within 30 days
       if (loan.secondsToExpiry <= 30 * 24 * 60 * 60) {
-        currentSnapshot.expiryBuckets["30Days"] += principalDue;
+        currentSnapshot.expiryBuckets.days30 += principalDue;
         return;
       }
 
       // Expiring within 121 days
       if (loan.secondsToExpiry <= 121 * 24 * 60 * 60) {
-        currentSnapshot.expiryBuckets["121Days"] += principalDue;
+        currentSnapshot.expiryBuckets.days121 += principalDue;
         return;
       }
 
