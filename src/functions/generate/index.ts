@@ -1,5 +1,5 @@
 import { adjustDate, setMidnight } from "../../helpers/dateHelper";
-import { getLatestCachedDate } from "../../helpers/storage";
+import { getLatestCachedDate } from "../../helpers/firestore";
 import { LoanSnapshotMap } from "../../types/loanSnapshot";
 import { Snapshot } from "../../types/snapshot";
 import { cacheSnapshots, getCachedSnapshot, writeCachedSnapshots } from "./cache";

@@ -1,6 +1,6 @@
 import { Firestore } from "@google-cloud/firestore";
 
-import { getLatestCachedDate, getSnapshot, getSnapshots, writeSnapshots } from "../../../helpers/storage";
+import { getLatestCachedDate, getSnapshot, getSnapshots, writeSnapshots } from "../../../helpers/firestore";
 import { Loan, Snapshot } from "../../../types/snapshot";
 
 // Set up the firestore emulator

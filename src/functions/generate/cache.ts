@@ -1,5 +1,5 @@
 import { getISO8601DateString } from "../../helpers/dateHelper";
-import { getSnapshot, writeSnapshots } from "../../helpers/storage";
+import { getSnapshot, writeSnapshots } from "../../helpers/firestore";
 import { Snapshot } from "../../types/snapshot";
 
 type SnapshotCache = {
