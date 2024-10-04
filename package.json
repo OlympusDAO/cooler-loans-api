@@ -7,8 +7,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "codegen:bigquery": "yarn run codegen:jsonschema && yarn -s jsbq -j tmp/snapshot.jsonschema > bigquery-schemas/snapshot.json && yarn -s jsbq -j tmp/loanSnapshot.jsonschema > bigquery-schemas/loanSnapshot.json && yarn run lint",
     "codegen:graphql": "graphql-code-generator",
-    "codegen:jsonschema": "yarn typescript-json-schema src/types/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
+    "codegen:jsonschema": "yarn typescript-json-schema src/types/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema && yarn typescript-json-schema src/types/loanSnapshot.ts LoanSnapshot --required -o tmp/loanSnapshot.jsonschema",
     "codegen:jsonschema-to-openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
     "codegen": "yarn codegen:graphql && yarn codegen:jsonschema && yarn codegen:jsonschema-to-openapi && yarn lint:fix",
     "test": "jest",
@@ -36,6 +37,7 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "jest": "^29.1.1",
+    "jsonschema-bigquery": "^7.0.0",
     "prettier": "^3.0.3",
     "ts-jest": "^29.0.2",
     "ts-node": "^10.9.2",

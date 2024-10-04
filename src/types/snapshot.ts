@@ -1,107 +1,10 @@
-import {
-  ClaimDefaultedLoanEventOptional,
-  ClearinghouseSnapshotOptional,
-  ClearLoanRequestEventOptional,
-  ExtendLoanEventOptional,
-  RepayLoanEventOptional,
-} from "./subgraph";
-
-export type Loan = {
-  /**
-   * Loan id unique across the clearinghouse and its coolers
-   *
-   * Format: cooler-loanId
-   */
-  id: string;
-  /**
-   * Loan id unique to the cooler
-   */
-  loanId: number;
-  /**
-   * Timestamp of the loan creation, in seconds
-   */
-  createdTimestamp: number;
-  coolerAddress: string;
-  borrowerAddress: string;
-  lenderAddress: string;
-  /**
-   * The loan duration, in seconds.
-   */
-  durationSeconds: number;
-  /**
-   * The loan principal. Will not change after loan creation.
-   */
-  principal: number;
-  /**
-   * Cumulative principal paid on the loan.
-   */
-  principalPaid: number;
-  /**
-   * The interest rate, stored as a decimal.
-   *
-   * e.g. 0.5% = 0.005
-   */
-  interestRate: number;
-  /**
-   * The total interest charged on the loan.
-   *
-   * When the loan is extended, this number will be increased.
-   */
-  interest: number;
-  /**
-   * Cumulative interest paid on the loan.
-   *
-   * Any outstanding interest is paid first, followed by principal.
-   */
-  interestPaid: number;
-  /**
-   * The current quantity of the collateral token that is deposited.
-   *
-   * As the loan is repaid, this will decrease.
-   */
-  collateralDeposited: number;
-  /**
-   * Timestamp of the expected loan expiry, in seconds
-   */
-  expiryTimestamp: number;
-  /**
-   * The number of seconds until the loan expires.
-   */
-  secondsToExpiry: number;
-  /**
-   * Status of the loan
-   */
-  status: "Active" | "Expired" | "Reclaimed" | "Repaid";
-  /**
-   * USD value of the income recognised from claiming the loan's collateral.
-   *
-   * As collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.
-   *
-   * The income is therefore calculated as:
-   *
-   * collateralValueAtClaim - principalOutstanding
-   */
-  collateralIncome: number;
-  /**
-   * Quantity of collateral claimed by the lender.
-   */
-  collateralClaimedQuantity: number;
-  /**
-   * USD value of the collateral claimed by the lender (at the time of claiming)
-   */
-  collateralClaimedValue: number;
-};
-
-export type SnapshotLoanMap = {
-  [key: string]: Loan;
-};
-
 export type Snapshot = {
-  date: Date;
   /**
-   * Timestamp of the snapshot, in milliseconds
+   * Date of the snapshot.
+   *
+   * Times are stored at UTC.
    */
-  timestamp: number;
+  snapshotDate: Date;
   /**
    * Principal receivable across all Coolers
    */
@@ -149,28 +52,12 @@ export type Snapshot = {
     loanToCollateral: number;
   };
   /**
-   * Dictionary of the loans that had been created by this date.
-   *
-   * Key: `cooler address`-`loanId`
-   * Value: Loan record
-   *
-   * Will only be fetched if explicitly specified.
-   */
-  loans: SnapshotLoanMap;
-
-  /**
    * Principal due for each expiry bucket.
    */
   expiryBuckets: {
     active: number;
     expired: number;
-    "30Days": number;
-    "121Days": number;
+    days30: number;
+    days121: number;
   };
-
-  creationEvents: ClearLoanRequestEventOptional[];
-  defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
-  repaymentEvents: RepayLoanEventOptional[];
-  extendEvents: ExtendLoanEventOptional[];
-  clearinghouseEvents: ClearinghouseSnapshotOptional[];
 };
