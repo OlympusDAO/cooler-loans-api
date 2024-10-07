@@ -1,0 +1,87 @@
+[
+  {
+    "name": "clearinghouse",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Represents the state of the Clearinghouse at the time of the snapshot.",
+    "fields": [
+      { "name": "collateralAddress", "type": "STRING", "mode": "REQUIRED" },
+      { "name": "coolerFactoryAddress", "type": "STRING", "mode": "REQUIRED" },
+      { "name": "daiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "debtAddress", "type": "STRING", "mode": "REQUIRED" },
+      { "name": "fundAmount", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "fundCadence", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "sDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "sDaiInDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" }
+    ]
+  },
+  {
+    "name": "collateralDeposited",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Quantity of collateral deposited across all Coolers"
+  },
+  {
+    "name": "collateralIncome",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Income from collateral reclaimed on this date."
+  },
+  {
+    "name": "expiryBuckets",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Principal due for each expiry bucket.",
+    "fields": [
+      { "name": "active", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "days121", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "days30", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "expired", "type": "BIGNUMERIC", "mode": "REQUIRED" }
+    ]
+  },
+  {
+    "name": "interestIncome",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Income from interest payments made on this date."
+  },
+  {
+    "name": "interestReceivables",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Interest receivable across all Coolers"
+  },
+  {
+    "name": "principalReceivables",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Principal receivable across all Coolers"
+  },
+  {
+    "name": "snapshotDate",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "Date of the snapshot.\n\nTimes are stored at UTC."
+  },
+  {
+    "name": "terms",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "fields": [
+      { "name": "duration", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "interestRate", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "loanToCollateral", "type": "BIGNUMERIC", "mode": "REQUIRED" }
+    ]
+  },
+  {
+    "name": "treasury",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Represents the state of the Treasury at the time of the snapshot.",
+    "fields": [
+      { "name": "daiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "sDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" },
+      { "name": "sDaiInDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED" }
+    ]
+  }
+]

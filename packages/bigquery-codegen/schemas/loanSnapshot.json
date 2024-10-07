@@ -1,0 +1,97 @@
+[
+  { "name": "borrowerAddress", "type": "STRING", "mode": "REQUIRED" },
+  {
+    "name": "collateralClaimedQuantity",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Quantity of collateral claimed by the lender."
+  },
+  {
+    "name": "collateralClaimedValue",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "USD value of the collateral claimed by the lender (at the time of claiming)"
+  },
+  {
+    "name": "collateralDeposited",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The current quantity of the collateral token that is deposited.\n\nAs the loan is repaid, this will decrease."
+  },
+  {
+    "name": "collateralIncome",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding"
+  },
+  { "name": "coolerAddress", "type": "STRING", "mode": "REQUIRED" },
+  {
+    "name": "createdTimestamp",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Timestamp of the loan creation, in seconds"
+  },
+  {
+    "name": "durationSeconds",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The loan duration, in seconds."
+  },
+  {
+    "name": "expiryTimestamp",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Timestamp of the expected loan expiry, in seconds"
+  },
+  {
+    "name": "id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Loan id unique across the clearinghouse and its coolers\n\nFormat: cooler-loanId"
+  },
+  {
+    "name": "interest",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The total interest charged on the loan.\n\nWhen the loan is extended, this number will be increased."
+  },
+  {
+    "name": "interestPaid",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Cumulative interest paid on the loan.\n\nAny outstanding interest is paid first, followed by principal."
+  },
+  {
+    "name": "interestRate",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The interest rate, stored as a decimal.\n\ne.g. 0.5% = 0.005"
+  },
+  { "name": "lenderAddress", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "loanId", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Loan id unique to the cooler" },
+  {
+    "name": "principal",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The loan principal. Will not change after loan creation."
+  },
+  {
+    "name": "principalPaid",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Cumulative principal paid on the loan."
+  },
+  {
+    "name": "secondsToExpiry",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "The number of seconds until the loan expires."
+  },
+  {
+    "name": "snapshotDate",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "Date of the snapshot.\n\nTimes are stored at UTC."
+  },
+  { "name": "status", "type": "STRING", "mode": "REQUIRED", "description": "Status of the loan" }
+]
