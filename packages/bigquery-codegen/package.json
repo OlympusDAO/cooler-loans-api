@@ -1,0 +1,19 @@
+{
+  "name": "bigquery-codegen",
+  "version": "1.0.0",
+  "description": "Code generation for BigQuery",
+  "main": "index.js",
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "jsonschema-bigquery": "^7.0.0",
+    "typescript-json-schema": "^0.61.0"
+  },
+  "scripts": {
+    "build": "yarn run build:jsonschema && yarn run build:bigquery",
+    "postbuild": "yarn run lint",
+    "build:jsonschema": "yarn typescript-json-schema ../types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema && yarn typescript-json-schema ../types/src/loanSnapshot.ts LoanSnapshot --required -o tmp/loanSnapshot.jsonschema",
+    "build:bigquery": "yarn -s jsbq -j tmp/snapshot.jsonschema > schemas/snapshot.json && yarn -s jsbq -j tmp/loanSnapshot.jsonschema > schemas/loanSnapshot.json",
+    "lint": "prettier --write ."
+  }
+}
