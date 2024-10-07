@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "gcp-build": "yarn run build",
     "lint": "prettier --write . && eslint --fix ."
   }
 }

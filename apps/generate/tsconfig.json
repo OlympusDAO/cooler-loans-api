@@ -1,8 +1,6 @@
 {
   "extends": "../../packages/typescript-config/base.json",
   "include": [
-    "src/**/*.ts",
-    "../../src/functions/generate/src/cache.ts",
-    "../../src/functions/generate/src/subgraph.ts"
+    "src/**/*.ts"
   ]
 }
