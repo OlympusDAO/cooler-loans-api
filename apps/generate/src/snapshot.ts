@@ -9,13 +9,13 @@ import {
 } from "../../../packages/shared/src/dateHelper";
 import { parseNumber } from "../../../packages/shared/src/numberHelper";
 import {
-  ClaimDefaultedLoanEventOptional,
-  ClearinghouseSnapshotOptional,
-  ClearLoanRequestEventOptional,
-  ExtendLoanEventOptional,
-  RepayLoanEventOptional,
-  SubgraphData,
-} from "../../../src/types/subgraph";
+  ClaimDefaultedLoanEvent,
+  ClearinghouseEvents,
+  ClearinghouseSnapshot,
+  ClearLoanRequestEvent,
+  ExtendLoanEvent,
+  RepayLoanEvent,
+} from "./types";
 
 type DateSnapshot = {
   date: Date;
@@ -159,18 +159,21 @@ const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number 
 type EventsByTimestamp = Record<
   number,
   {
-    clearinghouseSnapshots: ClearinghouseSnapshotOptional[];
-    creationEvents: ClearLoanRequestEventOptional[];
-    repaymentEvents: RepayLoanEventOptional[];
-    defaultedClaimEvents: ClaimDefaultedLoanEventOptional[];
-    extendEvents: ExtendLoanEventOptional[];
+    clearinghouseSnapshots: ClearinghouseSnapshot[];
+    creationEvents: ClearLoanRequestEvent[];
+    repaymentEvents: RepayLoanEvent[];
+    defaultedClaimEvents: ClaimDefaultedLoanEvent[];
+    extendEvents: ExtendLoanEvent[];
   }
 >;
 
-const populateEventsByTimestamp = (currentDateString: string, subgraphData: SubgraphData): EventsByTimestamp => {
+const populateEventsByTimestamp = (
+  currentDateString: string,
+  clearinghouseEvents: ClearinghouseEvents,
+): EventsByTimestamp => {
   const dateEventsByTimestamp: EventsByTimestamp = {};
 
-  const currentClearinghouseSnapshots = subgraphData.clearinghouseSnapshots[currentDateString] || [];
+  const currentClearinghouseSnapshots = clearinghouseEvents.clearinghouseSnapshots[currentDateString] || [];
   currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
     const timestamp = parseNumber(clearinghouseSnapshot.blockTimestamp);
     if (!dateEventsByTimestamp[timestamp]) {
@@ -185,7 +188,7 @@ const populateEventsByTimestamp = (currentDateString: string, subgraphData: Subg
     dateEventsByTimestamp[timestamp].clearinghouseSnapshots.push(clearinghouseSnapshot);
   });
 
-  const currentCreationEvents = subgraphData.creationEvents[currentDateString] || [];
+  const currentCreationEvents = clearinghouseEvents.creationEvents[currentDateString] || [];
   currentCreationEvents.forEach(creationEvent => {
     const timestamp = parseNumber(creationEvent.blockTimestamp);
     if (!dateEventsByTimestamp[timestamp]) {
@@ -200,7 +203,7 @@ const populateEventsByTimestamp = (currentDateString: string, subgraphData: Subg
     dateEventsByTimestamp[timestamp].creationEvents.push(creationEvent);
   });
 
-  const currentRepaymentEvents = subgraphData.repaymentEvents[currentDateString] || [];
+  const currentRepaymentEvents = clearinghouseEvents.repaymentEvents[currentDateString] || [];
   currentRepaymentEvents.forEach(repaymentEvent => {
     const timestamp = parseNumber(repaymentEvent.blockTimestamp);
     if (!dateEventsByTimestamp[timestamp]) {
@@ -215,7 +218,7 @@ const populateEventsByTimestamp = (currentDateString: string, subgraphData: Subg
     dateEventsByTimestamp[timestamp].repaymentEvents.push(repaymentEvent);
   });
 
-  const currentDefaultedClaimEvents = subgraphData.defaultedClaimEvents[currentDateString] || [];
+  const currentDefaultedClaimEvents = clearinghouseEvents.defaultedClaimEvents[currentDateString] || [];
   currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
     const timestamp = parseNumber(defaultedClaimEvent.blockTimestamp);
     if (!dateEventsByTimestamp[timestamp]) {
@@ -230,7 +233,7 @@ const populateEventsByTimestamp = (currentDateString: string, subgraphData: Subg
     dateEventsByTimestamp[timestamp].defaultedClaimEvents.push(defaultedClaimEvent);
   });
 
-  const currentExtendEvents = subgraphData.extendEvents[currentDateString] || [];
+  const currentExtendEvents = clearinghouseEvents.extendEvents[currentDateString] || [];
   currentExtendEvents.forEach(extendEvent => {
     const timestamp = parseNumber(extendEvent.blockTimestamp);
     if (!dateEventsByTimestamp[timestamp]) {
@@ -258,7 +261,7 @@ export const generateSnapshots = (
   beforeDate: Date,
   previousDateRecord: Snapshot | null,
   previousDateLoans: LoanSnapshotMap | null,
-  subgraphData: SubgraphData,
+  clearinghouseEvents: ClearinghouseEvents,
 ): DateSnapshot[] => {
   const FUNC = "generateSnapshots";
   const dateSnapshots: DateSnapshot[] = [];
@@ -283,10 +286,12 @@ export const generateSnapshots = (
 
     // Populate a new LoanSnapshotMap based on a deep copy of the previous one
     const currentLoansMap = structuredClone(previousLoans);
-    // TODO need to return loan records
 
     // Order all events by block timestamp
-    const currentDateEventsByTimestamp: EventsByTimestamp = populateEventsByTimestamp(currentDateString, subgraphData);
+    const currentDateEventsByTimestamp: EventsByTimestamp = populateEventsByTimestamp(
+      currentDateString,
+      clearinghouseEvents,
+    );
 
     // Iterate by timestamp, so that events are processed in order
     for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
@@ -352,6 +357,7 @@ export const generateSnapshots = (
           interestRate: creationEvent.loan.request.interestPercentage,
           durationSeconds: creationEvent.loan.request.durationSeconds,
         };
+        // TODO link loans and requests
 
         // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
         currentSnapshot.clearinghouse.daiBalance = parseNumber(creationEvent.clearinghouseDaiBalance);

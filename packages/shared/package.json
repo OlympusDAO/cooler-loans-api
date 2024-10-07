@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
+  "dependencies": {
+    "@google-cloud/logging-winston": "^6.0.0",
+    "winston": "^3.14.2"
+  },
   "devDependencies": {
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",

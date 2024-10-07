@@ -1,9 +1,3 @@
-// TODO
-// [ ] Write snapshots to GCS
-// [ ] Write loans to GCS
-// [ ] Fetch snapshots from GCS
-// [ ] Fetch loans from GCS
-
 import { File, Storage } from "@google-cloud/storage";
 import { getISO8601DateString } from "@repo/shared/src/dateHelper";
 import { LoanSnapshot } from "@repo/types/src/loanSnapshot";
@@ -65,6 +59,14 @@ const getSnapshotFile = async (date: Date): Promise<[File, boolean]> => {
   return [snapshotFile, snapshotExists];
 };
 
+/**
+ * Get the snapshot for a given date.
+ *
+ * This retrieves the file from Google Cloud Storage.
+ *
+ * @param date - The date to get the snapshot for
+ * @returns The snapshot
+ */
 export const getSnapshot = async (date: Date): Promise<Snapshot> => {
   const [snapshotFile, snapshotExists] = await getSnapshotFile(date);
 
@@ -77,6 +79,11 @@ export const getSnapshot = async (date: Date): Promise<Snapshot> => {
   return JSON.parse(snapshot.toString()) as Snapshot;
 };
 
+/**
+ * Get the latest snapshot date.
+ *
+ * @returns The latest snapshot date or null if no snapshots exist
+ */
 export const getLatestSnapshotDate = async (): Promise<Date | null> => {
   const bucket = getBucket();
 
@@ -110,12 +117,25 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
   return null;
 };
 
+/**
+ * Write the snapshot for a given date to Google Cloud Storage.
+ *
+ * @param snapshot - The snapshot to write
+ */
 export const writeSnapshot = async (snapshot: Snapshot) => {
   const snapshotFile = getBucket().file(getSnapshotFilePath(snapshot.snapshotDate));
 
   await snapshotFile.save(JSON.stringify(snapshot, null, 2));
 };
 
+/**
+ * Get the loan snapshots for a given date.
+ *
+ * This retrieves the file from Google Cloud Storage.
+ *
+ * @param date - The date to get the loan snapshots for
+ * @returns The loan snapshots
+ */
 export const getLoanSnapshots = async (date: Date): Promise<LoanSnapshot[]> => {
   const loanSnapshotFile = getBucket().file(getLoanSnapshotFilePath(date));
 
@@ -129,6 +149,12 @@ export const getLoanSnapshots = async (date: Date): Promise<LoanSnapshot[]> => {
   return JSON.parse(loanSnapshot.toString()) as LoanSnapshot[];
 };
 
+/**
+ * Write the loan snapshots for a given date to Google Cloud Storage.
+ *
+ * @param date - The date to write the loan snapshots for
+ * @param loanSnapshots - The loan snapshots to write
+ */
 export const writeLoanSnapshots = async (date: Date, loanSnapshots: LoanSnapshot[]) => {
   const loanSnapshotFile = getBucket().file(getLoanSnapshotFilePath(date));
 
