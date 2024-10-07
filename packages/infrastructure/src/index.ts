@@ -4,8 +4,7 @@ import cors from "cors";
 import express from "express";
 import { readFileSync } from "fs";
 
-import { handleGenerate } from "./apps/generate/src";
-import { handleGet } from "./src/functions/get";
+import { createGenerateFunction, createGetFunction } from "./cloudFunction";
 
 const gcpConfig = new pulumi.Config("gcp");
 const pulumiConfig = new pulumi.Config();
@@ -106,77 +105,32 @@ new gcp.firestore.Database(
 );
 
 /**
+ * Create a GCS bucket to store the function code
+ */
+const functionAssetsBucket = new gcp.storage.Bucket(`${projectStackName}-function-assets`, {
+  location: "us-central1",
+});
+
+/**
  * Deploy Cloud Function - Generate daily snapshots
  */
-const functionGenerate = new gcp.cloudfunctions.HttpCallbackFunction(
-  "generate",
-  {
-    runtime: "nodejs18",
-    availableMemoryMb: 1024,
-    timeout: 540,
-    maxInstances: 1,
-    callback: handleGenerate,
-    environmentVariables: {
-      GRAPHQL_ENDPOINT: pulumiConfig.require("GRAPHQL_ENDPOINT"),
-      SUBGRAPH_API_KEY: pulumiConfig.requireSecret("SUBGRAPH_API_KEY"),
-    },
-  },
-  {
-    dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
-  },
-);
-
-// Create a Cloud Scheduler job to run every hour
-new gcp.cloudscheduler.Job(
-  "generate",
-  {
-    schedule: "0 */4 * * *", // Every 4 hours
-    timeZone: "UTC",
-    httpTarget: {
-      uri: functionGenerate.httpsTriggerUrl,
-      httpMethod: "GET",
-    },
-    attemptDeadline: "540s", // Same as the function
-  },
-  {
-    dependsOn: [serviceCloudScheduler, functionGenerate],
-  },
+const functionGenerate = createGenerateFunction(
+  pulumiConfig,
+  functionAssetsBucket,
+  serviceCloudFunctions,
+  serviceCloudScheduler,
 );
 
 /**
  * Deploy Cloud Function - Fetch
  */
-const corsOrigins: (string | RegExp)[] = [/\.olympusdao.finance$/, /\.on.fleek.co$/];
-if (pulumi.getStack() === "dev") {
-  corsOrigins.push("http://localhost:5173");
-}
-
-const functionGet = new gcp.cloudfunctions.HttpCallbackFunction(
-  "get",
-  {
-    runtime: "nodejs18",
-    availableMemoryMb: 512,
-    callbackFactory: () => {
-      /**
-       * Google Cloud Functions mangles the handling of CORS, so we
-       * wrap it in an Express app that is configured to handle CORS
-       * and applies restrictions to the origin.
-       */
-      const app = express();
-      app.use(
-        cors({
-          origin: corsOrigins,
-        }),
-      );
-
-      app.get("/", handleGet);
-
-      return app;
-    },
-  },
-  {
-    dependsOn: [serviceFirestore, serviceCloudBuild, serviceCloudFunctions],
-  },
+const functionGet = createGetFunction(
+  bigQueryDataset,
+  bigQueryLoanSnapshotTable,
+  bigQuerySnapshotTable,
+  functionAssetsBucket,
+  serviceCloudFunctions,
+  serviceBigQuery,
 );
 
 /**
@@ -232,7 +186,7 @@ const firebaseHostingVersion = new gcp.firebase.HostingVersion(
       rewrites: [
         {
           glob: "**",
-          function: functionGet.function.name,
+          function: functionGet.name,
         },
       ],
     },
@@ -278,7 +232,7 @@ new gcp.monitoring.AlertPolicy(
         conditionThreshold: {
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.function.name}" AND
+            resource.labels.function_name = "${functionGet.name}" AND
             metric.type = "cloudfunctions.googleapis.com/function/execution_times"
             `,
           aggregations: [
@@ -320,7 +274,7 @@ new gcp.monitoring.AlertPolicy(
         conditionThreshold: {
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.function.name}" AND
+            resource.labels.function_name = "${functionGet.name}" AND
             metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
             metric.labels.status != "ok"
             `,
@@ -363,7 +317,7 @@ new gcp.monitoring.AlertPolicy(
         conditionThreshold: {
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGenerate.function.name}" AND
+            resource.labels.function_name = "${functionGenerate.name}" AND
             metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
             metric.labels.status != "ok"
             `,
@@ -407,7 +361,7 @@ new gcp.monitoring.AlertPolicy(
         conditionMatchedLog: {
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.function.name}" AND
+            resource.labels.function_name = "${functionGet.name}" AND
             textPayload =~ "error"
             `,
         },
@@ -439,7 +393,7 @@ new gcp.monitoring.AlertPolicy(
         conditionMatchedLog: {
           filter: pulumi.interpolate`
             resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGenerate.function.name}" AND
+            resource.labels.function_name = "${functionGenerate.name}" AND
             textPayload =~ "error"
             `,
         },
