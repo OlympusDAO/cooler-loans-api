@@ -34,7 +34,10 @@ export const createGenerateFunction = (
       timeout: 540,
       maxInstances: 1,
       availableMemoryMb: 1024,
-      environmentVariables: {},
+      environmentVariables: {
+        CACHE_PROJECT: pulumiConfig.require("cacheProject"),
+        CACHE_BIGQUERY_DATASET: pulumiConfig.require("cacheBigQueryDataset"),
+      },
     },
     {
       dependsOn: [functionBucketObject, serviceCloudFunctions],

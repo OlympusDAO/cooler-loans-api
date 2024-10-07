@@ -1,7 +1,5 @@
 import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
-import cors from "cors";
-import express from "express";
 import { readFileSync } from "fs";
 
 import { createGenerateFunction, createGetFunction } from "./cloudFunction";
