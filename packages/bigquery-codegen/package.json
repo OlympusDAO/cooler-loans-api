@@ -1,5 +1,5 @@
 {
-  "name": "bigquery-codegen",
+  "name": "@repo/bigquery-codegen",
   "version": "1.0.0",
   "description": "Code generation for BigQuery",
   "main": "index.js",
