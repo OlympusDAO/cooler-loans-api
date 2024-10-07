@@ -51,7 +51,7 @@ export const bigQueryDatasetId = bigQueryDataset.datasetId;
 /**
  * Create BigQuery tables
  */
-const bigQueryLoanSnapshotSchema = readFileSync("./bigquery-schemas/loanSnapshots.json", "utf-8");
+const bigQueryLoanSnapshotSchema = readFileSync("./packages/bigquery-codegen/schemas/loanSnapshot.json", "utf-8");
 const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
   "loanSnapshots",
   {
@@ -70,7 +70,7 @@ const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
 );
 export const bigQueryLoanSnapshotTableId = bigQueryLoanSnapshotTable.tableId;
 
-const bigQuerySnapshotSchema = readFileSync("./bigquery-schemas/snapshots.json", "utf-8");
+const bigQuerySnapshotSchema = readFileSync("./packages/bigquery-codegen/schemas/snapshot.json", "utf-8");
 const bigQuerySnapshotTable = new gcp.bigquery.Table(
   "snapshots",
   {
