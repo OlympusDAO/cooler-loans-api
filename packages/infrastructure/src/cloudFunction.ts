@@ -13,6 +13,7 @@ export const createGenerateFunction = (
     {
       bucket: functionAssetsBucket.name,
       source: new pulumi.asset.AssetArchive({
+        // TODO verify this path
         ".": new pulumi.asset.FileArchive("../../apps/generate/dist/"),
       }),
     },
@@ -93,6 +94,7 @@ export const createGetFunction = (
     {
       bucket: functionAssetsBucket.name,
       source: new pulumi.asset.AssetArchive({
+        // TODO verify this path
         ".": new pulumi.asset.FileArchive("../../apps/get/dist/"),
       }),
     },
