@@ -82,5 +82,7 @@ export const handleGenerate = async (req: any, res: any) => {
   }
 
   // Required to end the function
-  res.send("OK").end();
+  // https://cloud.google.com/functions/docs/concepts/nodejs-runtime#http_functions
+  res.status(200);
+  res.end();
 };

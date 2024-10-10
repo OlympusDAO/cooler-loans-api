@@ -3,23 +3,29 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "./date": {
-      "types": "./src/date.ts",
-      "default": "./dist/date.js"
-    },
-    "./env": {
-      "types": "./src/env.ts",
-      "default": "./dist/env.js"
-    },
-    "./logging": {
-      "types": "./src/logging.ts",
-      "default": "./dist/logging.js"
-    },
-    "./number": {
-      "types": "./src/number.ts",
-      "default": "./dist/number.js"
+    ".": "./dist/index.js",
+    "./date": "./dist/date.js",
+    "./env": "./dist/env.js",
+    "./logging": "./dist/logging.js",
+    "./number": "./dist/number.js"
+  },
+  "typesVersions": {
+    "*": {
+      "date": [
+        "./dist/date.d.ts"
+      ],
+      "env": [
+        "./dist/env.d.ts"
+      ],
+      "logging": [
+        "./dist/logging.d.ts"
+      ],
+      "number": [
+        "./dist/number.d.ts"
+      ]
     }
   },
   "dependencies": {
@@ -30,10 +36,11 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/node": "^18",
+    "tsup": "^8.3.0",
     "typescript": "^5.5.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit && tsup",
     "lint": "prettier --write . && eslint --fix ."
   }
 }

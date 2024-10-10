@@ -17,14 +17,16 @@ export async function handleGet(req: any, res: any) {
   console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate), false);
 
+  res.json({
+    records: snapshots,
+  });
+
   // Enable caching
   // Source: https://firebase.google.com/docs/hosting/manage-cache
   res.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
 
   // Required to end the function
-  res
-    .json({
-      records: snapshots,
-    })
-    .end();
+  // https://cloud.google.com/functions/docs/concepts/nodejs-runtime#http_functions
+  res.status(200);
+  res.end();
 }
