@@ -44,6 +44,7 @@ const run = async (startDate: Date, beforeDate: Date) => {
 
   // Write the snapshots to BigQuery
   for (const dateSnapshot of dateSnapshots) {
+    console.log(`run: Writing snapshot for ${dateSnapshot.date}`);
     await writeSnapshot(dateSnapshot.snapshot);
     await writeLoanSnapshots(dateSnapshot.date, dateSnapshot.loans);
   }

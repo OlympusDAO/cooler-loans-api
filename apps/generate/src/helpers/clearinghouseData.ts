@@ -9,6 +9,8 @@ import {
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
   ExtendLoanEvent,
+  Loan,
+  LoanRequest,
   RepayLoanEvent,
 } from "../types";
 
@@ -100,6 +102,30 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
 
   // TODO do defund and rebalance events need to be included?
 
+  // Created loans
+  const createdLoansRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT *
+    FROM \`${cacheProject}.${cacheBigQueryDataset}.CoolerLoan\`
+    WHERE dt >= DATE('${BigQuery.date(getISO8601DateString(startDate))}') AND dt < DATE('${BigQuery.date(
+      getISO8601DateString(beforeDate),
+    )}')
+  `,
+  )) as Loan[];
+
+  // Loan requests
+  const loanRequestRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT *
+    FROM \`${cacheProject}.${cacheBigQueryDataset}.CoolerLoanRequest\`
+    WHERE dt >= DATE('${BigQuery.date(getISO8601DateString(startDate))}') AND dt < DATE('${BigQuery.date(
+      getISO8601DateString(beforeDate),
+    )}')
+  `,
+  )) as LoanRequest[];
+
   // Format
   // Each map is keyed on the date in YYYY-MM-DD format and has an array of events as the value
   // Clearinghouse snapshots
@@ -167,11 +193,39 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     {} as Record<string, ExtendLoanEvent[]>,
   );
 
+  // Created loans
+  const createdLoans = createdLoansRows.reduce(
+    (acc, row) => {
+      const date = getISO8601DateString(row.dt);
+      if (!acc[date]) {
+        acc[date] = {};
+      }
+      acc[date][row.id] = row;
+      return acc;
+    },
+    {} as Record<string, Record<string, Loan>>,
+  );
+
+  // Loan requests
+  const loanRequests = loanRequestRows.reduce(
+    (acc, row) => {
+      const date = getISO8601DateString(row.dt);
+      if (!acc[date]) {
+        acc[date] = {};
+      }
+      acc[date][row.id] = row;
+      return acc;
+    },
+    {} as Record<string, Record<string, LoanRequest>>,
+  );
+
   return {
     clearinghouseSnapshots,
     creationEvents,
     repaymentEvents,
     defaultedClaimEvents,
     extendEvents,
+    createdLoans,
+    loanRequests,
   };
 };

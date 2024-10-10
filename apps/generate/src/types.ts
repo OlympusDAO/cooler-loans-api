@@ -150,6 +150,81 @@ export type RebalanceEvent = {
   dt: Date;
 };
 
+export type LoanRequest = {
+  __typename: string;
+  id: string;
+  createdBlock: number;
+  createdTimestamp: number;
+  createdTransaction: string;
+  cooler: string;
+  requestId: number;
+  borrower: string;
+  collateralToken: string;
+  debtToken: string;
+  amount: number;
+  interestPercentage: number;
+  loanToCollateralRatio: number;
+  durationSeconds: number;
+  isRescinded: boolean;
+  requestEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  rescindEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  clearEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  loans: {
+    __typename: string;
+    id: string;
+  }[];
+  dt: Date;
+};
+
+export type Loan = {
+  __typename: string;
+  id: string;
+  createdBlock: number;
+  createdTimestamp: number;
+  createdTransaction: string;
+  cooler: string;
+  request: {
+    __typename: string;
+    id: string;
+  };
+  loanId: number;
+  borrower: string;
+  lender: string;
+  interest: number;
+  principal: number;
+  collateral: number;
+  expiryTimestamp: number;
+  hasCallback: boolean;
+  collateralToken: string;
+  debtToken: string;
+  creationEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  repaymentEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  defaultedClaimEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  extendEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  dt: Date;
+};
+
 export type ClearinghouseEvents = {
   /**
    * A map of YYYY-MM-DD date strings to the clearinghouse snapshots for that date.
@@ -175,4 +250,14 @@ export type ClearinghouseEvents = {
    * A map of YYYY-MM-DD date strings to the extend events for that date.
    */
   extendEvents: Record<string, ExtendLoanEvent[]>;
+
+  /**
+   * A map of YYYY-MM-DD date strings to a map of record IDs to the loans for that date.
+   */
+  createdLoans: Record<string, Record<string, Loan>>;
+
+  /**
+   * A map of YYYY-MM-DD date strings to a map of record IDs to the loan requests for that date.
+   */
+  loanRequests: Record<string, Record<string, LoanRequest>>;
 };

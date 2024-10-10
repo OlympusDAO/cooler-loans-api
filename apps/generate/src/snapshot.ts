@@ -14,6 +14,8 @@ import {
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
   ExtendLoanEvent,
+  Loan,
+  LoanRequest,
   RepayLoanEvent,
 } from "./types";
 
@@ -164,6 +166,8 @@ type EventsByTimestamp = Record<
     repaymentEvents: RepayLoanEvent[];
     defaultedClaimEvents: ClaimDefaultedLoanEvent[];
     extendEvents: ExtendLoanEvent[];
+    createdLoans: Record<string, Loan>;
+    loanRequests: Record<string, LoanRequest>;
   }
 >;
 
@@ -173,6 +177,7 @@ const populateEventsByTimestamp = (
 ): EventsByTimestamp => {
   const dateEventsByTimestamp: EventsByTimestamp = {};
 
+  // Clearinghouse snapshots
   const currentClearinghouseSnapshots = clearinghouseEvents.clearinghouseSnapshots[currentDateString] || [];
   currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
     const timestamp = parseNumber(clearinghouseSnapshot.blockTimestamp);
@@ -183,11 +188,14 @@ const populateEventsByTimestamp = (
         repaymentEvents: [],
         defaultedClaimEvents: [],
         extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
       };
     }
     dateEventsByTimestamp[timestamp].clearinghouseSnapshots.push(clearinghouseSnapshot);
   });
 
+  // Creation events
   const currentCreationEvents = clearinghouseEvents.creationEvents[currentDateString] || [];
   currentCreationEvents.forEach(creationEvent => {
     const timestamp = parseNumber(creationEvent.blockTimestamp);
@@ -198,11 +206,14 @@ const populateEventsByTimestamp = (
         repaymentEvents: [],
         defaultedClaimEvents: [],
         extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
       };
     }
     dateEventsByTimestamp[timestamp].creationEvents.push(creationEvent);
   });
 
+  // Repayment events
   const currentRepaymentEvents = clearinghouseEvents.repaymentEvents[currentDateString] || [];
   currentRepaymentEvents.forEach(repaymentEvent => {
     const timestamp = parseNumber(repaymentEvent.blockTimestamp);
@@ -213,11 +224,14 @@ const populateEventsByTimestamp = (
         repaymentEvents: [],
         defaultedClaimEvents: [],
         extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
       };
     }
     dateEventsByTimestamp[timestamp].repaymentEvents.push(repaymentEvent);
   });
 
+  // Defaulted claim events
   const currentDefaultedClaimEvents = clearinghouseEvents.defaultedClaimEvents[currentDateString] || [];
   currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
     const timestamp = parseNumber(defaultedClaimEvent.blockTimestamp);
@@ -228,11 +242,14 @@ const populateEventsByTimestamp = (
         repaymentEvents: [],
         defaultedClaimEvents: [],
         extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
       };
     }
     dateEventsByTimestamp[timestamp].defaultedClaimEvents.push(defaultedClaimEvent);
   });
 
+  // Extend events
   const currentExtendEvents = clearinghouseEvents.extendEvents[currentDateString] || [];
   currentExtendEvents.forEach(extendEvent => {
     const timestamp = parseNumber(extendEvent.blockTimestamp);
@@ -243,9 +260,47 @@ const populateEventsByTimestamp = (
         repaymentEvents: [],
         defaultedClaimEvents: [],
         extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
       };
     }
     dateEventsByTimestamp[timestamp].extendEvents.push(extendEvent);
+  });
+
+  // Created loans
+  const currentCreatedLoans = clearinghouseEvents.createdLoans[currentDateString] || {};
+  Object.entries(currentCreatedLoans).forEach(([id, loan]) => {
+    const timestamp = parseNumber(loan.createdTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
+      };
+    }
+    dateEventsByTimestamp[timestamp].createdLoans[id] = loan;
+  });
+
+  // Loan requests
+  const currentLoanRequests = clearinghouseEvents.loanRequests[currentDateString] || {};
+  Object.entries(currentLoanRequests).forEach(([id, loanRequest]) => {
+    const timestamp = parseNumber(loanRequest.createdTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = {
+        clearinghouseSnapshots: [],
+        creationEvents: [],
+        repaymentEvents: [],
+        defaultedClaimEvents: [],
+        extendEvents: [],
+        createdLoans: {},
+        loanRequests: {},
+      };
+    }
+    dateEventsByTimestamp[timestamp].loanRequests[id] = loanRequest;
   });
 
   // Sort the events by timestamp
@@ -330,34 +385,42 @@ export const generateSnapshots = (
       currentCreationEvents.forEach(creationEvent => {
         console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
 
+        // Fetch the loan from the created loans
+        const loan = records.createdLoans[creationEvent.id];
+        if (!loan) {
+          throw new Error(`creationEvents: Could not find loan ${creationEvent.loan.id}`);
+        }
+
+        // Fetch the loan request
+        const loanRequest = records.loanRequests[loan.request.id];
+        if (!loanRequest) {
+          throw new Error(`creationEvents: Could not find loan request ${loan.request.id}`);
+        }
+
         // Add any new loans into running list
         console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
         currentLoansMap[creationEvent.loan.id] = {
           snapshotDate: currentDateBeforeMidnight,
           id: creationEvent.loan.id,
-          loanId: parseNumber(creationEvent.loan.loanId),
+          loanId: parseNumber(loan.loanId),
           createdTimestamp: parseNumber(creationEvent.blockTimestamp),
-          coolerAddress: creationEvent.loan.cooler,
-          borrowerAddress: creationEvent.loan.borrower,
-          lenderAddress: creationEvent.loan.lender,
-          principal: parseNumber(creationEvent.loan.principal),
-          interest: parseNumber(creationEvent.loan.interest),
-          collateralDeposited: parseNumber(creationEvent.loan.collateral),
-          expiryTimestamp: parseNumber(creationEvent.loan.expiryTimestamp),
-          secondsToExpiry: getSecondsToExpiry(
-            currentDateBeforeMidnight,
-            parseNumber(creationEvent.loan.expiryTimestamp),
-          ),
+          coolerAddress: loan.cooler,
+          borrowerAddress: loan.borrower,
+          lenderAddress: loan.lender,
+          principal: parseNumber(loan.principal),
+          interest: parseNumber(loan.interest),
+          collateralDeposited: parseNumber(loan.collateral),
+          expiryTimestamp: parseNumber(loan.expiryTimestamp),
+          secondsToExpiry: getSecondsToExpiry(currentDateBeforeMidnight, parseNumber(loan.expiryTimestamp)),
           status: "Active",
           principalPaid: 0,
           interestPaid: 0,
           collateralIncome: 0,
           collateralClaimedQuantity: 0,
           collateralClaimedValue: 0,
-          interestRate: creationEvent.loan.request.interestPercentage,
-          durationSeconds: creationEvent.loan.request.durationSeconds,
+          interestRate: loanRequest.interestPercentage,
+          durationSeconds: loanRequest.durationSeconds,
         };
-        // TODO link loans and requests
 
         // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
         currentSnapshot.clearinghouse.daiBalance = parseNumber(creationEvent.clearinghouseDaiBalance);
