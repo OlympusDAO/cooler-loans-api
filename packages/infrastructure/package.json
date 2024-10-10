@@ -2,7 +2,7 @@
   "name": "@repo/infrastructure",
   "version": "1.0.0",
   "description": "Deploys infrastructure for the cooler-loans-api",
-  "main": "dist/index.js",
+  "main": "src/index.ts",
   "devDependencies": {
     "@pulumi/gcp": "^6.0.0",
     "@pulumi/pulumi": "^3.0.0",
@@ -12,7 +12,7 @@
     "@repo/bigquery-codegen": "*",
     "cooler-loans-api-generate": "*",
     "cooler-loans-api-get": "*",
-    "typescript": "^5.2.2"
+    "typescript": "^5.5.0"
   },
   "scripts": {
     "build": "tsc",
