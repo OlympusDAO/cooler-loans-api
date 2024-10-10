@@ -1,7 +1,4 @@
 config:
-  cooler-loans-api:GRAPHQL_ENDPOINT: https://gateway-arbitrum.network.thegraph.com/api/[api-key]/subgraphs/id/4Vicyh7DiEGj6aSamLpAhwydcnaU1CPQgvWApWv7H9Rh
-  cooler-loans-api:SUBGRAPH_API_KEY:
-    secure: AAABAAVsepDS08GRFuySY48LTxhmwoqxJqbfUCrt9cGhzq6LA//kn2K0Q86gDt0WwWN6uMu0Vd2JRl+aviuHDw==
   cooler-loans-api:alertEmail:
     secure: AAABAIn37o4Q//rFMFNoW2K9Jr7bOYYcamISp06aBJ7F2YlKGI9dsTk+3HrnOmDUzA==
   gcp:project: cooler-loans-api-prod
