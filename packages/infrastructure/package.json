@@ -1,7 +1,8 @@
 {
   "name": "@repo/infrastructure",
-  "version": "1.0.0",
   "description": "Deploys infrastructure for the cooler-loans-api",
+  "version": "1.0.0",
+  "license": "MIT",
   "main": "src/index.ts",
   "devDependencies": {
     "@pulumi/gcp": "^6.0.0",
