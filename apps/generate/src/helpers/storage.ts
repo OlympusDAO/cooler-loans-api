@@ -7,9 +7,9 @@ const SNAPSHOT_DIR = "snapshot";
 const LOAN_SNAPSHOT_DIR = "loanSnapshot";
 
 const getBucket = () => {
-  const bucketName = process.env.BUCKET_NAME;
+  const bucketName = process.env.SNAPSHOT_BUCKET;
   if (!bucketName) {
-    throw new Error("BUCKET_NAME environment variable is not set");
+    throw new Error("SNAPSHOT_BUCKET environment variable is not set");
   }
 
   // Get the GCS bucket

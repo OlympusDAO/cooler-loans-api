@@ -4,8 +4,10 @@ import * as pulumi from "@pulumi/pulumi";
 export const createGenerateFunction = (
   pulumiConfig: pulumi.Config,
   functionAssetsBucket: gcp.storage.Bucket,
+  storageBucket: gcp.storage.Bucket,
   serviceCloudFunctions: gcp.projects.Service,
   serviceCloudScheduler: gcp.projects.Service,
+  serviceBigQuery: gcp.projects.Service,
 ) => {
   // Archive the function code in the bucket
   const functionBucketObject = new gcp.storage.BucketObject(
@@ -35,12 +37,13 @@ export const createGenerateFunction = (
       maxInstances: 1,
       availableMemoryMb: 1024,
       environmentVariables: {
+        SNAPSHOT_BUCKET: storageBucket.name,
         CACHE_PROJECT: pulumiConfig.require("cacheProject"),
         CACHE_BIGQUERY_DATASET: pulumiConfig.require("cacheBigQueryDataset"),
       },
     },
     {
-      dependsOn: [functionBucketObject, serviceCloudFunctions],
+      dependsOn: [functionBucketObject, serviceCloudFunctions, storageBucket],
     },
   );
 
@@ -77,6 +80,20 @@ export const createGenerateFunction = (
     },
     {
       dependsOn: [cloudFunction],
+    },
+  );
+
+  // Allow the generate function to access the subgraph-cache BigQuery dataset
+  new gcp.bigquery.DatasetIamMember(
+    `cooler-loans-api-generate`,
+    {
+      project: pulumiConfig.require("cacheProject"),
+      datasetId: pulumiConfig.require("cacheBigQueryDataset"),
+      role: "roles/bigquery.dataViewer",
+      member: pulumi.interpolate`serviceAccount:${cloudFunction.serviceAccountEmail}`,
+    },
+    {
+      dependsOn: [cloudFunction, serviceBigQuery],
     },
   );
 

@@ -12,9 +12,6 @@ const projectStackName = `${projectName}-${pulumi.getStack()}`;
 /**
  * Enable services
  */
-const serviceFirestore = new gcp.projects.Service("firestore", {
-  service: "firestore.googleapis.com",
-});
 const serviceCloudBuild = new gcp.projects.Service("cloudbuild", {
   service: "cloudbuild.googleapis.com",
 });
@@ -37,7 +34,7 @@ const serviceBigQuery = new gcp.projects.Service("bigquery", {
 const bigQueryDataset = new gcp.bigquery.Dataset(
   projectName,
   {
-    datasetId: projectName,
+    datasetId: projectName.replace(/-/g, "_"), // - is unsupported
   },
   {
     dependsOn: [serviceBigQuery],
@@ -46,9 +43,16 @@ const bigQueryDataset = new gcp.bigquery.Dataset(
 export const bigQueryDatasetId = bigQueryDataset.datasetId;
 
 /**
+ * Create a GCS bucket to store the snapshot data
+ */
+const snapshotDataBucket = new gcp.storage.Bucket(`${projectStackName}-snapshot-data`, {
+  location: "us-central1",
+});
+
+/**
  * Create BigQuery tables
  */
-const bigQueryLoanSnapshotSchema = readFileSync("./packages/bigquery-codegen/schemas/loanSnapshot.json", "utf-8");
+const bigQueryLoanSnapshotSchema = readFileSync("../bigquery-codegen/schemas/loanSnapshot.json", "utf-8");
 const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
   "loanSnapshots",
   {
@@ -60,6 +64,7 @@ const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
       field: "snapshotDate",
       requirePartitionFilter: true,
     },
+    // TODO load from GCS
   },
   {
     dependsOn: [bigQueryDataset],
@@ -67,7 +72,7 @@ const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
 );
 export const bigQueryLoanSnapshotTableId = bigQueryLoanSnapshotTable.tableId;
 
-const bigQuerySnapshotSchema = readFileSync("./packages/bigquery-codegen/schemas/snapshot.json", "utf-8");
+const bigQuerySnapshotSchema = readFileSync("../bigquery-codegen/schemas/snapshot.json", "utf-8");
 const bigQuerySnapshotTable = new gcp.bigquery.Table(
   "snapshots",
   {
@@ -79,28 +84,13 @@ const bigQuerySnapshotTable = new gcp.bigquery.Table(
       field: "snapshotDate",
       requirePartitionFilter: true,
     },
+    // TODO load from GCS
   },
   {
     dependsOn: [bigQueryDataset],
   },
 );
 export const bigQuerySnapshotTableId = bigQuerySnapshotTable.tableId;
-
-/**
- * Create Firestore database
- */
-new gcp.firestore.Database(
-  "default",
-  {
-    name: "(default)",
-    // us-central1 is not supported, so this is used instead
-    locationId: "us-east1",
-    type: "FIRESTORE_NATIVE",
-  },
-  {
-    dependsOn: [serviceFirestore],
-  },
-);
 
 /**
  * Create a GCS bucket to store the function code
@@ -115,306 +105,308 @@ const functionAssetsBucket = new gcp.storage.Bucket(`${projectStackName}-functio
 const functionGenerate = createGenerateFunction(
   pulumiConfig,
   functionAssetsBucket,
+  snapshotDataBucket,
   serviceCloudFunctions,
   serviceCloudScheduler,
-);
-
-/**
- * Deploy Cloud Function - Fetch
- */
-const functionGet = createGetFunction(
-  bigQueryDataset,
-  bigQueryLoanSnapshotTable,
-  bigQuerySnapshotTable,
-  functionAssetsBucket,
-  serviceCloudFunctions,
   serviceBigQuery,
 );
 
-/**
- * Firebase
- *
- * We utilise Firebase hosting to provide a static URL to the Cloud Function.
- */
+// /**
+//  * Deploy Cloud Function - Fetch
+//  */
+// const functionGet = createGetFunction(
+//   bigQueryDataset,
+//   bigQueryLoanSnapshotTable,
+//   bigQuerySnapshotTable,
+//   functionAssetsBucket,
+//   serviceCloudFunctions,
+//   serviceBigQuery,
+// );
 
-// Deploy a Firebase Hosting site, so that we can obtain a static URL
-const firebaseProject = new gcp.firebase.Project(
-  projectName,
-  {
-    project: gcpConfig.require("project"),
-  },
-  {
-    dependsOn: [serviceFirebase],
-  },
-);
+// /**
+//  * Firebase
+//  *
+//  * We utilise Firebase hosting to provide a static URL to the Cloud Function.
+//  */
 
-const firebaseHostingSite = new gcp.firebase.HostingSite(
-  projectName,
-  {
-    project: firebaseProject.project,
-    siteId: `olympus-${projectStackName}`, // Will end up as olympus-cooler-loans-api-<stack>.web.app
-  },
-  {
-    dependsOn: [firebaseProject],
-  },
-);
+// // Deploy a Firebase Hosting site, so that we can obtain a static URL
+// const firebaseProject = new gcp.firebase.Project(
+//   projectName,
+//   {
+//     project: gcpConfig.require("project"),
+//   },
+//   {
+//     dependsOn: [serviceFirebase],
+//   },
+// );
 
-const firebaseSiteId = firebaseHostingSite.siteId;
-if (!firebaseSiteId) {
-  throw new Error("Firebase Hosting site ID is undefined");
-}
+// const firebaseHostingSite = new gcp.firebase.HostingSite(
+//   projectName,
+//   {
+//     project: firebaseProject.project,
+//     siteId: `olympus-${projectStackName}`, // Will end up as olympus-cooler-loans-api-<stack>.web.app
+//   },
+//   {
+//     dependsOn: [firebaseProject],
+//   },
+// );
 
-const firebaseSiteIdInput: pulumi.Input<string> = firebaseSiteId.apply(str => `${str}`);
+// const firebaseSiteId = firebaseHostingSite.siteId;
+// if (!firebaseSiteId) {
+//   throw new Error("Firebase Hosting site ID is undefined");
+// }
 
-// Rewrite all requests to the Cloud Function
-const firebaseHostingVersion = new gcp.firebase.HostingVersion(
-  projectName,
-  {
-    siteId: firebaseSiteIdInput,
-    config: {
-      /**
-       * Firebase hosting does not forward CORS headers to the Cloud Function
-       * when using redirects, so we need to do a rewrite.
-       *
-       * Pulumi's implementation does not support specifying the region of the
-       * function (or does not discover the region accurately), so we need to
-       * ensure that both the Cloud Function and Firebase Hosting are in the
-       * default region, which is us-central1.
-       */
-      rewrites: [
-        {
-          glob: "**",
-          function: functionGet.name,
-        },
-      ],
-    },
-  },
-  {
-    dependsOn: [firebaseHostingSite, functionGet],
-  },
-);
+// const firebaseSiteIdInput: pulumi.Input<string> = firebaseSiteId.apply(str => `${str}`);
 
-new gcp.firebase.HostingRelease(
-  projectName,
-  {
-    siteId: firebaseSiteIdInput,
-    versionName: firebaseHostingVersion.name,
-    message: "Cloud Functions integration",
-  },
-  {
-    dependsOn: [firebaseHostingVersion],
-  },
-);
+// // Rewrite all requests to the Cloud Function
+// const firebaseHostingVersion = new gcp.firebase.HostingVersion(
+//   projectName,
+//   {
+//     siteId: firebaseSiteIdInput,
+//     config: {
+//       /**
+//        * Firebase hosting does not forward CORS headers to the Cloud Function
+//        * when using redirects, so we need to do a rewrite.
+//        *
+//        * Pulumi's implementation does not support specifying the region of the
+//        * function (or does not discover the region accurately), so we need to
+//        * ensure that both the Cloud Function and Firebase Hosting are in the
+//        * default region, which is us-central1.
+//        */
+//       rewrites: [
+//         {
+//           glob: "**",
+//           function: functionGet.name,
+//         },
+//       ],
+//     },
+//   },
+//   {
+//     dependsOn: [firebaseHostingSite, functionGet],
+//   },
+// );
 
-/**
- * Alerts
- */
-// Notification channel
-const notificationEmail = new gcp.monitoring.NotificationChannel("email", {
-  displayName: "Email",
-  type: "email",
-  labels: {
-    email_address: pulumiConfig.requireSecret("alertEmail"),
-  },
-});
+// new gcp.firebase.HostingRelease(
+//   projectName,
+//   {
+//     siteId: firebaseSiteIdInput,
+//     versionName: firebaseHostingVersion.name,
+//     message: "Cloud Functions integration",
+//   },
+//   {
+//     dependsOn: [firebaseHostingVersion],
+//   },
+// );
 
-// High Latency
-new gcp.monitoring.AlertPolicy(
-  "get-high-latency",
-  {
-    displayName: `${projectName} - Get - High Request Latency`,
-    userLabels: {},
-    conditions: [
-      {
-        displayName: `50% above 5s Latency`,
-        conditionThreshold: {
-          filter: pulumi.interpolate`
-            resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.name}" AND
-            metric.type = "cloudfunctions.googleapis.com/function/execution_times"
-            `,
-          aggregations: [
-            {
-              alignmentPeriod: "300s",
-              perSeriesAligner: "ALIGN_PERCENTILE_99",
-            },
-          ],
-          comparison: "COMPARISON_GT",
-          duration: "0s",
-          trigger: {
-            percent: 50,
-          },
-          thresholdValue: 30000000000, // 30 seconds in nanoseconds??
-        },
-      },
-    ],
-    alertStrategy: {
-      autoClose: "604800s",
-    },
-    combiner: "AND",
-    enabled: true,
-    notificationChannels: [notificationEmail.name],
-  },
-  {
-    dependsOn: [functionGet, notificationEmail],
-  },
-);
+// /**
+//  * Alerts
+//  */
+// // Notification channel
+// const notificationEmail = new gcp.monitoring.NotificationChannel("email", {
+//   displayName: "Email",
+//   type: "email",
+//   labels: {
+//     email_address: pulumiConfig.requireSecret("alertEmail"),
+//   },
+// });
 
-// HTTP Errors
-new gcp.monitoring.AlertPolicy(
-  "get-http-errors",
-  {
-    displayName: `${projectName} - Get - HTTP Errors`,
-    userLabels: {},
-    conditions: [
-      {
-        displayName: `Error Count`,
-        conditionThreshold: {
-          filter: pulumi.interpolate`
-            resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.name}" AND
-            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
-            metric.labels.status != "ok"
-            `,
-          aggregations: [
-            {
-              alignmentPeriod: "300s",
-              crossSeriesReducer: "REDUCE_NONE",
-              perSeriesAligner: "ALIGN_COUNT",
-            },
-          ],
-          comparison: "COMPARISON_GT",
-          duration: "0s",
-          trigger: {
-            count: 1,
-          },
-          thresholdValue: 5,
-        },
-      },
-    ],
-    alertStrategy: {
-      autoClose: "604800s",
-    },
-    combiner: "OR",
-    enabled: true,
-    notificationChannels: [notificationEmail.name],
-  },
-  {
-    dependsOn: [functionGet, notificationEmail],
-  },
-);
+// // High Latency
+// new gcp.monitoring.AlertPolicy(
+//   "get-high-latency",
+//   {
+//     displayName: `${projectName} - Get - High Request Latency`,
+//     userLabels: {},
+//     conditions: [
+//       {
+//         displayName: `50% above 5s Latency`,
+//         conditionThreshold: {
+//           filter: pulumi.interpolate`
+//             resource.type = "cloud_function" AND
+//             resource.labels.function_name = "${functionGet.name}" AND
+//             metric.type = "cloudfunctions.googleapis.com/function/execution_times"
+//             `,
+//           aggregations: [
+//             {
+//               alignmentPeriod: "300s",
+//               perSeriesAligner: "ALIGN_PERCENTILE_99",
+//             },
+//           ],
+//           comparison: "COMPARISON_GT",
+//           duration: "0s",
+//           trigger: {
+//             percent: 50,
+//           },
+//           thresholdValue: 30000000000, // 30 seconds in nanoseconds??
+//         },
+//       },
+//     ],
+//     alertStrategy: {
+//       autoClose: "604800s",
+//     },
+//     combiner: "AND",
+//     enabled: true,
+//     notificationChannels: [notificationEmail.name],
+//   },
+//   {
+//     dependsOn: [functionGet, notificationEmail],
+//   },
+// );
 
-new gcp.monitoring.AlertPolicy(
-  "generate-http-errors",
-  {
-    displayName: `${projectName} - Generate - HTTP Errors`,
-    userLabels: {},
-    conditions: [
-      {
-        displayName: `Error Count`,
-        conditionThreshold: {
-          filter: pulumi.interpolate`
-            resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGenerate.name}" AND
-            metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
-            metric.labels.status != "ok"
-            `,
-          aggregations: [
-            {
-              alignmentPeriod: "300s",
-              crossSeriesReducer: "REDUCE_NONE",
-              perSeriesAligner: "ALIGN_COUNT",
-            },
-          ],
-          comparison: "COMPARISON_GT",
-          duration: "0s",
-          trigger: {
-            count: 1,
-          },
-          thresholdValue: 5,
-        },
-      },
-    ],
-    alertStrategy: {
-      autoClose: "604800s",
-    },
-    combiner: "OR",
-    enabled: true,
-    notificationChannels: [notificationEmail.name],
-  },
-  {
-    dependsOn: [functionGet, notificationEmail],
-  },
-);
+// // HTTP Errors
+// new gcp.monitoring.AlertPolicy(
+//   "get-http-errors",
+//   {
+//     displayName: `${projectName} - Get - HTTP Errors`,
+//     userLabels: {},
+//     conditions: [
+//       {
+//         displayName: `Error Count`,
+//         conditionThreshold: {
+//           filter: pulumi.interpolate`
+//             resource.type = "cloud_function" AND
+//             resource.labels.function_name = "${functionGet.name}" AND
+//             metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
+//             metric.labels.status != "ok"
+//             `,
+//           aggregations: [
+//             {
+//               alignmentPeriod: "300s",
+//               crossSeriesReducer: "REDUCE_NONE",
+//               perSeriesAligner: "ALIGN_COUNT",
+//             },
+//           ],
+//           comparison: "COMPARISON_GT",
+//           duration: "0s",
+//           trigger: {
+//             count: 1,
+//           },
+//           thresholdValue: 5,
+//         },
+//       },
+//     ],
+//     alertStrategy: {
+//       autoClose: "604800s",
+//     },
+//     combiner: "OR",
+//     enabled: true,
+//     notificationChannels: [notificationEmail.name],
+//   },
+//   {
+//     dependsOn: [functionGet, notificationEmail],
+//   },
+// );
 
-// Log Errors
-new gcp.monitoring.AlertPolicy(
-  "get-log-errors",
-  {
-    displayName: `${projectName} - Get - Log Errors`,
-    userLabels: {},
-    conditions: [
-      {
-        displayName: `Log contains error`,
-        conditionMatchedLog: {
-          filter: pulumi.interpolate`
-            resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGet.name}" AND
-            textPayload =~ "error"
-            `,
-        },
-      },
-    ],
-    alertStrategy: {
-      notificationRateLimit: {
-        period: "3600s",
-      },
-      autoClose: "604800s",
-    },
-    combiner: "OR",
-    enabled: true,
-    notificationChannels: [notificationEmail.name],
-  },
-  {
-    dependsOn: [functionGet, notificationEmail],
-  },
-);
+// new gcp.monitoring.AlertPolicy(
+//   "generate-http-errors",
+//   {
+//     displayName: `${projectName} - Generate - HTTP Errors`,
+//     userLabels: {},
+//     conditions: [
+//       {
+//         displayName: `Error Count`,
+//         conditionThreshold: {
+//           filter: pulumi.interpolate`
+//             resource.type = "cloud_function" AND
+//             resource.labels.function_name = "${functionGenerate.name}" AND
+//             metric.type = "cloudfunctions.googleapis.com/function/execution_count" AND
+//             metric.labels.status != "ok"
+//             `,
+//           aggregations: [
+//             {
+//               alignmentPeriod: "300s",
+//               crossSeriesReducer: "REDUCE_NONE",
+//               perSeriesAligner: "ALIGN_COUNT",
+//             },
+//           ],
+//           comparison: "COMPARISON_GT",
+//           duration: "0s",
+//           trigger: {
+//             count: 1,
+//           },
+//           thresholdValue: 5,
+//         },
+//       },
+//     ],
+//     alertStrategy: {
+//       autoClose: "604800s",
+//     },
+//     combiner: "OR",
+//     enabled: true,
+//     notificationChannels: [notificationEmail.name],
+//   },
+//   {
+//     dependsOn: [functionGet, notificationEmail],
+//   },
+// );
 
-new gcp.monitoring.AlertPolicy(
-  "generate-log-errors",
-  {
-    displayName: `${projectName} - Generate - Log Errors`,
-    userLabels: {},
-    conditions: [
-      {
-        displayName: `Log contains error`,
-        conditionMatchedLog: {
-          filter: pulumi.interpolate`
-            resource.type = "cloud_function" AND
-            resource.labels.function_name = "${functionGenerate.name}" AND
-            textPayload =~ "error"
-            `,
-        },
-      },
-    ],
-    alertStrategy: {
-      notificationRateLimit: {
-        period: "3600s",
-      },
-      autoClose: "604800s",
-    },
-    combiner: "OR",
-    enabled: true,
-    notificationChannels: [notificationEmail.name],
-  },
-  {
-    dependsOn: [functionGet, notificationEmail],
-  },
-);
+// // Log Errors
+// new gcp.monitoring.AlertPolicy(
+//   "get-log-errors",
+//   {
+//     displayName: `${projectName} - Get - Log Errors`,
+//     userLabels: {},
+//     conditions: [
+//       {
+//         displayName: `Log contains error`,
+//         conditionMatchedLog: {
+//           filter: pulumi.interpolate`
+//             resource.type = "cloud_function" AND
+//             resource.labels.function_name = "${functionGet.name}" AND
+//             textPayload =~ "error"
+//             `,
+//         },
+//       },
+//     ],
+//     alertStrategy: {
+//       notificationRateLimit: {
+//         period: "3600s",
+//       },
+//       autoClose: "604800s",
+//     },
+//     combiner: "OR",
+//     enabled: true,
+//     notificationChannels: [notificationEmail.name],
+//   },
+//   {
+//     dependsOn: [functionGet, notificationEmail],
+//   },
+// );
+
+// new gcp.monitoring.AlertPolicy(
+//   "generate-log-errors",
+//   {
+//     displayName: `${projectName} - Generate - Log Errors`,
+//     userLabels: {},
+//     conditions: [
+//       {
+//         displayName: `Log contains error`,
+//         conditionMatchedLog: {
+//           filter: pulumi.interpolate`
+//             resource.type = "cloud_function" AND
+//             resource.labels.function_name = "${functionGenerate.name}" AND
+//             textPayload =~ "error"
+//             `,
+//         },
+//       },
+//     ],
+//     alertStrategy: {
+//       notificationRateLimit: {
+//         period: "3600s",
+//       },
+//       autoClose: "604800s",
+//     },
+//     combiner: "OR",
+//     enabled: true,
+//     notificationChannels: [notificationEmail.name],
+//   },
+//   {
+//     dependsOn: [functionGet, notificationEmail],
+//   },
+// );
 
 /**
  * Exports
  */
 export const generateHttpsUrl = functionGenerate.httpsTriggerUrl;
-export const getHttpsUrl = functionGet.httpsTriggerUrl;
-export const firebaseHostingUrl = firebaseHostingSite.defaultUrl;
+// export const getHttpsUrl = functionGet.httpsTriggerUrl;
+// export const firebaseHostingUrl = firebaseHostingSite.defaultUrl;
