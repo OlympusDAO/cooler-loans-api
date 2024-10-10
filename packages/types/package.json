@@ -3,8 +3,21 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "exports": {
+    "./loanSnapshot": {
+      "types": "./src/loanSnapshot.ts",
+      "default": "./dist/loanSnapshot.js"
+    },
+    "./snapshot": {
+      "types": "./src/snapshot.ts",
+      "default": "./dist/snapshot.js"
+    }
+  },
   "devDependencies": {
     "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^18",
     "typescript": "^5.5.0"
   },
   "scripts": {

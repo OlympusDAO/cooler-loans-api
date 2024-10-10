@@ -1,6 +1,6 @@
-import { adjustDate, setMidnight } from "@repo/shared/src/dateHelper";
-import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/src/loanSnapshot";
-import { Snapshot } from "@repo/types/src/snapshot";
+import { adjustDate, setMidnight } from "@repo/shared/date";
+import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
+import { Snapshot } from "@repo/types/snapshot";
 
 import { getClearinghouseEvents } from "./helpers/clearinghouseData";
 import {

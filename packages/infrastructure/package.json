@@ -11,6 +11,7 @@
     "@repo/typescript-config": "*",
     "@repo/types": "*",
     "@repo/bigquery-codegen": "*",
+    "@types/node": "^18",
     "cooler-loans-api-generate": "*",
     "cooler-loans-api-get": "*",
     "typescript": "^5.5.0"

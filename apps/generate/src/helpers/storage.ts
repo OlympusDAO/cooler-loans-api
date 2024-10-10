@@ -1,7 +1,7 @@
 import { File, Storage } from "@google-cloud/storage";
-import { getISO8601DateString } from "@repo/shared/src/dateHelper";
-import { LoanSnapshot } from "@repo/types/src/loanSnapshot";
-import { Snapshot } from "@repo/types/src/snapshot";
+import { getISO8601DateString } from "@repo/shared/date";
+import { LoanSnapshot } from "@repo/types/loanSnapshot";
+import { Snapshot } from "@repo/types/snapshot";
 
 const SNAPSHOT_DIR = "snapshot";
 const LOAN_SNAPSHOT_DIR = "loanSnapshot";

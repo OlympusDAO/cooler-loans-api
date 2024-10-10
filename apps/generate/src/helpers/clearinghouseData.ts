@@ -1,7 +1,7 @@
 import { BigQuery } from "@google-cloud/bigquery";
-import { getISO8601DateString } from "@repo/shared/src/dateHelper";
-import { getEnv } from "@repo/shared/src/env";
-import { logger } from "@repo/shared/src/logging";
+import { getISO8601DateString } from "@repo/shared/date";
+import { getEnv } from "@repo/shared/env";
+import { logger } from "@repo/shared/logging";
 
 import {
   ClaimDefaultedLoanEvent,

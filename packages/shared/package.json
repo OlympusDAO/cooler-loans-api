@@ -3,6 +3,25 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
+  "type": "module",
+  "exports": {
+    "./date": {
+      "types": "./src/date.ts",
+      "default": "./dist/date.js"
+    },
+    "./env": {
+      "types": "./src/env.ts",
+      "default": "./dist/env.js"
+    },
+    "./logging": {
+      "types": "./src/logging.ts",
+      "default": "./dist/logging.js"
+    },
+    "./number": {
+      "types": "./src/number.ts",
+      "default": "./dist/number.js"
+    }
+  },
   "dependencies": {
     "@google-cloud/logging-winston": "^6.0.0",
     "winston": "^3.14.2"
@@ -11,7 +30,7 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@types/node": "^18",
-    "typescript": "^5.2.2"
+    "typescript": "^5.5.0"
   },
   "scripts": {
     "build": "tsc",

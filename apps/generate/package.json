@@ -6,12 +6,12 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.1",
-    "@google-cloud/storage": "^7.13.0"
+    "@google-cloud/storage": "^7.13.0",
+    "@repo/shared": "*",
+    "@repo/types": "*"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
-    "@repo/shared": "*",
-    "@repo/types": "*",
     "@repo/typescript-config": "*",
     "@types/jest": "^29.5.0",
     "@types/node": "^18",
