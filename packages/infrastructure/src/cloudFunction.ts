@@ -110,6 +110,19 @@ export const createGenerateFunction = (
     },
   );
 
+  // Allow the generate function to access the subgraph-cache project
+  new gcp.projects.IAMMember(
+    `cooler-loans-api-generate`,
+    {
+      project: pulumiConfig.require("cacheProject"),
+      role: "roles/bigquery.jobUser",
+      member: pulumi.interpolate`serviceAccount:${cloudFunction.serviceAccountEmail}`,
+    },
+    {
+      dependsOn: [cloudFunction, serviceBigQuery],
+    },
+  );
+
   // Allow the generate function to access the subgraph-cache BigQuery dataset
   new gcp.bigquery.DatasetIamMember(
     `cooler-loans-api-generate`,
