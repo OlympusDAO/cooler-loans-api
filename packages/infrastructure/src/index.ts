@@ -48,6 +48,7 @@ export const bigQueryDatasetId = bigQueryDataset.datasetId;
 const snapshotDataBucket = new gcp.storage.Bucket(`${projectStackName}-snapshot-data`, {
   location: "us-central1",
 });
+export const snapshotDataBucketName = snapshotDataBucket.name;
 
 /**
  * Create BigQuery tables
