@@ -152,6 +152,19 @@ export const createGenerateFunction = (
     },
   );
 
+  // Allow the generate function to access the subgraph-cache GCS bucket
+  new gcp.storage.BucketIAMMember(
+    `cooler-loans-api-generate`,
+    {
+      bucket: pulumiConfig.require("cacheBucket"),
+      role: "roles/storage.objectViewer",
+      member: pulumi.interpolate`serviceAccount:${cloudFunction.serviceAccountEmail}`,
+    },
+    {
+      dependsOn: [cloudFunction],
+    },
+  );
+
   return cloudFunction;
 };
 
