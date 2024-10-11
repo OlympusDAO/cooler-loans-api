@@ -321,6 +321,10 @@ export const generateSnapshots = (
   let currentDate = setMidnight(startDate);
   const endDate = beforeDate;
 
+  logger.info(
+    `${FUNC}: Generating snapshots from ${getISO8601DateString(currentDate)} to ${getISO8601DateString(endDate)}`,
+  );
+
   let previousSnapshot: Snapshot | null = previousSnapshotIn;
   if (previousSnapshot) {
     logger.debug(`Previous snapshot exists with date: ${previousSnapshot.snapshotDate}`);
@@ -331,7 +335,7 @@ export const generateSnapshots = (
   while (currentDate.getTime() < endDate.getTime()) {
     const currentDateString = getISO8601DateString(currentDate);
     const currentDateBeforeMidnight = setBeforeMidnight(currentDate);
-    logger.debug(`${FUNC}: currentDate: ${currentDateString}`);
+    logger.info(`${FUNC}: currentDate: ${currentDateString}`);
 
     // Populate a new Snapshot based on the previous one
     const currentSnapshot = createSnapshot(currentDateBeforeMidnight, previousSnapshot);
@@ -613,6 +617,8 @@ export const generateSnapshots = (
     previousLoans = currentLoansMap;
     currentDate = adjustDate(currentDate, 1);
   }
+
+  logger.info(`${FUNC}: Completed generating snapshots`);
 
   return dateSnapshots;
 };

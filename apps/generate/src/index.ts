@@ -63,11 +63,11 @@ export const handleGenerate = async (req: express.Request, res: express.Response
         : adjustDate(new Date(), -1) // Otherwise, use the day before
       : new Date(LAUNCH_DATE), // Otherwise, use the launch date
   );
-  logger.debug(`handleGenerate: Starting from ${startDate.toISOString()}`);
+  logger.info(`handleGenerate: Starting from ${startDate.toISOString()}`);
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
   const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 14));
-  logger.debug(`handleGenerate: Up to ${beforeDate.toISOString()}`);
+  logger.info(`handleGenerate: Up to ${beforeDate.toISOString()}`);
 
   let currentStartDate = new Date(startDate);
   let currentEndDate = adjustDate(new Date(startDate), DAYS_OFFSET);

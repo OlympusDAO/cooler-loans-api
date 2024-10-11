@@ -18,11 +18,11 @@ const performQuery = async (client: BigQuery, query: string) => {
   const [job] = await client.createQueryJob({
     query,
   });
-  logger.info(`Query job ${job.id} started.`);
+  logger.debug(`Query job ${job.id} started.`);
 
   const [rows] = await job.getQueryResults();
 
-  logger.info(`Query job ${job.id} completed.`);
+  logger.debug(`Query job ${job.id} completed.`);
 
   return rows;
 };

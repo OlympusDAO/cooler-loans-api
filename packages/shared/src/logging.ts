@@ -2,7 +2,7 @@ import { LoggingWinston } from "@google-cloud/logging-winston";
 import { createLogger, format, transports } from "winston";
 
 const logger = createLogger({
-  level: "debug", // We still want these logged
+  level: "info", // We still want these logged
   transports: [new LoggingWinston()],
 });
 
