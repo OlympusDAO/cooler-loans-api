@@ -3,7 +3,6 @@ import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
 import * as express from "express";
 
-import { refreshBigQueryMetadata } from "./helpers/bigquery";
 import { getClearinghouseEvents } from "./helpers/clearinghouseData";
 import {
   getLatestSnapshotDate,
@@ -84,10 +83,10 @@ export const handleGenerate = async (req: express.Request, res: express.Response
   }
 
   // Refresh BigQuery metadata
-  await refreshBigQueryMetadata(startDate, beforeDate);
+  // TODO re-enable this. Create the table as BigLake?
+  // await refreshBigQueryMetadata(startDate, beforeDate);
 
   // Required to end the function
   // https://cloud.google.com/functions/docs/concepts/nodejs-runtime#http_functions
-  res.status(200);
-  res.end();
+  res.status(200).end();
 };
