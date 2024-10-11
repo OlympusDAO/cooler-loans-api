@@ -36,7 +36,7 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
   },
-  ignorePatterns: ["dist", "node_modules", "**/.eslintrc.js", "**/jest.config.js"],
+  ignorePatterns: ["dist", "node_modules", "**/.eslintrc.js", "**/jest.config.js", "**/tsup.config.ts"],
   overrides: [
     {
       files: ["**/*.js", "**/*.jsx"],

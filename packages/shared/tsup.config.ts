@@ -4,5 +4,5 @@ export default defineConfig({
   entry: ["src"],
   format: ["cjs"],
   clean: true,
-  dts: true
+  dts: true,
 });
