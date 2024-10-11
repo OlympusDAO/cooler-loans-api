@@ -1,4 +1,5 @@
 import { adjustDate, setMidnight } from "@repo/shared/date";
+import { logger } from "@repo/shared/logging";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
 import * as express from "express";
@@ -12,7 +13,6 @@ import {
   writeSnapshot,
 } from "./helpers/storage";
 import { generateSnapshots } from "./snapshot";
-import { logger } from "@repo/shared/logging";
 
 const LAUNCH_DATE = "2023-09-21";
 // So that the next 4 months of income can be projected
@@ -66,7 +66,10 @@ export const handleGenerate = async (req: express.Request, res: express.Response
   logger.info(`handleGenerate: Starting from ${startDate.toISOString()}`);
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
-  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 14));
+  const beforeDate: Date = adjustDate(
+    setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 14)),
+    1,
+  );
   logger.info(`handleGenerate: Up to ${beforeDate.toISOString()}`);
 
   let currentStartDate = new Date(startDate);
