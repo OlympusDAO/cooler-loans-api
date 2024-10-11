@@ -6,6 +6,7 @@ export default defineConfig({
   noExternal: [/(.*)/],
   clean: true,
   dts: true,
-  minify: true,
+  // https://github.com/node-fetch/node-fetch/issues/784
+  minify: false,
   target: "node18",
 });
