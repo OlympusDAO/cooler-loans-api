@@ -27,8 +27,12 @@ const prepareTemporaryDirectory = (name: string, distDirectory: string) => {
 
 export const createGenerateFunction = (
   pulumiConfig: pulumi.Config,
+  gcpConfig: pulumi.Config,
   functionAssetsBucket: gcp.storage.Bucket,
   storageBucket: gcp.storage.Bucket,
+  bigQueryDataset: gcp.bigquery.Dataset,
+  bigQuerySnapshotTable: gcp.bigquery.Table,
+  bigQueryLoanSnapshotTable: gcp.bigquery.Table,
   serviceCloudFunctions: gcp.projects.Service,
   serviceCloudScheduler: gcp.projects.Service,
   serviceBigQuery: gcp.projects.Service,
@@ -65,12 +69,23 @@ export const createGenerateFunction = (
       availableMemoryMb: 1024,
       environmentVariables: {
         SNAPSHOT_BUCKET: storageBucket.name,
+        GCP_PROJECT: gcpConfig.require("project"),
+        BIGQUERY_DATASET: bigQueryDataset.datasetId,
+        BIGQUERY_SNAPSHOT_TABLE: bigQuerySnapshotTable.tableId,
+        BIGQUERY_LOAN_SNAPSHOT_TABLE: bigQueryLoanSnapshotTable.tableId,
         CACHE_PROJECT: pulumiConfig.require("cacheProject"),
         CACHE_BIGQUERY_DATASET: pulumiConfig.require("cacheBigQueryDataset"),
       },
     },
     {
-      dependsOn: [functionBucketObject, serviceCloudFunctions, storageBucket],
+      dependsOn: [
+        functionBucketObject,
+        serviceCloudFunctions,
+        storageBucket,
+        bigQueryDataset,
+        bigQuerySnapshotTable,
+        bigQueryLoanSnapshotTable,
+      ],
     },
   );
 

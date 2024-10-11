@@ -3,6 +3,7 @@ import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
 import * as express from "express";
 
+import { refreshBigQueryMetadata } from "./helpers/bigquery";
 import { getClearinghouseEvents } from "./helpers/clearinghouseData";
 import {
   getLatestSnapshotDate,
@@ -65,7 +66,7 @@ export const handleGenerate = async (req: express.Request, res: express.Response
   console.debug(`handleGenerate: Starting from ${startDate.toISOString()}`);
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
-  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, DAYS_AFTER));
+  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 7));
   console.debug(`handleGenerate: Up to ${beforeDate.toISOString()}`);
 
   let currentStartDate = new Date(startDate);
@@ -80,6 +81,9 @@ export const handleGenerate = async (req: express.Request, res: express.Response
     currentStartDate = adjustDate(currentStartDate, DAYS_OFFSET);
     currentEndDate = adjustDate(currentEndDate, DAYS_OFFSET);
   }
+
+  // Refresh BigQuery metadata
+  await refreshBigQueryMetadata(startDate, beforeDate);
 
   // Required to end the function
   // https://cloud.google.com/functions/docs/concepts/nodejs-runtime#http_functions

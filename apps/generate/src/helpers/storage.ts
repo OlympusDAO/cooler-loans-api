@@ -1,18 +1,14 @@
 import { File, Storage } from "@google-cloud/storage";
-import { logger } from "@repo/shared";
+import { getEnv, logger } from "@repo/shared";
 import { getISO8601DateString } from "@repo/shared/date";
 import { LoanSnapshot } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
 import JSONL from "jsonl-parse-stringify";
 
-const SNAPSHOT_DIR = "snapshots";
-const LOAN_SNAPSHOT_DIR = "loanSnapshots";
+import { LOAN_SNAPSHOT_DIR, SNAPSHOT_DIR } from "../constants";
 
 const getBucket = () => {
-  const bucketName = process.env.SNAPSHOT_BUCKET;
-  if (!bucketName) {
-    throw new Error("SNAPSHOT_BUCKET environment variable is not set");
-  }
+  const bucketName = getEnv("SNAPSHOT_BUCKET");
 
   // Get the GCS bucket
   const bucket = new Storage().bucket(bucketName);

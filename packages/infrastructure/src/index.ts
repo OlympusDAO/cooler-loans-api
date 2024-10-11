@@ -120,8 +120,12 @@ const functionAssetsBucket = new gcp.storage.Bucket(`${projectStackName}-functio
  */
 const functionGenerate = createGenerateFunction(
   pulumiConfig,
+  gcpConfig,
   functionAssetsBucket,
   snapshotDataBucket,
+  bigQueryDataset,
+  bigQuerySnapshotTable,
+  bigQueryLoanSnapshotTable,
   serviceCloudFunctions,
   serviceCloudScheduler,
   serviceBigQuery,
