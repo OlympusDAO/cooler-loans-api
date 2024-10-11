@@ -3,6 +3,7 @@ import { logger } from "@repo/shared";
 import { getISO8601DateString } from "@repo/shared/date";
 import { LoanSnapshot } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
+import JSONL from "jsonl-parse-stringify";
 
 const SNAPSHOT_DIR = "snapshot";
 const LOAN_SNAPSHOT_DIR = "loanSnapshot";
@@ -30,7 +31,7 @@ const getBucket = () => {
  * @returns The path to the snapshot file
  */
 const getSnapshotFilePath = (date: Date) => {
-  return `${SNAPSHOT_DIR}/dt=${getISO8601DateString(date)}/snapshot.json`;
+  return `${SNAPSHOT_DIR}/dt=${getISO8601DateString(date)}/snapshot.jsonl`;
 };
 
 /**
@@ -44,7 +45,7 @@ const getSnapshotFilePath = (date: Date) => {
  * @returns The path to the loan snapshot file
  */
 const getLoanSnapshotFilePath = (date: Date) => {
-  return `${LOAN_SNAPSHOT_DIR}/dt=${getISO8601DateString(date)}/loanSnapshot.json`;
+  return `${LOAN_SNAPSHOT_DIR}/dt=${getISO8601DateString(date)}/loanSnapshot.jsonl`;
 };
 
 /**
@@ -79,7 +80,14 @@ export const getSnapshot = async (date: Date): Promise<Snapshot | null> => {
 
   const [snapshot] = await snapshotFile.download();
 
-  return JSON.parse(snapshot.toString()) as Snapshot;
+  const snapshots = JSONL.parse(snapshot.toString()) as Snapshot[];
+
+  if (snapshots.length === 0) {
+    logger.warn(`Snapshot for date ${date.toISOString()} does not contain any snapshots`);
+    return null;
+  }
+
+  return snapshots[0];
 };
 
 /**
@@ -132,7 +140,7 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
 export const writeSnapshot = async (snapshot: Snapshot) => {
   const snapshotFile = getBucket().file(getSnapshotFilePath(new Date(snapshot.snapshotDate)));
 
-  await snapshotFile.save(JSON.stringify(snapshot, null, 2));
+  await snapshotFile.save(JSONL.stringify([snapshot]));
 };
 
 /**
@@ -155,7 +163,7 @@ export const getLoanSnapshots = async (date: Date): Promise<LoanSnapshot[]> => {
 
   const [loanSnapshot] = await loanSnapshotFile.download();
 
-  return JSON.parse(loanSnapshot.toString()) as LoanSnapshot[];
+  return JSONL.parse(loanSnapshot.toString()) as LoanSnapshot[];
 };
 
 /**
@@ -167,5 +175,5 @@ export const getLoanSnapshots = async (date: Date): Promise<LoanSnapshot[]> => {
 export const writeLoanSnapshots = async (date: Date, loanSnapshots: LoanSnapshot[]) => {
   const loanSnapshotFile = getBucket().file(getLoanSnapshotFilePath(date));
 
-  await loanSnapshotFile.save(JSON.stringify(loanSnapshots, null, 2));
+  await loanSnapshotFile.save(JSONL.stringify(loanSnapshots));
 };

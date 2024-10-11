@@ -4121,6 +4121,11 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
+jsonl-parse-stringify@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/jsonl-parse-stringify/-/jsonl-parse-stringify-1.0.3.tgz#f8a6b7a91d0845c0a67bd9ee9ba362c3a64ae5a8"
+  integrity sha512-EdOSqaMIRhkF0p8So65MU8biuDYRr5XUV9XxJhTEKQ3v2eY6WT3F99Cp5hdHtJo6wLjoPvWQq38szYKpM/GYpQ==
+
 jsonschema-bigquery@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/jsonschema-bigquery/-/jsonschema-bigquery-7.0.0.tgz#17582f022353f752ff198b565b3c603fb6a5392f"
