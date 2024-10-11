@@ -1,6 +1,7 @@
 import { adjustDate, setMidnight } from "@repo/shared/date";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
+import * as express from "express";
 
 import { getClearinghouseEvents } from "./helpers/clearinghouseData";
 import {
@@ -50,8 +51,7 @@ const run = async (startDate: Date, beforeDate: Date) => {
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const handleGenerate = async (req: any, res: any) => {
+export const handleGenerate = async (req: express.Request, res: express.Response) => {
   // Determine the last cached date
   const lastCachedDate: Date | null = await getLatestSnapshotDate();
   const startDate: Date = setMidnight(
