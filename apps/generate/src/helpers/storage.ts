@@ -5,8 +5,8 @@ import { LoanSnapshot } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
 import JSONL from "jsonl-parse-stringify";
 
-const SNAPSHOT_DIR = "snapshot";
-const LOAN_SNAPSHOT_DIR = "loanSnapshot";
+const SNAPSHOT_DIR = "snapshots";
+const LOAN_SNAPSHOT_DIR = "loanSnapshots";
 
 const getBucket = () => {
   const bucketName = process.env.SNAPSHOT_BUCKET;
