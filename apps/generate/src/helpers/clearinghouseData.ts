@@ -1,7 +1,7 @@
 import { BigQuery, BigQueryDate } from "@google-cloud/bigquery";
 import { getISO8601DateString } from "@repo/shared/date";
 import { getEnv } from "@repo/shared/env";
-import { logger } from "@repo/shared/logging";
+import { logger, throwError } from "@repo/shared/logging";
 
 import {
   ClaimDefaultedLoanEvent,
@@ -29,7 +29,7 @@ const performQuery = async (client: BigQuery, query: string) => {
 
 const getDateValue = (date: unknown): string => {
   if (typeof date !== "object" || date === null) {
-    throw new Error("object expected");
+    throwError("object expected");
   }
 
   const bqDate = date as BigQueryDate;

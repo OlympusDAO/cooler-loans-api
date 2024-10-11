@@ -1,5 +1,5 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "@repo/shared/date";
-import { logger } from "@repo/shared/logging";
+import { logger, throwError } from "@repo/shared/logging";
 import { parseNumber } from "@repo/shared/number";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
@@ -389,13 +389,13 @@ export const generateSnapshots = (
         // Fetch the loan from the created loans
         const loan = records.createdLoans[creationEvent.id];
         if (!loan) {
-          throw new Error(`creationEvents: Could not find loan ${creationEvent.loan.id}`);
+          throwError(`creationEvents: Could not find loan ${creationEvent.loan.id}`);
         }
 
         // Fetch the loan request
         const loanRequest = records.loanRequests[loan.request.id];
         if (!loanRequest) {
-          throw new Error(`creationEvents: Could not find loan request ${loan.request.id}`);
+          throwError(`creationEvents: Could not find loan request ${loan.request.id}`);
         }
 
         // Add any new loans into running list
@@ -441,7 +441,7 @@ export const generateSnapshots = (
         // Find the loan
         const loan = currentLoansMap[repaymentEvent.loan.id];
         if (!loan) {
-          throw new Error(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
+          throwError(`repaymentEvents: Could not find loan ${repaymentEvent.loan.id}`);
         }
 
         // Update the loan state
@@ -479,7 +479,7 @@ export const generateSnapshots = (
         // Find the loan
         const loan = currentLoansMap[defaultedClaimEvent.loan.id];
         if (!loan) {
-          throw new Error(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
+          throwError(`defaultedClaim: Could not find loan ${defaultedClaimEvent.loan.id}`);
         }
 
         const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
@@ -507,7 +507,7 @@ export const generateSnapshots = (
         // Find the loan
         const loan = currentLoansMap[extendEvent.loan.id];
         if (!loan) {
-          throw new Error(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
+          throwError(`extendEvents: Could not find loan ${extendEvent.loan.id}`);
         }
 
         // Update the loan

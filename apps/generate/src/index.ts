@@ -13,6 +13,7 @@ import {
   writeSnapshot,
 } from "./helpers/storage";
 import { generateSnapshots } from "./snapshot";
+import { logger } from "@repo/shared/logging";
 
 const LAUNCH_DATE = "2023-09-21";
 // So that the next 4 months of income can be projected
@@ -20,7 +21,7 @@ const DAYS_AFTER = 121;
 const DAYS_OFFSET = 7;
 
 const run = async (startDate: Date, beforeDate: Date) => {
-  console.log(`run: Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
+  logger.info(`run: Generating snapshots from ${startDate.toISOString()} to ${beforeDate.toISOString()}`);
 
   // Fetch events data from BigQuery
   const clearinghouseEvents = await getClearinghouseEvents(startDate, beforeDate);
@@ -46,7 +47,7 @@ const run = async (startDate: Date, beforeDate: Date) => {
 
   // Write the snapshots to BigQuery
   for (const dateSnapshot of dateSnapshots) {
-    console.log(`run: Writing snapshot for ${dateSnapshot.date}`);
+    logger.info(`run: Writing snapshot for ${dateSnapshot.date}`);
     await writeSnapshot(dateSnapshot.snapshot);
     await writeLoanSnapshots(dateSnapshot.date, dateSnapshot.loans);
   }
@@ -63,11 +64,11 @@ export const handleGenerate = async (req: express.Request, res: express.Response
         : adjustDate(new Date(), -1) // Otherwise, use the day before
       : new Date(LAUNCH_DATE), // Otherwise, use the launch date
   );
-  console.debug(`handleGenerate: Starting from ${startDate.toISOString()}`);
+  logger.debug(`handleGenerate: Starting from ${startDate.toISOString()}`);
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
-  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 7));
-  console.debug(`handleGenerate: Up to ${beforeDate.toISOString()}`);
+  const beforeDate: Date = setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 14));
+  logger.debug(`handleGenerate: Up to ${beforeDate.toISOString()}`);
 
   let currentStartDate = new Date(startDate);
   let currentEndDate = adjustDate(new Date(startDate), DAYS_OFFSET);
