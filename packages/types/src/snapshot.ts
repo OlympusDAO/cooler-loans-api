@@ -4,7 +4,7 @@ export type Snapshot = {
    *
    * Times are stored at UTC.
    */
-  snapshotDate: Date;
+  snapshotDate: string;
   /**
    * Principal receivable across all Coolers
    */

@@ -8,7 +8,7 @@ export type LoanSnapshot = {
    *
    * Times are stored at UTC.
    */
-  snapshotDate: Date;
+  snapshotDate: string;
   /**
    * Loan id unique across the clearinghouse and its coolers
    *

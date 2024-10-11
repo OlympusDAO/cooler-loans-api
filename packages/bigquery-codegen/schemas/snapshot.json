@@ -59,7 +59,7 @@
   },
   {
     "name": "snapshotDate",
-    "type": "TIMESTAMP",
+    "type": "STRING",
     "mode": "REQUIRED",
     "description": "Date of the snapshot.\n\nTimes are stored at UTC."
   },

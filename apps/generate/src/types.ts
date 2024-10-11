@@ -15,7 +15,7 @@ export type ClaimDefaultedLoanEvent = {
     id: string;
   };
   secondsSinceExpiry: number;
-  dt: Date;
+  dt: string;
 };
 
 export type ClearinghouseSnapshot = {
@@ -43,7 +43,7 @@ export type ClearinghouseSnapshot = {
   treasuryDaiBalance: number;
   treasurySDaiBalance: number;
   treasurySDaiInDaiBalance: number;
-  dt: Date;
+  dt: string;
 };
 
 export type ClearLoanRequestEvent = {
@@ -67,7 +67,7 @@ export type ClearLoanRequestEvent = {
   treasuryDaiBalance: number;
   treasurySDaiBalance: number;
   treasurySDaiInDaiBalance: number;
-  dt: Date;
+  dt: string;
 };
 
 export type RepayLoanEvent = {
@@ -92,7 +92,7 @@ export type RepayLoanEvent = {
   treasuryDaiBalance: number;
   treasurySDaiBalance: number;
   treasurySDaiInDaiBalance: number;
-  dt: Date;
+  dt: string;
 };
 
 export type ExtendLoanEvent = {
@@ -115,7 +115,7 @@ export type ExtendLoanEvent = {
   treasuryDaiBalance: number;
   treasurySDaiBalance: number;
   treasurySDaiInDaiBalance: number;
-  dt: Date;
+  dt: string;
 };
 
 export type DefundEvent = {
@@ -131,7 +131,7 @@ export type DefundEvent = {
     id: string;
   };
   amount: number;
-  dt: Date;
+  dt: string;
 };
 
 export type RebalanceEvent = {
@@ -147,7 +147,7 @@ export type RebalanceEvent = {
     id: string;
   };
   amount: number;
-  dt: Date;
+  dt: string;
 };
 
 export type LoanRequest = {
@@ -182,7 +182,7 @@ export type LoanRequest = {
     __typename: string;
     id: string;
   }[];
-  dt: Date;
+  dt: string;
 };
 
 export type Loan = {
@@ -222,7 +222,7 @@ export type Loan = {
     __typename: string;
     id: string;
   }[];
-  dt: Date;
+  dt: string;
 };
 
 export type ClearinghouseEvents = {

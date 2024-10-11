@@ -1,4 +1,5 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "@repo/shared/date";
+import { logger } from "@repo/shared/logging";
 import { parseNumber } from "@repo/shared/number";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
@@ -21,9 +22,9 @@ type DateSnapshot = {
 };
 
 const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): number => {
-  console.log(`repayment is ${repayment}`);
+  logger.debug(`repayment is ${repayment}`);
   const interestDue = loan.interest - loan.interestPaid;
-  console.log(`Interest due: ${interestDue}`);
+  logger.debug(`Interest due: ${interestDue}`);
 
   if (repayment > interestDue) {
     return interestDue;
@@ -33,17 +34,17 @@ const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): numb
 };
 
 const calculatePrincipalRepayment = (repayment: number, loan: LoanSnapshot): number => {
-  console.log(`repayment is ${repayment}`);
+  logger.debug(`repayment is ${repayment}`);
   const interestRepayment = calculateInterestRepayment(repayment, loan);
 
   if (interestRepayment <= 0) {
-    console.log(`No interest payment. Making full repayment of ${repayment}`);
+    logger.debug(`No interest payment. Making full repayment of ${repayment}`);
     return repayment;
   }
 
   // Interest is paid first
   const principalRepayment = repayment - interestRepayment;
-  console.log(`Principal repayment after deduction of interest is ${principalRepayment}`);
+  logger.debug(`Principal repayment after deduction of interest is ${principalRepayment}`);
   return principalRepayment;
 };
 
@@ -51,9 +52,9 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   const FUNC = "createSnapshot";
   // If there is no previous snapshot, return a new one
   if (!previousSnapshot) {
-    console.log(`${FUNC}: No previous snapshot found`);
+    logger.debug(`${FUNC}: No previous snapshot found`);
     return {
-      snapshotDate: currentDate,
+      snapshotDate: getISO8601DateString(currentDate),
       principalReceivables: 0,
       interestReceivables: 0,
       interestIncome: 0,
@@ -89,11 +90,11 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   }
 
   // Otherwise, return a new one based on the previous day
-  console.log(`${FUNC}: Previous snapshot for ${getISO8601DateString(previousSnapshot.snapshotDate)} found. Copying.`);
+  logger.debug(`${FUNC}: Previous snapshot for ${previousSnapshot.snapshotDate} found. Copying.`);
   const newSnapshot = JSON.parse(JSON.stringify(previousSnapshot)) as Snapshot;
 
   // Set the current date
-  newSnapshot.snapshotDate = currentDate;
+  newSnapshot.snapshotDate = getISO8601DateString(currentDate);
 
   // Some snapshot values are not carried over
   newSnapshot.interestIncome = 0;
@@ -309,8 +310,8 @@ const populateEventsByTimestamp = (
 export const generateSnapshots = (
   startDate: Date,
   beforeDate: Date,
-  previousDateRecord: Snapshot | null,
-  previousDateLoans: LoanSnapshotMap | null,
+  previousSnapshotIn: Snapshot | null,
+  previousLoanSnapshotIn: LoanSnapshotMap | null,
   clearinghouseEvents: ClearinghouseEvents,
 ): DateSnapshot[] => {
   const FUNC = "generateSnapshots";
@@ -320,22 +321,27 @@ export const generateSnapshots = (
   let currentDate = setMidnight(startDate);
   const endDate = beforeDate;
 
-  let previousSnapshot: Snapshot | null = previousDateRecord;
+  let previousSnapshot: Snapshot | null = previousSnapshotIn;
   if (previousSnapshot) {
-    console.log(`Previous snapshot exists`);
+    logger.debug(`Previous snapshot exists with date: ${previousSnapshot.snapshotDate}`);
   }
-  const previousLoans: LoanSnapshotMap = previousDateLoans || {};
+
+  let previousLoans: LoanSnapshotMap = previousLoanSnapshotIn || {};
 
   while (currentDate.getTime() < endDate.getTime()) {
     const currentDateString = getISO8601DateString(currentDate);
     const currentDateBeforeMidnight = setBeforeMidnight(currentDate);
-    console.log(`${FUNC}: currentDate: ${currentDateString}`);
+    logger.debug(`${FUNC}: currentDate: ${currentDateString}`);
 
     // Populate a new Snapshot based on the previous one
     const currentSnapshot = createSnapshot(currentDateBeforeMidnight, previousSnapshot);
 
     // Populate a new LoanSnapshotMap based on a deep copy of the previous one
     const currentLoansMap = structuredClone(previousLoans);
+    // Adjust the snapshot date in the new loans
+    Object.values(currentLoansMap).forEach(loan => {
+      loan.snapshotDate = getISO8601DateString(currentDateBeforeMidnight);
+    });
 
     // Order all events by block timestamp
     const currentDateEventsByTimestamp: EventsByTimestamp = populateEventsByTimestamp(
@@ -345,15 +351,15 @@ export const generateSnapshots = (
 
     // Iterate by timestamp, so that events are processed in order
     for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
-      console.log(
+      logger.debug(
         `${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp) * 1000))}`,
       );
 
       // Update clearinghouse data, if it exists
       const currentClearinghouseSnapshots = records.clearinghouseSnapshots;
-      console.log(`${FUNC}: processing ${currentClearinghouseSnapshots.length} clearinghouse snapshots`);
+      logger.debug(`${FUNC}: processing ${currentClearinghouseSnapshots.length} clearinghouse snapshots`);
       currentClearinghouseSnapshots.forEach(clearinghouseSnapshot => {
-        console.log(`${FUNC}: processing clearinghouse snapshot ${clearinghouseSnapshot.id}`);
+        logger.debug(`${FUNC}: processing clearinghouse snapshot ${clearinghouseSnapshot.id}`);
 
         // If there are multiple snapshots in a day, successive ones will overwrite the previous values
         currentSnapshot.clearinghouse.daiBalance = parseNumber(clearinghouseSnapshot.daiBalance);
@@ -376,9 +382,9 @@ export const generateSnapshots = (
 
       // Create loans where there were creation events
       const currentCreationEvents = records.creationEvents;
-      console.log(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
+      logger.debug(`${FUNC}: processing ${currentCreationEvents.length} creation events`);
       currentCreationEvents.forEach(creationEvent => {
-        console.log(`${FUNC}: processing creation event ${creationEvent.id}`);
+        logger.debug(`${FUNC}: processing creation event ${creationEvent.id}`);
 
         // Fetch the loan from the created loans
         const loan = records.createdLoans[creationEvent.id];
@@ -393,9 +399,9 @@ export const generateSnapshots = (
         }
 
         // Add any new loans into running list
-        console.log(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
+        logger.debug(`${FUNC}: creationEvent.loan.id: ${creationEvent.loan.id}`);
         currentLoansMap[creationEvent.loan.id] = {
-          snapshotDate: currentDateBeforeMidnight,
+          snapshotDate: getISO8601DateString(currentDateBeforeMidnight),
           id: creationEvent.loan.id,
           loanId: parseNumber(loan.loanId),
           createdTimestamp: parseNumber(creationEvent.blockTimestamp),
@@ -413,8 +419,8 @@ export const generateSnapshots = (
           collateralIncome: 0,
           collateralClaimedQuantity: 0,
           collateralClaimedValue: 0,
-          interestRate: loanRequest.interestPercentage,
-          durationSeconds: loanRequest.durationSeconds,
+          interestRate: parseNumber(loanRequest.interestPercentage),
+          durationSeconds: parseNumber(loanRequest.durationSeconds),
         };
 
         // Adjust the clearinghouse and treasury balances to reflect the value at the time of the event
@@ -428,9 +434,9 @@ export const generateSnapshots = (
 
       // Update loans where there were repayment events
       const currentRepaymentEvents = records.repaymentEvents;
-      console.log(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
+      logger.debug(`${FUNC}: processing ${currentRepaymentEvents.length} repayment events`);
       currentRepaymentEvents.forEach(repaymentEvent => {
-        console.log(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
+        logger.debug(`${FUNC}: processing repayment event ${repaymentEvent.id}`);
 
         // Find the loan
         const loan = currentLoansMap[repaymentEvent.loan.id];
@@ -445,9 +451,9 @@ export const generateSnapshots = (
         const eventAmountPaid = parseNumber(repaymentEvent.amountPaid);
         const interestRepayment = calculateInterestRepayment(eventAmountPaid, loan);
         const principalRepayment = calculatePrincipalRepayment(eventAmountPaid, loan);
-        console.log(`${FUNC}: eventAmountPaid: ${eventAmountPaid}`);
-        console.log(`${FUNC}: interestRepayment: ${interestRepayment}`);
-        console.log(`${FUNC}: principalRepayment: ${principalRepayment}`);
+        logger.debug(`${FUNC}: eventAmountPaid: ${eventAmountPaid}`);
+        logger.debug(`${FUNC}: interestRepayment: ${interestRepayment}`);
+        logger.debug(`${FUNC}: principalRepayment: ${principalRepayment}`);
 
         loan.interestPaid += interestRepayment;
         loan.principalPaid += principalRepayment;
@@ -466,9 +472,9 @@ export const generateSnapshots = (
 
       // Update loans where there were defaulted claim events
       const currentDefaultedClaimEvents = records.defaultedClaimEvents;
-      console.log(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
+      logger.debug(`${FUNC}: processing ${currentDefaultedClaimEvents.length} default claim events`);
       currentDefaultedClaimEvents.forEach(defaultedClaimEvent => {
-        console.log(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
+        logger.debug(`${FUNC}: processing default claim event ${defaultedClaimEvent.id}`);
 
         // Find the loan
         const loan = currentLoansMap[defaultedClaimEvent.loan.id];
@@ -494,9 +500,9 @@ export const generateSnapshots = (
 
       // Update loans where there were extend events
       const currentExtendEvents = records.extendEvents;
-      console.log(`${FUNC}: processing ${currentExtendEvents.length} extend events`);
+      logger.debug(`${FUNC}: processing ${currentExtendEvents.length} extend events`);
       currentExtendEvents.forEach(extendEvent => {
-        console.log(`${FUNC}: processing extend event ${extendEvent.id}`);
+        logger.debug(`${FUNC}: processing extend event ${extendEvent.id}`);
 
         // Find the loan
         const loan = currentLoansMap[extendEvent.loan.id];
@@ -513,7 +519,7 @@ export const generateSnapshots = (
         // https://github.com/ohmzeus/Cooler/pull/63
         const interestPerPeriod =
           ((loan.principal - loan.principalPaid) * loan.interestRate * loan.durationSeconds) / (365 * 24 * 60 * 60);
-        console.log(
+        logger.debug(
           `${FUNC}: interestPerPeriod for loan ${loan.id} on remaining principal ${
             loan.principal - loan.principalPaid
           }: ${interestPerPeriod}`,
@@ -537,7 +543,7 @@ export const generateSnapshots = (
 
     // Update secondsToExpiry and status for all loans
     const loans = Object.values(currentLoansMap);
-    console.log(`${FUNC}: processing ${loans.length} loans`);
+    logger.debug(`${FUNC}: processing ${loans.length} loans`);
     loans.forEach(loan => {
       // Update the seconds to expiry
       loan.secondsToExpiry = getSecondsToExpiry(currentDateBeforeMidnight, loan.expiryTimestamp);
@@ -567,7 +573,7 @@ export const generateSnapshots = (
     });
 
     // Update the expiry buckets
-    console.log(`${FUNC}: updating expiry buckets`);
+    logger.debug(`${FUNC}: updating expiry buckets`);
     loans.forEach(loan => {
       // Exclude repaid and reclaimed loans
       if (loan.status === "Repaid" || loan.status === "Reclaimed") {
@@ -606,6 +612,7 @@ export const generateSnapshots = (
     });
 
     previousSnapshot = currentSnapshot;
+    previousLoans = currentLoansMap;
     currentDate = adjustDate(currentDate, 1);
   }
 

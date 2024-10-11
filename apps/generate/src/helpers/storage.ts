@@ -1,4 +1,5 @@
 import { File, Storage } from "@google-cloud/storage";
+import { logger } from "@repo/shared";
 import { getISO8601DateString } from "@repo/shared/date";
 import { LoanSnapshot } from "@repo/types/loanSnapshot";
 import { Snapshot } from "@repo/types/snapshot";
@@ -67,11 +68,13 @@ const getSnapshotFile = async (date: Date): Promise<[File, boolean]> => {
  * @param date - The date to get the snapshot for
  * @returns The snapshot
  */
-export const getSnapshot = async (date: Date): Promise<Snapshot> => {
+export const getSnapshot = async (date: Date): Promise<Snapshot | null> => {
+  logger.info(`Getting snapshot for date ${date.toISOString()}`);
   const [snapshotFile, snapshotExists] = await getSnapshotFile(date);
 
   if (!snapshotExists) {
-    throw new Error(`Snapshot for date ${date.toISOString()} does not exist`);
+    logger.warn(`Snapshot for date ${date.toISOString()} does not exist`);
+    return null;
   }
 
   const [snapshot] = await snapshotFile.download();
@@ -85,6 +88,7 @@ export const getSnapshot = async (date: Date): Promise<Snapshot> => {
  * @returns The latest snapshot date or null if no snapshots exist
  */
 export const getLatestSnapshotDate = async (): Promise<Date | null> => {
+  logger.info(`Getting latest snapshot date`);
   const bucket = getBucket();
 
   // Get a listing of all the folders in the snapshot directory
@@ -93,7 +97,7 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
   // Get the latest snapshot date
   // Directory is in the format of /dt=<date>/
   const snapshotDates = files.map(file => {
-    const dateString = file.name.split("dt=")[1];
+    const dateString = file.name.split("dt=")[1].split("/")[0];
 
     return new Date(dateString);
   });
@@ -103,6 +107,8 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
     return null;
   }
 
+  logger.debug(`Found ${snapshotDates.length} snapshot dates`);
+
   // Sort in descending order, in place
   snapshotDates.sort((a, b) => b.getTime() - a.getTime());
 
@@ -110,6 +116,7 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
   for (const snapshotDate of snapshotDates) {
     const [, snapshotExists] = await getSnapshotFile(snapshotDate);
     if (snapshotExists) {
+      logger.info(`Found latest snapshot date: ${snapshotDate.toISOString()}`);
       return snapshotDate;
     }
   }
@@ -123,7 +130,7 @@ export const getLatestSnapshotDate = async (): Promise<Date | null> => {
  * @param snapshot - The snapshot to write
  */
 export const writeSnapshot = async (snapshot: Snapshot) => {
-  const snapshotFile = getBucket().file(getSnapshotFilePath(snapshot.snapshotDate));
+  const snapshotFile = getBucket().file(getSnapshotFilePath(new Date(snapshot.snapshotDate)));
 
   await snapshotFile.save(JSON.stringify(snapshot, null, 2));
 };
@@ -137,11 +144,13 @@ export const writeSnapshot = async (snapshot: Snapshot) => {
  * @returns The loan snapshots
  */
 export const getLoanSnapshots = async (date: Date): Promise<LoanSnapshot[]> => {
+  logger.info(`Getting loan snapshots for date ${date.toISOString()}`);
   const loanSnapshotFile = getBucket().file(getLoanSnapshotFilePath(date));
 
   const [loanSnapshotExists] = await loanSnapshotFile.exists();
   if (!loanSnapshotExists) {
-    throw new Error(`Loan snapshots for date ${date.toISOString()} do not exist`);
+    logger.warn(`Loan snapshots for date ${date.toISOString()} do not exist`);
+    return [];
   }
 
   const [loanSnapshot] = await loanSnapshotFile.download();
