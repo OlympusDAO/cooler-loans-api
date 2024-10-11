@@ -351,9 +351,7 @@ export const generateSnapshots = (
 
     // Iterate by timestamp, so that events are processed in order
     for (const [timestamp, records] of Object.entries(currentDateEventsByTimestamp)) {
-      logger.debug(
-        `${FUNC}: processing events for timestamp ${getISO8601DateString(new Date(parseInt(timestamp) * 1000))}`,
-      );
+      logger.debug(`${FUNC}: processing events for timestamp ${new Date(parseInt(timestamp) * 1000).toISOString()}`);
 
       // Update clearinghouse data, if it exists
       const currentClearinghouseSnapshots = records.clearinghouseSnapshots;
