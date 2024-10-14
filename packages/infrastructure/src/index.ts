@@ -2,8 +2,8 @@ import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
 import { readFileSync } from "fs";
 
-import { createGenerateFunction, createGetFunction } from "./cloudFunction";
 import { createDummyFile } from "./bigQuery";
+import { createGenerateFunction } from "./cloudFunction";
 
 const gcpConfig = new pulumi.Config("gcp");
 const pulumiConfig = new pulumi.Config();
@@ -21,9 +21,6 @@ const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
 });
 const serviceCloudScheduler = new gcp.projects.Service("cloudscheduler", {
   service: "cloudscheduler.googleapis.com",
-});
-const serviceFirebase = new gcp.projects.Service("firebase", {
-  service: "firebase.googleapis.com",
 });
 const serviceBigQuery = new gcp.projects.Service("bigquery", {
   service: "bigquery.googleapis.com",
@@ -126,6 +123,7 @@ const functionGenerate = createGenerateFunction(
   bigQueryDataset,
   bigQuerySnapshotTable,
   bigQueryLoanSnapshotTable,
+  serviceCloudBuild,
   serviceCloudFunctions,
   serviceCloudScheduler,
   serviceBigQuery,

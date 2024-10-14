@@ -1,8 +1,8 @@
 import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { mkdirSync, writeFileSync } from "fs";
 import * as fsExtra from "fs-extra";
+import { join } from "path";
 
 const prepareTemporaryDirectory = (name: string, distDirectory: string) => {
   // Create a temporary directory
@@ -33,6 +33,7 @@ export const createGenerateFunction = (
   bigQueryDataset: gcp.bigquery.Dataset,
   bigQuerySnapshotTable: gcp.bigquery.Table,
   bigQueryLoanSnapshotTable: gcp.bigquery.Table,
+  serviceCloudBuild: gcp.projects.Service,
   serviceCloudFunctions: gcp.projects.Service,
   serviceCloudScheduler: gcp.projects.Service,
   serviceBigQuery: gcp.projects.Service,
@@ -80,6 +81,7 @@ export const createGenerateFunction = (
     {
       dependsOn: [
         functionBucketObject,
+        serviceCloudBuild,
         serviceCloudFunctions,
         storageBucket,
         bigQueryDataset,
@@ -92,7 +94,7 @@ export const createGenerateFunction = (
   /**
    * Scheduling: Cloud Scheduler
    */
-  const schedulerJob = new gcp.cloudscheduler.Job(
+  new gcp.cloudscheduler.Job(
     `generate`,
     {
       schedule: "0 */4 * * *", // Every 4 hours
