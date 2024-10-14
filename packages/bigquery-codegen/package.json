@@ -6,6 +6,7 @@
   "license": "MIT",
   "devDependencies": {
     "@repo/eslint-config": "*",
+    "@repo/types": "*",
     "@repo/typescript-config": "*",
     "jsonschema-bigquery": "^7.0.0",
     "typescript-json-schema": "^0.61.0"
