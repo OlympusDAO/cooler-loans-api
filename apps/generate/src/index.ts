@@ -67,7 +67,7 @@ export const handleGenerate = async (req: express.Request, res: express.Response
   const todayMidnight = setMidnight(new Date());
   // Generate `DAYS_AFTER` days of snapshots if doing catch-up
   const beforeDate: Date = adjustDate(
-    setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, 14)),
+    setMidnight(adjustDate(startDate < todayMidnight ? startDate : todayMidnight, DAYS_AFTER)),
     1,
   );
   logger.info(`handleGenerate: Up to ${beforeDate.toISOString()}`);
