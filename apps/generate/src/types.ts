@@ -260,4 +260,14 @@ export type ClearinghouseEvents = {
    * A map of YYYY-MM-DD date strings to a map of record IDs to the loan requests for that date.
    */
   loanRequests: Record<string, Record<string, LoanRequest>>;
+
+  // /**
+  //  * A map of YYYY-MM-DD date strings to the Clearinghouse defund events for that date.
+  //  */
+  // clearinghouseDefundEvents: Record<string, DefundEvent[]>;
+
+  // /**
+  //  * A map of YYYY-MM-DD date strings to the Clearinghouse rebalance events for that date.
+  //  */
+  // clearinghouseRebalanceEvents: Record<string, RebalanceEvent[]>;
 };

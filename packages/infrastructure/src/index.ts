@@ -22,6 +22,10 @@ const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
 const serviceCloudScheduler = new gcp.projects.Service("cloudscheduler", {
   service: "cloudscheduler.googleapis.com",
 });
+// TODO remove this service
+new gcp.projects.Service("firebase", {
+  service: "firebase.googleapis.com",
+});
 const serviceBigQuery = new gcp.projects.Service("bigquery", {
   service: "bigquery.googleapis.com",
 });
@@ -54,7 +58,7 @@ export const snapshotDataBucketName = snapshotDataBucket.name;
 const bigQueryLoanSnapshotSchema = readFileSync("../bigquery-codegen/schemas/loanSnapshot.json", "utf-8");
 const bigQueryLoanSnapshotSourceUriPrefix = snapshotDataBucket.url.apply(url => `${url}/loanSnapshots`);
 const bigQueryLoanSnapshotSourceUri = snapshotDataBucket.url.apply(url => `${url}/loanSnapshots/*`);
-const bigQueryLoanSnapshotDummyFile = createDummyFile(snapshotDataBucket, "loanSnapshots");
+const bigQueryLoanSnapshotDummyFile = createDummyFile(snapshotDataBucket, "loanSnapshots", "./data/loanSnapshot.json");
 
 const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
   "loanSnapshots",
@@ -81,7 +85,7 @@ export const bigQueryLoanSnapshotTableId = bigQueryLoanSnapshotTable.tableId;
 const bigQuerySnapshotSchema = readFileSync("../bigquery-codegen/schemas/snapshot.json", "utf-8");
 const bigQuerySnapshotSourceUriPrefix = snapshotDataBucket.url.apply(url => `${url}/snapshots`);
 const bigQuerySnapshotSourceUri = snapshotDataBucket.url.apply(url => `${url}/snapshots/*`);
-const bigQuerySnapshotDummyFile = createDummyFile(snapshotDataBucket, "snapshots");
+const bigQuerySnapshotDummyFile = createDummyFile(snapshotDataBucket, "snapshots", "./data/snapshot.json");
 
 const bigQuerySnapshotTable = new gcp.bigquery.Table(
   "snapshots",

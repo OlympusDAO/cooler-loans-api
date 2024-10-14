@@ -23,8 +23,17 @@ export type LoanSnapshot = {
    * Timestamp of the loan creation, in seconds
    */
   createdTimestamp: number;
+  /**
+   * Address of the cooler that created the loan
+   */
   coolerAddress: string;
+  /**
+   * Address of the borrower
+   */
   borrowerAddress: string;
+  /**
+   * Address of the lender (Clearinghouse)
+   */
   lenderAddress: string;
   /**
    * The loan duration, in seconds.

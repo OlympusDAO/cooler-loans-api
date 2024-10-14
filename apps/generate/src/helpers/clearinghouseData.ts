@@ -110,7 +110,27 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   )) as ExtendLoanEvent[];
   logger.debug(`Fetched ${extendRows.length} extend events`);
 
-  // TODO do defund and rebalance events need to be included?
+  // // Defund events
+  // const defundRows = (await performQuery(
+  //   bigQuery,
+  //   `
+  //   SELECT *
+  //   FROM \`${cacheProject}.${cacheBigQueryDataset}.DefundEvent\`
+  //   WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
+  //   `,
+  // )) as DefundEvent[];
+  // logger.debug(`Fetched ${defundRows.length} defund events`);
+
+  // // Rebalance events
+  // const rebalanceRows = (await performQuery(
+  //   bigQuery,
+  //   `
+  //   SELECT *
+  //   FROM \`${cacheProject}.${cacheBigQueryDataset}.RebalanceEvent\`
+  //   WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
+  //   `,
+  // )) as RebalanceEvent[];
+  // logger.debug(`Fetched ${rebalanceRows.length} rebalance events`);
 
   // Created loans
   const createdLoansRows = (await performQuery(
@@ -205,6 +225,34 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   );
   logger.debug(`Extend event dates: ${Object.keys(extendEvents).join(", ")}`);
 
+  // // Defund events
+  // const clearinghouseDefundEvents = defundRows.reduce(
+  //   (acc, row) => {
+  //     const date = getDateValue(row.dt);
+  //     if (!acc[date]) {
+  //       acc[date] = [];
+  //     }
+  //     acc[date].push(row);
+  //     return acc;
+  //   },
+  //   {} as Record<string, DefundEvent[]>,
+  // );
+  // logger.debug(`Defund event dates: ${Object.keys(clearinghouseDefundEvents).join(", ")}`);
+
+  // // Rebalance events
+  // const clearinghouseRebalanceEvents = rebalanceRows.reduce(
+  //   (acc, row) => {
+  //     const date = getDateValue(row.dt);
+  //     if (!acc[date]) {
+  //       acc[date] = [];
+  //     }
+  //     acc[date].push(row);
+  //     return acc;
+  //   },
+  //   {} as Record<string, RebalanceEvent[]>,
+  // );
+  // logger.debug(`Rebalance event dates: ${Object.keys(clearinghouseRebalanceEvents).join(", ")}`);
+
   // Created loans
   const createdLoans = createdLoansRows.reduce(
     (acc, row) => {
@@ -243,5 +291,7 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     extendEvents,
     createdLoans,
     loanRequests,
+    // clearinghouseDefundEvents,
+    // clearinghouseRebalanceEvents,
   };
 };

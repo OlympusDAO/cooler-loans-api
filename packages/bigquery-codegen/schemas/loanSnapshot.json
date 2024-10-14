@@ -1,5 +1,5 @@
 [
-  { "name": "borrowerAddress", "type": "STRING", "mode": "REQUIRED" },
+  { "name": "borrowerAddress", "type": "STRING", "mode": "REQUIRED", "description": "Address of the borrower" },
   {
     "name": "collateralClaimedQuantity",
     "type": "BIGNUMERIC",
@@ -24,7 +24,12 @@
     "mode": "REQUIRED",
     "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding"
   },
-  { "name": "coolerAddress", "type": "STRING", "mode": "REQUIRED" },
+  {
+    "name": "coolerAddress",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Address of the cooler that created the loan"
+  },
   {
     "name": "createdTimestamp",
     "type": "BIGNUMERIC",
@@ -67,7 +72,12 @@
     "mode": "REQUIRED",
     "description": "The interest rate, stored as a decimal.\n\ne.g. 0.5% = 0.005"
   },
-  { "name": "lenderAddress", "type": "STRING", "mode": "REQUIRED" },
+  {
+    "name": "lenderAddress",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Address of the lender (Clearinghouse)"
+  },
   { "name": "loanId", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Loan id unique to the cooler" },
   {
     "name": "principal",
