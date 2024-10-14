@@ -22,8 +22,7 @@ const serviceCloudFunctions = new gcp.projects.Service("cloudfunctions", {
 const serviceCloudScheduler = new gcp.projects.Service("cloudscheduler", {
   service: "cloudscheduler.googleapis.com",
 });
-// TODO remove this service
-new gcp.projects.Service("firebase", {
+const serviceFirebase = new gcp.projects.Service("firebase", {
   service: "firebase.googleapis.com",
 });
 const serviceBigQuery = new gcp.projects.Service("bigquery", {
