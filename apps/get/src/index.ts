@@ -22,8 +22,23 @@ export async function handleGet(req: express.Request, res: express.Response) {
   // Source: https://firebase.google.com/docs/hosting/manage-cache
   res.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
 
+  // Handle CORS
+  res.set("Access-Control-Allow-Origin", "*");
+
+  if (req.method === "OPTIONS") {
+    // Send response to OPTIONS requests
+    res.set("Access-Control-Allow-Methods", "GET");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.set("Access-Control-Max-Age", "3600");
+    res.status(204).send("");
+    return;
+  }
+
   // Send results and end
-  res.status(200).json({
-    records: snapshots,
-  });
+  res
+    .status(200)
+    .json({
+      records: snapshots,
+    })
+    .end();
 }
