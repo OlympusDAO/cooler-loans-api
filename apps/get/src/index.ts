@@ -14,20 +14,16 @@ export async function handleGet(req: express.Request, res: express.Response) {
     return;
   }
 
-  // Grab from Firestore
+  // Grab from BigQuery
   console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
-
-  res.json({
-    records: snapshots,
-  });
 
   // Enable caching
   // Source: https://firebase.google.com/docs/hosting/manage-cache
   res.set("Cache-Control", "public, max-age=1800, s-maxage=1800");
 
-  // Required to end the function
-  // https://cloud.google.com/functions/docs/concepts/nodejs-runtime#http_functions
-  res.status(200);
-  res.end();
+  // Send results and end
+  res.status(200).json({
+    records: snapshots,
+  });
 }
