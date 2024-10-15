@@ -12,6 +12,8 @@ paths:
     get:
       summary: Retrieves all Cooler Loans snapshots between the given dates.
       operationId: getSnapshots
+      tags:
+        - snapshot
       parameters:
         - name: startDate
           in: query
@@ -19,14 +21,12 @@ paths:
           required: true
           schema:
             type: string
-            format: date
         - name: beforeDate
           in: query
           description: The date (YYYY-MM-DD) up to (but not including) which records should be retrieved
           required: true
           schema:
             type: string
-            format: date
       responses:
         "200":
           description: OK
