@@ -1,9 +1,12 @@
-openapi: "3.0.2"
+openapi: "3.1.0"
 info:
   title: Cooler Loans
-  version: "1.0"
+  version: "1.1"
 servers:
   - url: https://olympusdao-cooler-loans-api-prod.web.app/
+    description: Production
+  - url: https://olympusdao-cooler-loans-api-dev.web.app/
+    description: Development
 paths:
   /:
     get:

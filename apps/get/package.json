@@ -22,9 +22,9 @@
     "typescript-json-schema": "^0.61.0"
   },
   "scripts": {
-    "build:jsonschema": "yarn typescript-json-schema ../../packages/typescript-codegen/src/types/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema && yarn typescript-json-schema ../../packages/typescript-codegen/src/types/loanSnapshot.ts LoanSnapshot --required -o tmp/loanSnapshot.jsonschema",
+    "build:jsonschema": "yarn typescript-json-schema ../../packages/types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
     "build:openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
-    "build": "tsc --noEmit && tsup",
+    "build": "tsc --noEmit && tsup && yarn build:jsonschema && yarn build:openapi",
     "gcp-build": "yarn run build",
     "lint": "prettier --write . && eslint --fix ."
   }
