@@ -1,8 +1,9 @@
-import { getSnapshots } from "../../helpers/firestore";
-import { isISO8601DateString } from "./helpers/date";
+import { isISO8601DateString } from "@repo/shared/date";
+import express from "express";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function handleGet(req: any, res: any) {
+import { getSnapshots } from "./helpers/bigquery";
+
+export async function handleGet(req: express.Request, res: express.Response) {
   // Get start and end parameters
   const startDate: string | undefined = req.query.startDate as string;
   const beforeDate: string | undefined = req.query.beforeDate as string;
@@ -15,7 +16,7 @@ export async function handleGet(req: any, res: any) {
 
   // Grab from Firestore
   console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
-  const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate), false);
+  const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate));
 
   res.json({
     records: snapshots,

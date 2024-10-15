@@ -171,21 +171,26 @@ export const createGenerateFunction = (
 };
 
 export const createGetFunction = (
+  gcpConfig: pulumi.Config,
   bigQueryDataset: gcp.bigquery.Dataset,
   bigQueryLoanSnapshotTable: gcp.bigquery.Table,
   bigQuerySnapshotTable: gcp.bigquery.Table,
   functionAssetsBucket: gcp.storage.Bucket,
+  serviceCloudBuild: gcp.projects.Service,
   serviceCloudFunctions: gcp.projects.Service,
   serviceBigQuery: gcp.projects.Service,
 ) => {
+  // Create a temporary directory to store the function code
+  // Google Cloud Functions struggles with bundling the internal packages, so this is a workaround
+  const tempDirectory = prepareTemporaryDirectory("get", "../../apps/get/dist");
+
   // Archive the function code in the bucket
   const functionBucketObject = new gcp.storage.BucketObject(
     `get`, // Lowercase to avoid issues with GCS
     {
       bucket: functionAssetsBucket.name,
       source: new pulumi.asset.AssetArchive({
-        // TODO verify this path
-        ".": new pulumi.asset.FileArchive("../../apps/get/"),
+        ".": new pulumi.asset.FileArchive(tempDirectory),
       }),
     },
     {
@@ -195,7 +200,7 @@ export const createGetFunction = (
 
   // Create the function
   const cloudFunction = new gcp.cloudfunctions.Function(
-    `generate`,
+    `get`,
     {
       sourceArchiveBucket: functionAssetsBucket.name,
       sourceArchiveObject: functionBucketObject.name,
@@ -204,11 +209,11 @@ export const createGetFunction = (
       entryPoint: "handleGet",
       availableMemoryMb: 512,
       environmentVariables: {
+        GCP_PROJECT: gcpConfig.require("project"),
         BIGQUERY_DATASET: bigQueryDataset.datasetId,
         BIGQUERY_LOAN_SNAPSHOT_TABLE: bigQueryLoanSnapshotTable.tableId,
         BIGQUERY_SNAPSHOT_TABLE: bigQuerySnapshotTable.tableId,
       },
-      // TODO enable open access?
     },
     {
       dependsOn: [
@@ -216,9 +221,25 @@ export const createGetFunction = (
         bigQueryDataset,
         bigQueryLoanSnapshotTable,
         bigQuerySnapshotTable,
+        serviceCloudBuild,
         serviceCloudFunctions,
         serviceBigQuery,
       ],
+    },
+  );
+
+  // Allow the function to be called by the public
+  new gcp.cloudfunctions.FunctionIamMember(
+    `get-invoker`,
+    {
+      project: cloudFunction.project,
+      region: cloudFunction.region,
+      cloudFunction: cloudFunction.name,
+      role: "roles/cloudfunctions.invoker",
+      member: "allUsers",
+    },
+    {
+      dependsOn: [cloudFunction],
     },
   );
 
