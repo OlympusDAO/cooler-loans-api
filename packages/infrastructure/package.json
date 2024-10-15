@@ -5,8 +5,8 @@
   "license": "MIT",
   "main": "src/index.ts",
   "devDependencies": {
-    "@pulumi/gcp": "^6.0.0",
-    "@pulumi/pulumi": "^3.0.0",
+    "@pulumi/gcp": "^8.5.0",
+    "@pulumi/pulumi": "^3.136.0",
     "@repo/bigquery-codegen": "*",
     "@repo/eslint-config": "*",
     "@repo/types": "*",
