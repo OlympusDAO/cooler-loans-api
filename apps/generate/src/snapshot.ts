@@ -123,15 +123,11 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     days30: 0,
     days121: 0,
   };
-
-  // Ensure the clearinghouse snapshot has a value
-  if (!newSnapshot.clearinghouseTotals) {
-    newSnapshot.clearinghouseTotals = {
-      daiBalance: 0,
-      sDaiBalance: 0,
-      sDaiInDaiBalance: 0,
-    };
-  }
+  newSnapshot.clearinghouseTotals = {
+    daiBalance: 0,
+    sDaiBalance: 0,
+    sDaiInDaiBalance: 0,
+  };
 
   // Ensure the terms has a value
   if (!newSnapshot.terms) {
