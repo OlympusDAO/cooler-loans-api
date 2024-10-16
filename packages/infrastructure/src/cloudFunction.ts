@@ -206,7 +206,7 @@ export const createGetFunction = (
       sourceArchiveObject: functionBucketObject.name,
       triggerHttp: true,
       runtime: "nodejs18",
-      entryPoint: "handleGet",
+      entryPoint: "app",
       availableMemoryMb: 512,
       environmentVariables: {
         GCP_PROJECT: gcpConfig.require("project"),

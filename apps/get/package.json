@@ -7,13 +7,17 @@
   "private": true,
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.1",
+    "@google-cloud/functions-framework": "^3.4.2",
     "@repo/shared": "*",
-    "@repo/types": "*"
+    "@repo/types": "*",
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
   },
   "devDependencies": {
     "@openapi-contrib/json-schema-to-openapi-schema": "^2.2.5",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@types/cors": "^2.8.17",
     "@types/node": "^18",
     "express": "^4.21.1",
     "ts-node": "^10.9.2",

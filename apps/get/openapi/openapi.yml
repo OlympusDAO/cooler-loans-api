@@ -8,7 +8,7 @@ servers:
   - url: https://olympusdao-cooler-loans-api-dev.web.app/
     description: Development
 paths:
-  /:
+  /snapshots:
     get:
       summary: Retrieves all Cooler Loans snapshots between the given dates.
       operationId: getSnapshots
@@ -27,6 +27,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: orderBy
+          in: query
+          description: The order in which to return the snapshots. ASC or DESC
+          required: false
+          default: DESC
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -39,3 +46,21 @@ paths:
                     type: array
                     items:
                       $ref: "snapshot.yaml"
+  /snapshots/current:
+    get:
+      summary: Retrieves the current Cooler Loans snapshot
+      description: The current snapshot is the most recent one up to the current date.
+      operationId: getCurrentSnapshot
+      tags:
+        - snapshot
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record:
+                    type: object
+                    $ref: "snapshot.yaml"
