@@ -18,7 +18,49 @@ const performQuery = async (client: BigQuery, query: string) => {
   return rows;
 };
 
-export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<Snapshot[]> => {
+const formatSnapshot = (row: Snapshot): Snapshot => {
+  return {
+    ...row,
+    clearinghouses: row.clearinghouses.map(clearinghouse => ({
+      ...clearinghouse,
+      daiBalance: parseNumber(clearinghouse.daiBalance),
+      sDaiBalance: parseNumber(clearinghouse.sDaiBalance),
+      sDaiInDaiBalance: parseNumber(clearinghouse.sDaiInDaiBalance),
+      fundAmount: parseNumber(clearinghouse.fundAmount),
+      fundCadence: parseNumber(clearinghouse.fundCadence),
+    })),
+    clearinghouseTotals: {
+      daiBalance: parseNumber(row.clearinghouseTotals.daiBalance),
+      sDaiBalance: parseNumber(row.clearinghouseTotals.sDaiBalance),
+      sDaiInDaiBalance: parseNumber(row.clearinghouseTotals.sDaiInDaiBalance),
+    },
+    expiryBuckets: {
+      active: parseNumber(row.expiryBuckets.active),
+      expired: parseNumber(row.expiryBuckets.expired),
+      days30: parseNumber(row.expiryBuckets.days30),
+      days121: parseNumber(row.expiryBuckets.days121),
+    },
+    collateralDeposited: parseNumber(row.collateralDeposited),
+    collateralIncome: parseNumber(row.collateralIncome),
+    interestIncome: parseNumber(row.interestIncome),
+    interestReceivables: parseNumber(row.interestReceivables),
+    principalReceivables: parseNumber(row.principalReceivables),
+    terms: {
+      ...row.terms,
+      interestRate: parseNumber(row.terms.interestRate),
+      duration: parseNumber(row.terms.duration),
+      loanToCollateral: parseNumber(row.terms.loanToCollateral),
+    },
+    treasury: {
+      ...row.treasury,
+      daiBalance: parseNumber(row.treasury.daiBalance),
+      sDaiBalance: parseNumber(row.treasury.sDaiBalance),
+      sDaiInDaiBalance: parseNumber(row.treasury.sDaiInDaiBalance),
+    },
+  };
+};
+
+export const getSnapshots = async (startDate: Date, beforeDate: Date, orderBy: "ASC" | "DESC"): Promise<Snapshot[]> => {
   // Get the BigQuery details
   const gcpProject = getEnv("GCP_PROJECT");
   const bigQueryDataset = getEnv("BIGQUERY_DATASET");
@@ -41,6 +83,7 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
     SELECT * EXCEPT (dt)
     FROM \`${gcpProject}.${bigQueryDataset}.${snapshotTable}\`
     WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
+    ORDER BY dt ${orderBy}
   `,
   )) as Snapshot[];
   logger.debug(`Fetched ${snapshotRows.length} snapshots`);
@@ -48,50 +91,44 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date): Promise<S
   // All values are returned as strings
   // Convert the number values to the correct type
   const snapshots = snapshotRows.map(row => {
-    const clearinghouses = row.clearinghouses.map(clearinghouse => {
-      return {
-        ...clearinghouse,
-        daiBalance: parseNumber(clearinghouse.daiBalance),
-        sDaiBalance: parseNumber(clearinghouse.sDaiBalance),
-        sDaiInDaiBalance: parseNumber(clearinghouse.sDaiInDaiBalance),
-        fundAmount: parseNumber(clearinghouse.fundAmount),
-        fundCadence: parseNumber(clearinghouse.fundCadence),
-      };
-    });
-
-    return {
-      ...row,
-      clearinghouses,
-      clearinghouseTotals: {
-        daiBalance: parseNumber(row.clearinghouseTotals.daiBalance),
-        sDaiBalance: parseNumber(row.clearinghouseTotals.sDaiBalance),
-        sDaiInDaiBalance: parseNumber(row.clearinghouseTotals.sDaiInDaiBalance),
-      },
-      expiryBuckets: {
-        active: parseNumber(row.expiryBuckets.active),
-        expired: parseNumber(row.expiryBuckets.expired),
-        days30: parseNumber(row.expiryBuckets.days30),
-        days121: parseNumber(row.expiryBuckets.days121),
-      },
-      collateralDeposited: parseNumber(row.collateralDeposited),
-      collateralIncome: parseNumber(row.collateralIncome),
-      interestIncome: parseNumber(row.interestIncome),
-      interestReceivables: parseNumber(row.interestReceivables),
-      principalReceivables: parseNumber(row.principalReceivables),
-      terms: {
-        ...row.terms,
-        interestRate: parseNumber(row.terms.interestRate),
-        duration: parseNumber(row.terms.duration),
-        loanToCollateral: parseNumber(row.terms.loanToCollateral),
-      },
-      treasury: {
-        ...row.treasury,
-        daiBalance: parseNumber(row.treasury.daiBalance),
-        sDaiBalance: parseNumber(row.treasury.sDaiBalance),
-        sDaiInDaiBalance: parseNumber(row.treasury.sDaiInDaiBalance),
-      },
-    };
+    return formatSnapshot(row);
   });
 
   return snapshots;
+};
+
+export const getCurrentSnapshot = async (): Promise<Snapshot | null> => {
+  const gcpProject = getEnv("GCP_PROJECT");
+  const bigQueryDataset = getEnv("BIGQUERY_DATASET");
+  const snapshotTable = getEnv("BIGQUERY_SNAPSHOT_TABLE");
+  const currentDate = new Date();
+
+  logger.info(`Fetching current snapshot`);
+
+  const bigQuery = new BigQuery({});
+
+  // Get the snapshots
+  // Skip the dt column, which is used for partitioning
+  const snapshotRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT * EXCEPT (dt)
+    FROM \`${gcpProject}.${bigQueryDataset}.${snapshotTable}\`
+    WHERE dt <= '${getISO8601DateString(currentDate)}'
+    ORDER BY dt DESC
+    LIMIT 1
+  `,
+  )) as Snapshot[];
+
+  // All values are returned as strings
+  // Convert the number values to the correct type
+  const snapshots = snapshotRows.map(row => {
+    return formatSnapshot(row);
+  });
+
+  if (snapshots.length === 0) {
+    return null;
+  }
+
+  return snapshots[0];
 };
