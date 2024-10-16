@@ -7,6 +7,7 @@
     "graphql.vscode-graphql",
     "kavod-io.vscode-jest-test-adapter",
     "rvest.vs-code-prettier-eslint",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "zoellner.openapi-preview"
   ]
 }
