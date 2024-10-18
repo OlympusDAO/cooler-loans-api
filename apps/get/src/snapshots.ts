@@ -1,7 +1,7 @@
 import { isISO8601DateString } from "@repo/shared/date";
 import express from "express";
 
-import { getCurrentSnapshot, getSnapshots } from "./helpers/bigquery";
+import { getCurrentSnapshot, getEarliestSnapshot, getSnapshots } from "./helpers/bigquery";
 
 const setHeaders = (res: express.Response) => {
   // Enable caching
@@ -41,9 +41,19 @@ export const handleGetSnapshots = async (req: express.Request, res: express.Resp
     .end();
 };
 
-export const handleGetCurrentSnapshot = async (req: express.Request, res: express.Response) => {
+export const handleGetCurrentSnapshot = async (_req: express.Request, res: express.Response) => {
   // Grab from BigQuery
   const snapshot = await getCurrentSnapshot();
+
+  setHeaders(res);
+
+  // Send results and end
+  res.status(200).json({ record: snapshot }).end();
+};
+
+export const handleGetEarliestSnapshot = async (_req: express.Request, res: express.Response) => {
+  // Grab from BigQuery
+  const snapshot = await getEarliestSnapshot();
 
   setHeaders(res);
 

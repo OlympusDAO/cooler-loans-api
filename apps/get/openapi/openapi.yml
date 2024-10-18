@@ -64,3 +64,19 @@ paths:
                 properties:
                   record:
                     $ref: "snapshot.yaml"
+  /snapshots/earliest:
+    get:
+      summary: Retrieves the earliest Cooler Loans snapshot
+      operationId: getEarliestSnapshot
+      tags:
+        - snapshot
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record:
+                    $ref: "snapshot.yaml"

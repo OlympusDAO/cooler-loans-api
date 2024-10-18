@@ -134,3 +134,39 @@ export const getCurrentSnapshot = async (): Promise<Snapshot | null> => {
 
   return snapshots[0];
 };
+
+export const getEarliestSnapshot = async (): Promise<Snapshot | null> => {
+  const gcpProject = getEnv("GCP_PROJECT");
+  const bigQueryDataset = getEnv("BIGQUERY_DATASET");
+  const snapshotTable = getEnv("BIGQUERY_SNAPSHOT_TABLE");
+
+  logger.info(`Fetching earliest snapshot`);
+
+  const bigQuery = new BigQuery({});
+
+  // Get the snapshots
+  // Skip the dt column, which is used for partitioning
+  // There is a dummy file (2021-01-01) in the bucket for Hive partitioning, so we need to exclude it
+  const snapshotRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT * EXCEPT (dt)
+    FROM \`${gcpProject}.${bigQueryDataset}.${snapshotTable}\`
+    WHERE dt > '2021-01-01'
+    ORDER BY dt ASC
+    LIMIT 1
+  `,
+  )) as Snapshot[];
+
+  // All values are returned as strings
+  // Convert the number values to the correct type
+  const snapshots = snapshotRows.map(row => {
+    return formatSnapshot(row);
+  });
+
+  if (snapshots.length === 0) {
+    return null;
+  }
+
+  return snapshots[0];
+};
