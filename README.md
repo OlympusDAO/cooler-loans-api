@@ -14,7 +14,7 @@ This repository deploys two API endpoints:
     - Each snapshot is based on the previous day's snapshot (where applicable), in combination with the loan events (e.g. repayment) from that day.
     - Loan events are processed in the order that they occur.
   - A Google Cloud Function (with a periodic trigger) determines the previous date for which the snapshot was generated, and generates from that day onwards.
-  - The snapshots are stored in Google Firestore
+  - The snapshots are stored in Google Cloud Storage and exposed through a BigQuery database.
 
 - `get`
 
@@ -22,30 +22,28 @@ This repository deploys two API endpoints:
 
 ## Developer
 
-### Environment
+### Setup
 
-- Install JDK 11+, which is required for the firestore emulator
-  - On Mac:
-    - Install OpenJDK: `brew install openjdk@11`
-    - Let the system know where OpenJDK 11 is installed: `sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk`
-    - Switch to OpenJDK 11 by default: `/usr/libexec/java_home -v 11`
-- Install the firebase emulator
-  - `gcloud emulators firestore start`
-- Copy the `.env.sample` file to `.env` and fill out the required variables
+- Run `yarn` to install the dependencies of the whole project
 
 ### Testing
 
-- Run the firestore emulator: `yarn firestore:start`
 - `yarn test`
+
+### Deployment
+
+Pulumi is used to deploy the infrastructure.
+
+To deploy:
+
+- Build the project: `yarn run build`
+- `cd packages/infrastructure`
+- `pulumi up --stack <STACK_NAME>`
 
 ### Rebuild Snapshots
 
-If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the snapshot structure), simply delete the `snapshots` collection in the GCP project's Firestore section.
-
-This can alternatively be achieved using the `firebase` CLI:
-
-`firebase firestore:delete --recursive "/snapshots" -P <GCP PROJECT>`
+If the daily snapshots need to be rebuilt (e.g. change in the subgraph or the snapshot structure), simply delete the directories in the Google Cloud Storage bucket that corresponds to the environment.
 
 ### OpenAPI
 
-REST API clients can utilise the `openapi/openapi.yml` file to generate typings. The schema, contained in `openapi/snapshot.yaml` is regenerated with the `yarn codegen` command.
+REST API clients can utilise the `apps/get/openapi/openapi.yml` file to generate typings. The schema, contained in `apps/get/openapi/snapshot.yaml` is regenerated with the `yarn run build` command.

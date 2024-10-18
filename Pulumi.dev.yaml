@@ -1,9 +1,0 @@
-config:
-  cooler-loans-api:GRAPHQL_ENDPOINT: https://gateway-arbitrum.network.thegraph.com/api/[api-key]/subgraphs/id/4Vicyh7DiEGj6aSamLpAhwydcnaU1CPQgvWApWv7H9Rh
-  cooler-loans-api:SUBGRAPH_API_KEY:
-    secure: AAABAKaGk8x8pbEqk27P1fCgkmpqEG/DACgVQpDgfkH1K8o3+Oci7I5WMOVMcnBezIWCBY3skMIlP+8G2tsBcw==
-  cooler-loans-api:alertEmail:
-    secure: AAABANkHwERItdBf1fRBExjTMflbX2icrfQ4T/RVKvzLMRBzwhyZf5ZkFJOubvsijg==
-  gcp:project: cooler-loans-api-dev
-  # Don't change this - required for Cloud Functions + Firebase hosting to work in tandem
-  gcp:region: us-central1
