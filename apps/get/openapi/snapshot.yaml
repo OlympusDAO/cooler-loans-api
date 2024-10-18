@@ -48,8 +48,15 @@
             },
           "type": "array",
         },
+      "collateralClaimedQuantity":
+        { "description": "Quantity of collateral reclaimed on this date.", "type": "number" },
+      "collateralClaimedValue": { "description": "USD value of collateral claimed on this date.", "type": "number" },
       "collateralDeposited": { "description": "Quantity of collateral deposited across all Coolers", "type": "number" },
-      "collateralIncome": { "description": "Income from collateral reclaimed on this date.", "type": "number" },
+      "collateralIncome":
+        {
+          "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding",
+          "type": "number",
+        },
       "expiryBuckets":
         {
           "description": "Principal due for each expiry bucket.",
@@ -100,6 +107,8 @@
     [
       "clearinghouseTotals",
       "clearinghouses",
+      "collateralClaimedQuantity",
+      "collateralClaimedValue",
       "collateralDeposited",
       "collateralIncome",
       "expiryBuckets",

@@ -62,6 +62,18 @@
     ]
   },
   {
+    "name": "collateralClaimedQuantity",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Quantity of collateral reclaimed on this date."
+  },
+  {
+    "name": "collateralClaimedValue",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "USD value of collateral claimed on this date."
+  },
+  {
     "name": "collateralDeposited",
     "type": "BIGNUMERIC",
     "mode": "REQUIRED",
@@ -71,7 +83,7 @@
     "name": "collateralIncome",
     "type": "BIGNUMERIC",
     "mode": "REQUIRED",
-    "description": "Income from collateral reclaimed on this date."
+    "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding"
   },
   {
     "name": "expiryBuckets",

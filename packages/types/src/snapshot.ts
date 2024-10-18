@@ -57,9 +57,23 @@ export type Snapshot = {
    */
   interestIncome: number;
   /**
-   * Income from collateral reclaimed on this date.
+   * USD value of the income recognised from claiming the loan's collateral.
+   *
+   * As collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.
+   *
+   * The income is therefore calculated as:
+   *
+   * collateralValueAtClaim - principalOutstanding
    */
   collateralIncome: number;
+  /**
+   * Quantity of collateral reclaimed on this date.
+   */
+  collateralClaimedQuantity: number;
+  /**
+   * USD value of collateral claimed on this date.
+   */
+  collateralClaimedValue: number;
   /**
    * Quantity of collateral deposited across all Coolers
    */

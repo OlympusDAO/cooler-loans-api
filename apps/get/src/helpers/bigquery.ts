@@ -42,6 +42,8 @@ const formatSnapshot = (row: Snapshot): Snapshot => {
     },
     collateralDeposited: parseNumber(row.collateralDeposited),
     collateralIncome: parseNumber(row.collateralIncome),
+    collateralClaimedQuantity: parseNumber(row.collateralClaimedQuantity),
+    collateralClaimedValue: parseNumber(row.collateralClaimedValue),
     interestIncome: parseNumber(row.interestIncome),
     interestReceivables: parseNumber(row.interestReceivables),
     principalReceivables: parseNumber(row.principalReceivables),

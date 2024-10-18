@@ -78,6 +78,8 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       interestReceivables: 0,
       interestIncome: 0,
       collateralIncome: 0,
+      collateralClaimedQuantity: 0,
+      collateralClaimedValue: 0,
       collateralDeposited: 0,
       clearinghouses: [],
       clearinghouseTotals: {
@@ -544,8 +546,10 @@ export const generateSnapshots = (
         const collateralIncome = collateralValueClaimed - (loan.principal - loan.principalPaid);
         loan.collateralIncome += collateralIncome;
 
-        // Set the income from the default claim
+        // Update the overall snapshot with reclaimed collateral
         currentSnapshot.collateralIncome += collateralIncome;
+        currentSnapshot.collateralClaimedQuantity += loan.collateralClaimedQuantity;
+        currentSnapshot.collateralClaimedValue += loan.collateralClaimedValue;
 
         // No clearinghouse balances to use for updates
       });
