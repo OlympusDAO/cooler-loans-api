@@ -19,6 +19,8 @@
   ],
   "collateralDeposited": "0",
   "collateralIncome": "0",
+  "collateralClaimedQuantity": "0",
+  "collateralClaimedValue": "0",
   "expiryBuckets": {
     "active": "0",
     "days121": "0",
