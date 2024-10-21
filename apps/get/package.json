@@ -1,0 +1,38 @@
+{
+  "name": "cooler-loans-api-get",
+  "version": "1.0.0",
+  "description": "API to get snapshot data for Cooler Loans",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.9.1",
+    "@google-cloud/firestore": "^7.10.0",
+    "@google-cloud/functions-framework": "^3.4.2",
+    "@repo/shared": "*",
+    "@repo/types": "*",
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@openapi-contrib/json-schema-to-openapi-schema": "^2.2.5",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^18",
+    "express": "^4.21.1",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.3.0",
+    "typescript": "~5.5.0",
+    "typescript-json-schema": "^0.61.0"
+  },
+  "scripts": {
+    "build:jsonschema": "yarn typescript-json-schema ../../packages/types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
+    "build:openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
+    "build": "tsc --noEmit && tsup && yarn build:jsonschema && yarn build:openapi",
+    "gcp-build": "yarn run build",
+    "lint": "prettier --write . && eslint --fix .",
+    "prestart": "yarn run build",
+    "start": "npx @google-cloud/functions-framework --target=app"
+  }
+}

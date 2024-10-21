@@ -1,0 +1,44 @@
+{
+  "clearinghouseTotals": {
+    "daiBalance": "0",
+    "sDaiBalance": "0",
+    "sDaiInDaiBalance": "0"
+  },
+  "clearinghouses": [
+    {
+      "address": "0x0000000000000000000000000000000000000000",
+      "collateralAddress": "0x0000000000000000000000000000000000000000",
+      "coolerFactoryAddress": "0x0000000000000000000000000000000000000000",
+      "daiBalance": "0",
+      "debtAddress": "0x0000000000000000000000000000000000000000",
+      "fundAmount": "0",
+      "fundCadence": "0",
+      "sDaiBalance": "0",
+      "sDaiInDaiBalance": "0"
+    }
+  ],
+  "collateralDeposited": "0",
+  "collateralIncome": "0",
+  "collateralClaimedQuantity": "0",
+  "collateralClaimedValue": "0",
+  "expiryBuckets": {
+    "active": "0",
+    "days121": "0",
+    "days30": "0",
+    "expired": "0"
+  },
+  "interestIncome": "0",
+  "interestReceivables": "0",
+  "principalReceivables": "0",
+  "snapshotDate": "2021-01-01",
+  "terms": {
+    "duration": "0",
+    "interestRate": "0",
+    "loanToCollateral": "0"
+  },
+  "treasury": {
+    "daiBalance": "0",
+    "sDaiBalance": "0",
+    "sDaiInDaiBalance": "0"
+  }
+}

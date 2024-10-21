@@ -1,0 +1,27 @@
+{
+  "name": "@repo/infrastructure",
+  "description": "Deploys infrastructure for the cooler-loans-api",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "@pulumi/gcp": "^8.6.0",
+    "@pulumi/pulumi": "^3.137.0",
+    "@repo/bigquery-codegen": "*",
+    "@repo/eslint-config": "*",
+    "@repo/types": "*",
+    "@repo/typescript-config": "*",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^18",
+    "cooler-loans-api-generate": "*",
+    "cooler-loans-api-get": "*",
+    "fs-extra": "^11.2.0",
+    "typescript": "~5.5.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "pulumi up --stack dev",
+    "lint": "prettier --write . && eslint --fix .",
+    "refresh": "pulumi refresh --stack dev"
+  }
+}

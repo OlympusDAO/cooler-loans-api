@@ -1,0 +1,82 @@
+openapi: "3.0.3"
+info:
+  title: Cooler Loans
+  version: "1.1"
+servers:
+  - url: https://olympusdao-cooler-loans-api-prod.web.app/
+    description: Production
+  - url: https://olympusdao-cooler-loans-api-dev.web.app/
+    description: Development
+paths:
+  /snapshots:
+    get:
+      summary: Retrieves all Cooler Loans snapshots between the given dates.
+      operationId: getSnapshots
+      tags:
+        - snapshot
+      parameters:
+        - name: startDate
+          in: query
+          description: The start date (YYYY-MM-DD) of the loan period
+          required: true
+          schema:
+            type: string
+        - name: beforeDate
+          in: query
+          description: The date (YYYY-MM-DD) up to (but not including) which records should be retrieved
+          required: true
+          schema:
+            type: string
+        - name: orderBy
+          in: query
+          description: The order in which to return the snapshots. ASC or DESC
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: "snapshot.yaml"
+  /snapshots/current:
+    get:
+      summary: Retrieves the current Cooler Loans snapshot
+      description: The current snapshot is the most recent one up to the current date.
+      operationId: getCurrentSnapshot
+      tags:
+        - snapshot
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record:
+                    $ref: "snapshot.yaml"
+  /snapshots/earliest:
+    get:
+      summary: Retrieves the earliest Cooler Loans snapshot
+      operationId: getEarliestSnapshot
+      tags:
+        - snapshot
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  record:
+                    $ref: "snapshot.yaml"
