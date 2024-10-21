@@ -1,8 +1,7 @@
 import * as gcp from "@pulumi/gcp";
 import * as pulumi from "@pulumi/pulumi";
-import { readFileSync } from "fs";
 
-import { createDummyFile } from "./bigQuery";
+import { createBigQueryDataset, createBigQueryTable } from "./bigQuery";
 import { createGenerateFunction, createGetFunction } from "./cloudFunction";
 
 const gcpConfig = new pulumi.Config("gcp");
@@ -52,15 +51,7 @@ new gcp.firestore.Database(
 /**
  * Create BigQuery dataset
  */
-const bigQueryDataset = new gcp.bigquery.Dataset(
-  projectName,
-  {
-    datasetId: projectName.replace(/-/g, "_"), // - is unsupported
-  },
-  {
-    dependsOn: [serviceBigQuery],
-  },
-);
+const bigQueryDataset = createBigQueryDataset(projectName, serviceBigQuery);
 export const bigQueryDatasetId = bigQueryDataset.datasetId;
 
 /**
@@ -74,57 +65,23 @@ export const snapshotDataBucketName = snapshotDataBucket.name;
 /**
  * Create BigQuery tables
  */
-const bigQueryLoanSnapshotSchema = readFileSync("../bigquery-codegen/schemas/loanSnapshot.json", "utf-8");
-const bigQueryLoanSnapshotSourceUriPrefix = snapshotDataBucket.url.apply(url => `${url}/loanSnapshots`);
-const bigQueryLoanSnapshotSourceUri = snapshotDataBucket.url.apply(url => `${url}/loanSnapshots/*`);
-const bigQueryLoanSnapshotDummyFile = createDummyFile(snapshotDataBucket, "loanSnapshots", "./data/loanSnapshot.json");
-
-const bigQueryLoanSnapshotTable = new gcp.bigquery.Table(
+const bigQueryLoanSnapshotTable = createBigQueryTable(
   "loanSnapshots",
-  {
-    datasetId: bigQueryDataset.datasetId,
-    tableId: "loanSnapshots",
-    externalDataConfiguration: {
-      sourceFormat: "NEWLINE_DELIMITED_JSON",
-      sourceUris: [bigQueryLoanSnapshotSourceUri],
-      autodetect: false,
-      schema: bigQueryLoanSnapshotSchema,
-      hivePartitioningOptions: {
-        mode: "AUTO",
-        sourceUriPrefix: bigQueryLoanSnapshotSourceUriPrefix,
-      },
-    },
-  },
-  {
-    dependsOn: [bigQueryDataset, bigQueryLoanSnapshotDummyFile],
-  },
+  bigQueryDataset,
+  snapshotDataBucket,
+  "loanSnapshots",
+  "../bigquery-codegen/schemas/loanSnapshot.json",
+  "./data/loanSnapshot.json",
 );
 export const bigQueryLoanSnapshotTableId = bigQueryLoanSnapshotTable.tableId;
 
-const bigQuerySnapshotSchema = readFileSync("../bigquery-codegen/schemas/snapshot.json", "utf-8");
-const bigQuerySnapshotSourceUriPrefix = snapshotDataBucket.url.apply(url => `${url}/snapshots`);
-const bigQuerySnapshotSourceUri = snapshotDataBucket.url.apply(url => `${url}/snapshots/*`);
-const bigQuerySnapshotDummyFile = createDummyFile(snapshotDataBucket, "snapshots", "./data/snapshot.json");
-
-const bigQuerySnapshotTable = new gcp.bigquery.Table(
+const bigQuerySnapshotTable = createBigQueryTable(
   "snapshots",
-  {
-    datasetId: bigQueryDataset.datasetId,
-    tableId: "snapshots",
-    externalDataConfiguration: {
-      sourceFormat: "NEWLINE_DELIMITED_JSON",
-      sourceUris: [bigQuerySnapshotSourceUri],
-      autodetect: false,
-      schema: bigQuerySnapshotSchema,
-      hivePartitioningOptions: {
-        mode: "AUTO",
-        sourceUriPrefix: bigQuerySnapshotSourceUriPrefix,
-      },
-    },
-  },
-  {
-    dependsOn: [bigQueryDataset, bigQuerySnapshotDummyFile],
-  },
+  bigQueryDataset,
+  snapshotDataBucket,
+  "snapshots",
+  "../bigquery-codegen/schemas/snapshot.json",
+  "./data/snapshot.json",
 );
 export const bigQuerySnapshotTableId = bigQuerySnapshotTable.tableId;
 

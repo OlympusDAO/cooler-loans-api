@@ -28,3 +28,50 @@ export const createDummyFile = (bucket: gcp.storage.Bucket, baseDirectory: strin
 
   return dummyFile;
 };
+
+export const createBigQueryDataset = (name: string, serviceBigQuery: gcp.projects.Service) => {
+  return new gcp.bigquery.Dataset(
+    name,
+    {
+      datasetId: name.replace(/-/g, "_"), // - is unsupported,
+    },
+    {
+      dependsOn: [serviceBigQuery],
+    },
+  );
+};
+
+export const createBigQueryTable = (
+  name: string,
+  dataset: gcp.bigquery.Dataset,
+  dataBucket: gcp.storage.Bucket,
+  dataBucketPrefix: string,
+  schemaPath: string,
+  dummyFileInputPath: string,
+) => {
+  const schema = readFileSync(schemaPath, "utf-8");
+  const sourceUriPrefix = dataBucket.url.apply(url => `${url}/${dataBucketPrefix}`);
+  const sourceUri = dataBucket.url.apply(url => `${url}/${dataBucketPrefix}/*`);
+  const dummyFile = createDummyFile(dataBucket, dataBucketPrefix, dummyFileInputPath);
+
+  return new gcp.bigquery.Table(
+    name,
+    {
+      datasetId: dataset.datasetId,
+      tableId: name,
+      externalDataConfiguration: {
+        sourceFormat: "NEWLINE_DELIMITED_JSON",
+        sourceUris: [sourceUri],
+        autodetect: false,
+        schema: schema,
+        hivePartitioningOptions: {
+          mode: "AUTO",
+          sourceUriPrefix: sourceUriPrefix,
+        },
+      },
+    },
+    {
+      dependsOn: [dataset, dataBucket, dummyFile],
+    },
+  );
+};
