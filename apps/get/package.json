@@ -7,6 +7,7 @@
   "private": true,
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.1",
+    "@google-cloud/firestore": "^7.10.0",
     "@google-cloud/functions-framework": "^3.4.2",
     "@repo/shared": "*",
     "@repo/types": "*",
@@ -30,6 +31,8 @@
     "build:openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
     "build": "tsc --noEmit && tsup && yarn build:jsonschema && yarn build:openapi",
     "gcp-build": "yarn run build",
-    "lint": "prettier --write . && eslint --fix ."
+    "lint": "prettier --write . && eslint --fix .",
+    "prestart": "yarn run build",
+    "start": "npx @google-cloud/functions-framework --target=app"
   }
 }
