@@ -48,7 +48,7 @@ const run = async (startDate: Date, beforeDate: Date) => {
   for (const dateSnapshot of dateSnapshots) {
     logger.info(`run: Writing snapshot for ${dateSnapshot.date}`);
     await writeSnapshot(dateSnapshot.snapshot);
-    await writeLoanSnapshots(dateSnapshot.date, dateSnapshot.loans);
+    await writeLoanSnapshots(dateSnapshot.date, Object.values(dateSnapshot.loans));
   }
 };
 

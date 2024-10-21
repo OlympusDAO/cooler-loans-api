@@ -16,9 +16,18 @@ import {
 } from "./types";
 
 type DateSnapshot = {
+  /**
+   * The date of the snapshot
+   */
   date: Date;
+  /**
+   * The snapshot
+   */
   snapshot: Snapshot;
-  loans: LoanSnapshot[];
+  /**
+   * A mapping between the loan id and the loan snapshot
+   */
+  loans: Record<string, LoanSnapshot>;
 };
 
 type ClearinghouseBalanceSnapshotMap = Record<string, ClearinghouseBalanceSnapshot>;
@@ -331,6 +340,16 @@ const generateClearinghouseBalanceSnapshotsMap = (
   return clearinghouseBalanceSnapshotsMap;
 };
 
+/**
+ * Generate a series of snapshots from the start date to the before date
+ *
+ * @param startDate - The start date
+ * @param beforeDate - The date to stop at
+ * @param previousSnapshotIn - The previous snapshot, if it exists
+ * @param previousLoanSnapshotIn - The previous loan snapshot, if it exists
+ * @param clearinghouseEvents - The clearinghouse events
+ * @returns An array of snapshots in ascending order
+ */
 export const generateSnapshots = (
   startDate: Date,
   beforeDate: Date,
@@ -684,7 +703,7 @@ export const generateSnapshots = (
     dateSnapshots.push({
       date: currentDateBeforeMidnight,
       snapshot: currentSnapshot,
-      loans: Object.values(currentLoansMap),
+      loans: currentLoansMap,
     });
 
     previousSnapshot = currentSnapshot;
