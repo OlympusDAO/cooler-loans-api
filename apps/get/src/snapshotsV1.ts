@@ -1,9 +1,12 @@
 import { isISO8601DateString } from "@repo/shared/date";
+import { logger } from "@repo/shared/logging";
 import express from "express";
 
 import { getSnapshots } from "./helpers/firestore";
 
 export const handleGetSnapshotsFirestore = async (req: express.Request, res: express.Response) => {
+  const FUNC = "handleGetSnapshotsFirestore";
+
   // Get start and end parameters
   const startDate: string | undefined = req.query.startDate as string;
   const beforeDate: string | undefined = req.query.beforeDate as string;
@@ -15,7 +18,7 @@ export const handleGetSnapshotsFirestore = async (req: express.Request, res: exp
   }
 
   // Grab from Firestore
-  console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
+  logger.info(`${FUNC}: Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate), false);
 
   // Enable caching

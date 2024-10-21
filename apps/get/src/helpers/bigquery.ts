@@ -6,14 +6,16 @@ import { parseNumber } from "@repo/shared/number";
 import { Snapshot } from "@repo/types";
 
 const performQuery = async (client: BigQuery, query: string) => {
+  const FUNC = "performQuery";
+
   const [job] = await client.createQueryJob({
     query,
   });
-  logger.debug(`Query job ${job.id} started.`);
+  logger.debug(`${FUNC}: Query job ${job.id} started.`);
 
   const [rows] = await job.getQueryResults();
 
-  logger.debug(`Query job ${job.id} completed.`);
+  logger.debug(`${FUNC}: Query job ${job.id} completed.`);
 
   return rows;
 };
@@ -63,13 +65,15 @@ const formatSnapshot = (row: Snapshot): Snapshot => {
 };
 
 export const getSnapshots = async (startDate: Date, beforeDate: Date, orderBy: "ASC" | "DESC"): Promise<Snapshot[]> => {
+  const FUNC = "getSnapshots";
+
   // Get the BigQuery details
   const gcpProject = getEnv("GCP_PROJECT");
   const bigQueryDataset = getEnv("BIGQUERY_DATASET");
   const snapshotTable = getEnv("BIGQUERY_SNAPSHOT_TABLE");
 
   logger.info(
-    `Fetching clearinghouse events for date range ${getISO8601DateString(startDate)} to ${getISO8601DateString(
+    `${FUNC}: Fetching clearinghouse events for date range ${getISO8601DateString(startDate)} to ${getISO8601DateString(
       beforeDate,
     )}`,
   );
@@ -88,7 +92,7 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date, orderBy: "
     ORDER BY dt ${orderBy}
   `,
   )) as Snapshot[];
-  logger.debug(`Fetched ${snapshotRows.length} snapshots`);
+  logger.debug(`${FUNC}: Fetched ${snapshotRows.length} snapshots`);
 
   // All values are returned as strings
   // Convert the number values to the correct type
@@ -100,12 +104,14 @@ export const getSnapshots = async (startDate: Date, beforeDate: Date, orderBy: "
 };
 
 export const getCurrentSnapshot = async (): Promise<Snapshot | null> => {
+  const FUNC = "getCurrentSnapshot";
+
   const gcpProject = getEnv("GCP_PROJECT");
   const bigQueryDataset = getEnv("BIGQUERY_DATASET");
   const snapshotTable = getEnv("BIGQUERY_SNAPSHOT_TABLE");
   const currentDate = new Date();
 
-  logger.info(`Fetching current snapshot`);
+  logger.info(`${FUNC}: Fetching current snapshot`);
 
   const bigQuery = new BigQuery({});
 
@@ -136,11 +142,13 @@ export const getCurrentSnapshot = async (): Promise<Snapshot | null> => {
 };
 
 export const getEarliestSnapshot = async (): Promise<Snapshot | null> => {
+  const FUNC = "getEarliestSnapshot";
+
   const gcpProject = getEnv("GCP_PROJECT");
   const bigQueryDataset = getEnv("BIGQUERY_DATASET");
   const snapshotTable = getEnv("BIGQUERY_SNAPSHOT_TABLE");
 
-  logger.info(`Fetching earliest snapshot`);
+  logger.info(`${FUNC}: Fetching earliest snapshot`);
 
   const bigQuery = new BigQuery({});
 

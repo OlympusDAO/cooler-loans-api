@@ -1,4 +1,5 @@
 import { isISO8601DateString } from "@repo/shared/date";
+import { logger } from "@repo/shared/logging";
 import express from "express";
 
 import { getCurrentSnapshot, getEarliestSnapshot, getSnapshots } from "./helpers/bigquery";
@@ -10,6 +11,8 @@ const setHeaders = (res: express.Response) => {
 };
 
 export const handleGetSnapshots = async (req: express.Request, res: express.Response) => {
+  const FUNC = "handleGetSnapshots";
+
   // Get start and end parameters
   const startDate: string | undefined = req.query.startDate as string;
   const beforeDate: string | undefined = req.query.beforeDate as string;
@@ -27,7 +30,7 @@ export const handleGetSnapshots = async (req: express.Request, res: express.Resp
   }
 
   // Grab from BigQuery
-  console.log(`Getting snapshots between ${startDate} and ${beforeDate}`);
+  logger.info(`${FUNC}: Getting snapshots between ${startDate} and ${beforeDate}`);
   const snapshots = await getSnapshots(new Date(startDate), new Date(beforeDate), orderBy);
 
   setHeaders(res);
