@@ -125,6 +125,8 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   // Some snapshot values are not carried over
   newSnapshot.interestIncome = 0;
   newSnapshot.collateralIncome = 0;
+  newSnapshot.collateralClaimedQuantity = 0;
+  newSnapshot.collateralClaimedValue = 0;
   newSnapshot.collateralDeposited = 0;
   newSnapshot.principalReceivables = 0;
   newSnapshot.interestReceivables = 0;
