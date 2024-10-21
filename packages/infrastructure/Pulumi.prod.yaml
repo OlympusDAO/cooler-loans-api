@@ -1,8 +1,8 @@
 config:
   cooler-loans-api:alertEmail:
     secure: AAABAIn37o4Q//rFMFNoW2K9Jr7bOYYcamISp06aBJ7F2YlKGI9dsTk+3HrnOmDUzA==
-  cooler-loans-api:cacheBigQueryDataset: Cooler_Loans_QmQoJMZT4bLLUNvf9Z15VNub6Wk1oq6VcMm34omrrVZevs # TODO update
-  cooler-loans-api:cacheBucket: olympus-subgraph-cache-dev-1d625e2 # TODO update
+  cooler-loans-api:cacheBigQueryDataset: Cooler_Loans_QmQoJMZT4bLLUNvf9Z15VNub6Wk1oq6VcMm34omrrVZevs
+  cooler-loans-api:cacheBucket: olympus-subgraph-cache-prod-616461c
   cooler-loans-api:cacheProject: utility-descent-365911
   gcp:project: cooler-loans-api-prod
   # Don't change this - required for Cloud Functions + Firebase hosting to work in tandem

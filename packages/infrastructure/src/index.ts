@@ -34,9 +34,8 @@ const serviceFirestore = new gcp.projects.Service("firestore", {
 
 /**
  * Create Firestore database
- *
- * TODO this will be removed once the migration is complete
  */
+// TODO remove this once the migration is complete
 new gcp.firestore.Database(
   "default",
   {
