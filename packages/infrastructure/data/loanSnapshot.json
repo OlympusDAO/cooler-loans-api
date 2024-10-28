@@ -1,0 +1,22 @@
+{
+  "borrowerAddress": "0x0000000000000000000000000000000000000000",
+  "collateralClaimedQuantity": "0",
+  "collateralClaimedValue": "0",
+  "collateralDeposited": "0",
+  "collateralIncome": "0",
+  "coolerAddress": "0x0000000000000000000000000000000000000000",
+  "createdTimestamp": "0",
+  "durationSeconds": "0",
+  "expiryTimestamp": "0",
+  "id": "",
+  "interest": "0",
+  "interestPaid": "0",
+  "interestRate": "0",
+  "lenderAddress": "0x0000000000000000000000000000000000000000",
+  "loanId": "0",
+  "principal": "0",
+  "principalPaid": "0",
+  "secondsToExpiry": "0",
+  "snapshotDate": "2021-01-01",
+  "status": "UNKNOWN"
+}

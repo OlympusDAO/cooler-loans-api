@@ -1,0 +1,196 @@
+[
+  {
+    "name": "clearinghouseTotals",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Totals for the Clearinghouses at the time of the snapshot.",
+    "fields": [
+      {
+        "name": "daiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of DAI across all Clearinghouses"
+      },
+      {
+        "name": "sDaiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of sDAI across all Clearinghouses"
+      },
+      {
+        "name": "sDaiInDaiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of sDAI in terms of DAI across all Clearinghouses"
+      }
+    ]
+  },
+  {
+    "name": "clearinghouses",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "fields": [
+      { "name": "address", "type": "STRING", "mode": "REQUIRED", "description": "Address of the Clearinghouse" },
+      {
+        "name": "collateralAddress",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "The address of the collateral"
+      },
+      {
+        "name": "coolerFactoryAddress",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "The address of the CoolerFactory"
+      },
+      { "name": "daiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Balance of DAI" },
+      { "name": "debtAddress", "type": "STRING", "mode": "REQUIRED", "description": "The address of the debt" },
+      {
+        "name": "fundAmount",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Amount of DAI that the Clearinghouse should be funded with"
+      },
+      { "name": "fundCadence", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "The cadence of the funding" },
+      { "name": "sDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Balance of sDAI" },
+      {
+        "name": "sDaiInDaiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Balance of sDAI in terms of DAI"
+      }
+    ]
+  },
+  {
+    "name": "collateralClaimedQuantity",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Quantity of collateral reclaimed on this date."
+  },
+  {
+    "name": "collateralClaimedValue",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "USD value of collateral claimed on this date."
+  },
+  {
+    "name": "collateralDeposited",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Quantity of collateral deposited across all Coolers"
+  },
+  {
+    "name": "collateralIncome",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding"
+  },
+  {
+    "name": "expiryBuckets",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Principal due for each expiry bucket.",
+    "fields": [
+      {
+        "name": "active",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Principal due for loans that are active"
+      },
+      {
+        "name": "days121",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Principal due for loans that are within 121 days of expiry"
+      },
+      {
+        "name": "days30",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Principal due for loans that are within 30 days of expiry"
+      },
+      {
+        "name": "expired",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Principal due for loans that are expired"
+      }
+    ]
+  },
+  {
+    "name": "interestIncome",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Income from interest payments made on this date."
+  },
+  {
+    "name": "interestReceivables",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Interest receivable across all Coolers"
+  },
+  {
+    "name": "principalReceivables",
+    "type": "BIGNUMERIC",
+    "mode": "REQUIRED",
+    "description": "Principal receivable across all Coolers"
+  },
+  {
+    "name": "snapshotDate",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Date of the snapshot.\n\nTimes are stored at UTC."
+  },
+  {
+    "name": "terms",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Current Clearinghouse terms",
+    "fields": [
+      {
+        "name": "duration",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Duration of the loan in seconds"
+      },
+      {
+        "name": "interestRate",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Interest rate as a decimal\n\ne.g. 0.005 = 0.5%"
+      },
+      {
+        "name": "loanToCollateral",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Value of the loan (in DAI) provided against the collateral"
+      }
+    ]
+  },
+  {
+    "name": "treasury",
+    "type": "RECORD",
+    "mode": "REQUIRED",
+    "description": "Represents the state of the Treasury at the time of the snapshot.",
+    "fields": [
+      {
+        "name": "daiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of DAI in the active treasury"
+      },
+      {
+        "name": "sDaiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of sDAI in the active treasury"
+      },
+      {
+        "name": "sDaiInDaiBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of sDAI in terms of DAI in the active treasury"
+      }
+    ]
+  }
+]

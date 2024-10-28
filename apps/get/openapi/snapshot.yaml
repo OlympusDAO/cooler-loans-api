@@ -1,0 +1,123 @@
+{
+  "properties":
+    {
+      "clearinghouseTotals":
+        {
+          "description": "Totals for the Clearinghouses at the time of the snapshot.",
+          "properties":
+            {
+              "daiBalance": { "description": "Total balance of DAI across all Clearinghouses", "type": "number" },
+              "sDaiBalance": { "description": "Total balance of sDAI across all Clearinghouses", "type": "number" },
+              "sDaiInDaiBalance":
+                { "description": "Total balance of sDAI in terms of DAI across all Clearinghouses", "type": "number" },
+            },
+          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "type": "object",
+        },
+      "clearinghouses":
+        {
+          "description": "State of the Clearinghouses at the time of the snapshot.",
+          "items":
+            {
+              "properties":
+                {
+                  "address": { "description": "Address of the Clearinghouse", "type": "string" },
+                  "collateralAddress": { "description": "The address of the collateral", "type": "string" },
+                  "coolerFactoryAddress": { "description": "The address of the CoolerFactory", "type": "string" },
+                  "daiBalance": { "description": "Balance of DAI", "type": "number" },
+                  "debtAddress": { "description": "The address of the debt", "type": "string" },
+                  "fundAmount":
+                    { "description": "Amount of DAI that the Clearinghouse should be funded with", "type": "number" },
+                  "fundCadence": { "description": "The cadence of the funding", "type": "number" },
+                  "sDaiBalance": { "description": "Balance of sDAI", "type": "number" },
+                  "sDaiInDaiBalance": { "description": "Balance of sDAI in terms of DAI", "type": "number" },
+                },
+              "required":
+                [
+                  "address",
+                  "collateralAddress",
+                  "coolerFactoryAddress",
+                  "daiBalance",
+                  "debtAddress",
+                  "fundAmount",
+                  "fundCadence",
+                  "sDaiBalance",
+                  "sDaiInDaiBalance",
+                ],
+              "type": "object",
+            },
+          "type": "array",
+        },
+      "collateralClaimedQuantity":
+        { "description": "Quantity of collateral reclaimed on this date.", "type": "number" },
+      "collateralClaimedValue": { "description": "USD value of collateral claimed on this date.", "type": "number" },
+      "collateralDeposited": { "description": "Quantity of collateral deposited across all Coolers", "type": "number" },
+      "collateralIncome":
+        {
+          "description": "USD value of the income recognised from claiming the loan's collateral.\n\nAs collateral is returned to the borrower as they repay the loan principal, the collateral at any point in time covers the principal outstanding.\n\nThe income is therefore calculated as:\n\ncollateralValueAtClaim - principalOutstanding",
+          "type": "number",
+        },
+      "expiryBuckets":
+        {
+          "description": "Principal due for each expiry bucket.",
+          "properties":
+            {
+              "active": { "description": "Principal due for loans that are active", "type": "number" },
+              "days121":
+                { "description": "Principal due for loans that are within 121 days of expiry", "type": "number" },
+              "days30":
+                { "description": "Principal due for loans that are within 30 days of expiry", "type": "number" },
+              "expired": { "description": "Principal due for loans that are expired", "type": "number" },
+            },
+          "required": ["active", "days121", "days30", "expired"],
+          "type": "object",
+        },
+      "interestIncome": { "description": "Income from interest payments made on this date.", "type": "number" },
+      "interestReceivables": { "description": "Interest receivable across all Coolers", "type": "number" },
+      "principalReceivables": { "description": "Principal receivable across all Coolers", "type": "number" },
+      "snapshotDate": { "description": "Date of the snapshot.\n\nTimes are stored at UTC.", "type": "string" },
+      "terms":
+        {
+          "description": "Current Clearinghouse terms",
+          "properties":
+            {
+              "duration": { "description": "Duration of the loan in seconds", "type": "number" },
+              "interestRate": { "description": "Interest rate as a decimal\n\ne.g. 0.005 = 0.5%", "type": "number" },
+              "loanToCollateral":
+                { "description": "Value of the loan (in DAI) provided against the collateral", "type": "number" },
+            },
+          "required": ["duration", "interestRate", "loanToCollateral"],
+          "type": "object",
+        },
+      "treasury":
+        {
+          "description": "Represents the state of the Treasury at the time of the snapshot.",
+          "properties":
+            {
+              "daiBalance": { "description": "Total balance of DAI in the active treasury", "type": "number" },
+              "sDaiBalance": { "description": "Total balance of sDAI in the active treasury", "type": "number" },
+              "sDaiInDaiBalance":
+                { "description": "Total balance of sDAI in terms of DAI in the active treasury", "type": "number" },
+            },
+          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "type": "object",
+        },
+    },
+  "required":
+    [
+      "clearinghouseTotals",
+      "clearinghouses",
+      "collateralClaimedQuantity",
+      "collateralClaimedValue",
+      "collateralDeposited",
+      "collateralIncome",
+      "expiryBuckets",
+      "interestIncome",
+      "interestReceivables",
+      "principalReceivables",
+      "snapshotDate",
+      "terms",
+      "treasury",
+    ],
+  "type": "object",
+}

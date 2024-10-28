@@ -1,0 +1,46 @@
+{
+  "name": "@repo/shared",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./date": "./dist/date.js",
+    "./env": "./dist/env.js",
+    "./logging": "./dist/logging.js",
+    "./number": "./dist/number.js"
+  },
+  "typesVersions": {
+    "*": {
+      "date": [
+        "./dist/date.d.ts"
+      ],
+      "env": [
+        "./dist/env.d.ts"
+      ],
+      "logging": [
+        "./dist/logging.d.ts"
+      ],
+      "number": [
+        "./dist/number.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@google-cloud/logging-winston": "^6.0.0",
+    "winston": "^3.14.2"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^18",
+    "tsup": "^8.3.0",
+    "typescript": "~5.5.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && tsup",
+    "lint": "prettier --write . && eslint --fix ."
+  }
+}
