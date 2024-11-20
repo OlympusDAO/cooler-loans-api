@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
+    "@repo/subgraph-cache-types": "*",
     "@repo/typescript-config": "*",
     "@types/jest": "^29.5.0",
     "@types/node": "^18",

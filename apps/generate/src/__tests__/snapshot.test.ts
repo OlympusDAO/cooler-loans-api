@@ -1,8 +1,8 @@
-import { ClearinghouseBalanceSnapshot, Snapshot } from "@repo/types/snapshot";
+import { Snapshot } from "@repo/types/snapshot";
 import { generateSnapshots } from "../snapshot";
-import { ClearinghouseEvents, Loan } from "../types";
+import { ClearinghouseEvents } from "../types";
 import { LoanSnapshotMap } from "@repo/types/loanSnapshot";
-import { assert } from "console";
+import { CoolerLoan } from "@repo/subgraph-cache-types";
 
 const LOAN_ID = "0x3-0";
 const LOAN_PRINCIPAL = 99000;
@@ -46,7 +46,7 @@ const TREASURY_DAI_BALANCE = 1000;
 const TREASURY_SDAI_BALANCE = 1500;
 const TREASURY_SDAI_IN_DAI_BALANCE = 1600;
 
-const getLoanData = (): Loan => {
+const getLoanData = (): CoolerLoan => {
   return {
     __typename: "Loan",
     id: LOAN_ID,

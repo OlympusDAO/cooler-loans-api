@@ -1,19 +1,19 @@
 import { adjustDate, getISO8601DateString, setBeforeMidnight, setMidnight } from "@repo/shared/date";
 import { logger, throwError } from "@repo/shared/logging";
 import { parseNumber } from "@repo/shared/number";
+import {
+  ClaimDefaultedLoanEvent,
+  ClearinghouseSnapshot,
+  ClearLoanRequestEvent,
+  CoolerLoan,
+  CoolerLoanRequest,
+  ExtendLoanEvent,
+  RepayLoanEvent,
+} from "@repo/subgraph-cache-types/types";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { ClearinghouseBalanceSnapshot, Snapshot } from "@repo/types/snapshot";
 
-import {
-  ClaimDefaultedLoanEvent,
-  ClearinghouseEvents,
-  ClearinghouseSnapshot,
-  ClearLoanRequestEvent,
-  ExtendLoanEvent,
-  Loan,
-  LoanRequest,
-  RepayLoanEvent,
-} from "./types";
+import { ClearinghouseEvents } from "./types";
 
 type DateSnapshot = {
   /**
@@ -186,8 +186,8 @@ type EventsByTimestamp = Record<
     repaymentEvents: RepayLoanEvent[];
     defaultedClaimEvents: ClaimDefaultedLoanEvent[];
     extendEvents: ExtendLoanEvent[];
-    createdLoans: Record<string, Loan>;
-    loanRequests: Record<string, LoanRequest>;
+    createdLoans: Record<string, CoolerLoan>;
+    loanRequests: Record<string, CoolerLoanRequest>;
   }
 >;
 

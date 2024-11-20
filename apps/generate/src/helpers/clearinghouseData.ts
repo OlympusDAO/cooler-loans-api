@@ -2,17 +2,17 @@ import { BigQuery, BigQueryDate } from "@google-cloud/bigquery";
 import { getISO8601DateString } from "@repo/shared/date";
 import { getEnv } from "@repo/shared/env";
 import { logger, throwError } from "@repo/shared/logging";
-
-import {
+import type {
   ClaimDefaultedLoanEvent,
-  ClearinghouseEvents,
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
+  CoolerLoan,
+  CoolerLoanRequest,
   ExtendLoanEvent,
-  Loan,
-  LoanRequest,
   RepayLoanEvent,
-} from "../types";
+} from "@repo/subgraph-cache-types";
+
+import { ClearinghouseEvents } from "../types";
 
 const performQuery = async (client: BigQuery, query: string) => {
   const [job] = await client.createQueryJob({
@@ -140,7 +140,7 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     FROM \`${cacheProject}.${cacheBigQueryDataset}.CoolerLoan\`
     WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
   `,
-  )) as Loan[];
+  )) as CoolerLoan[];
   logger.debug(`Fetched ${createdLoansRows.length} created loans`);
 
   // Loan requests
@@ -151,7 +151,7 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     FROM \`${cacheProject}.${cacheBigQueryDataset}.CoolerLoanRequest\`
     WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
   `,
-  )) as LoanRequest[];
+  )) as CoolerLoanRequest[];
   logger.debug(`Fetched ${loanRequestRows.length} loan requests`);
 
   // Format
@@ -263,7 +263,7 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
       acc[date][row.id] = row;
       return acc;
     },
-    {} as Record<string, Record<string, Loan>>,
+    {} as Record<string, Record<string, CoolerLoan>>,
   );
   logger.debug(`Created loan dates: ${Object.keys(createdLoans).join(", ")}`);
 
@@ -277,7 +277,7 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
       acc[date][row.id] = row;
       return acc;
     },
-    {} as Record<string, Record<string, LoanRequest>>,
+    {} as Record<string, Record<string, CoolerLoanRequest>>,
   );
   logger.debug(`Loan request dates: ${Object.keys(loanRequests).join(", ")}`);
 
