@@ -44,6 +44,11 @@ export type ClearinghouseEvents = {
    */
   loanRequests: Record<string, Record<string, CoolerLoanRequest>>;
 
+  /**
+   * A map of clearinghouse addresses to the Clearinghouse.
+   */
+  clearinghouses: Record<string, Clearinghouse>;
+
   // /**
   //  * A map of YYYY-MM-DD date strings to the Clearinghouse defund events for that date.
   //  */
