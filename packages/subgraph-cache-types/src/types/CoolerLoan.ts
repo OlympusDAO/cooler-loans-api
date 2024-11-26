@@ -13,14 +13,15 @@ export type CoolerLoan = {
   };
   loanId: string;
   borrower: string;
-  lender: string;
+  clearinghouse: {
+    __typename: string;
+    id: string;
+  };
   interest: string;
   principal: string;
   collateral: string;
   expiryTimestamp: string;
   hasCallback: boolean;
-  collateralToken: string;
-  debtToken: string;
   creationEvents: {
     __typename: string;
     id: string;

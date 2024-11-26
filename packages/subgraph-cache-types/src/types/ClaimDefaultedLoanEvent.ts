@@ -15,5 +15,9 @@ export type ClaimDefaultedLoanEvent = {
     id: string;
   };
   secondsSinceExpiry: string;
+  clearinghouseSnapshot: {
+    __typename: string;
+    id: string;
+  };
   dt: string;
 };

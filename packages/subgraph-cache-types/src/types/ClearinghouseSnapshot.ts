@@ -6,30 +6,44 @@ export type ClearinghouseSnapshot = {
   date: string;
   blockNumber: string;
   blockTimestamp: string;
-  clearinghouse: string;
-  coolerFactoryAddress: string;
-  collateralAddress: string;
-  debtAddress: string;
+  transactionHash: string;
+  clearinghouse: {
+    __typename: string;
+    id: string;
+  };
   isActive: boolean;
   nextRebalanceTimestamp: string;
   interestReceivables: string;
   principalReceivables: string;
-  interestRate: string;
-  duration: string;
-  fundCadence: string;
-  fundAmount: string;
-  loanToCollateral: string;
-  daiBalance: string;
-  sDaiBalance: string;
-  sDaiInDaiBalance: string;
-  treasuryDaiBalance: string;
-  treasurySDaiBalance: string;
-  treasurySDaiInDaiBalance: string;
+  reserveToken: string;
+  sReserveToken: string;
+  reserveBalance: string;
+  sReserveBalance: string;
+  sReserveInReserveBalance: string;
+  treasuryReserveBalance: string;
+  treasurySReserveBalance: string;
+  treasurySReserveInReserveBalance: string;
   rebalanceEvents: {
     __typename: string;
     id: string;
   }[];
   defundEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  creationEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  defaultedClaimEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  repaymentEvents: {
+    __typename: string;
+    id: string;
+  }[];
+  extendEvents: {
     __typename: string;
     id: string;
   }[];

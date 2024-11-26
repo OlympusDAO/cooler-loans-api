@@ -14,11 +14,9 @@ export type ExtendLoanEvent = {
   };
   expiryTimestamp: string;
   interestDue: string;
-  clearinghouseDaiBalance: string;
-  clearinghouseSDaiBalance: string;
-  clearinghouseSDaiInDaiBalance: string;
-  treasuryDaiBalance: string;
-  treasurySDaiBalance: string;
-  treasurySDaiInDaiBalance: string;
+  clearinghouseSnapshot: {
+    __typename: string;
+    id: string;
+  };
   dt: string;
 };
