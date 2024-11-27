@@ -1,5 +1,6 @@
 import type {
   ClaimDefaultedLoanEvent,
+  Clearinghouse,
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
   CoolerLoan,
@@ -48,14 +49,4 @@ export type ClearinghouseEvents = {
    * A map of clearinghouse addresses to the Clearinghouse.
    */
   clearinghouses: Record<string, Clearinghouse>;
-
-  // /**
-  //  * A map of YYYY-MM-DD date strings to the Clearinghouse defund events for that date.
-  //  */
-  // clearinghouseDefundEvents: Record<string, DefundEvent[]>;
-
-  // /**
-  //  * A map of YYYY-MM-DD date strings to the Clearinghouse rebalance events for that date.
-  //  */
-  // clearinghouseRebalanceEvents: Record<string, RebalanceEvent[]>;
 };

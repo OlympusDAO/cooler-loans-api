@@ -4,6 +4,7 @@ import { getEnv } from "@repo/shared/env";
 import { logger, throwError } from "@repo/shared/logging";
 import type {
   ClaimDefaultedLoanEvent,
+  Clearinghouse,
   ClearinghouseSnapshot,
   ClearLoanRequestEvent,
   CoolerLoan,
@@ -110,28 +111,6 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   )) as ExtendLoanEvent[];
   logger.debug(`Fetched ${extendRows.length} extend events`);
 
-  // // Defund events
-  // const defundRows = (await performQuery(
-  //   bigQuery,
-  //   `
-  //   SELECT *
-  //   FROM \`${cacheProject}.${cacheBigQueryDataset}.DefundEvent\`
-  //   WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
-  //   `,
-  // )) as DefundEvent[];
-  // logger.debug(`Fetched ${defundRows.length} defund events`);
-
-  // // Rebalance events
-  // const rebalanceRows = (await performQuery(
-  //   bigQuery,
-  //   `
-  //   SELECT *
-  //   FROM \`${cacheProject}.${cacheBigQueryDataset}.RebalanceEvent\`
-  //   WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
-  //   `,
-  // )) as RebalanceEvent[];
-  // logger.debug(`Fetched ${rebalanceRows.length} rebalance events`);
-
   // Created loans
   const createdLoansRows = (await performQuery(
     bigQuery,
@@ -153,6 +132,17 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   `,
   )) as CoolerLoanRequest[];
   logger.debug(`Fetched ${loanRequestRows.length} loan requests`);
+
+  // Clearinghouses
+  const clearinghouseRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT *
+    FROM \`${cacheProject}.${cacheBigQueryDataset}.Clearinghouse\`
+    WHERE dt >= '2021-01-01'
+  `, // Partitioning is required, so we add in a dummy date
+  )) as Clearinghouse[];
+  logger.debug(`Fetched ${clearinghouseRows.length} clearinghouses`);
 
   // Format
   // Each map is keyed on the date in YYYY-MM-DD format and has an array of events as the value
@@ -225,34 +215,6 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   );
   logger.debug(`Extend event dates: ${Object.keys(extendEvents).join(", ")}`);
 
-  // // Defund events
-  // const clearinghouseDefundEvents = defundRows.reduce(
-  //   (acc, row) => {
-  //     const date = getDateValue(row.dt);
-  //     if (!acc[date]) {
-  //       acc[date] = [];
-  //     }
-  //     acc[date].push(row);
-  //     return acc;
-  //   },
-  //   {} as Record<string, DefundEvent[]>,
-  // );
-  // logger.debug(`Defund event dates: ${Object.keys(clearinghouseDefundEvents).join(", ")}`);
-
-  // // Rebalance events
-  // const clearinghouseRebalanceEvents = rebalanceRows.reduce(
-  //   (acc, row) => {
-  //     const date = getDateValue(row.dt);
-  //     if (!acc[date]) {
-  //       acc[date] = [];
-  //     }
-  //     acc[date].push(row);
-  //     return acc;
-  //   },
-  //   {} as Record<string, RebalanceEvent[]>,
-  // );
-  // logger.debug(`Rebalance event dates: ${Object.keys(clearinghouseRebalanceEvents).join(", ")}`);
-
   // Created loans
   const createdLoans = createdLoansRows.reduce(
     (acc, row) => {
@@ -281,6 +243,15 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   );
   logger.debug(`Loan request dates: ${Object.keys(loanRequests).join(", ")}`);
 
+  // Clearinghouses
+  const clearinghouses = clearinghouseRows.reduce(
+    (acc, row) => {
+      acc[row.address] = row;
+      return acc;
+    },
+    {} as Record<string, Clearinghouse>,
+  );
+
   logger.info(`Completed fetching clearinghouse events`);
 
   return {
@@ -291,7 +262,6 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     extendEvents,
     createdLoans,
     loanRequests,
-    // clearinghouseDefundEvents,
-    // clearinghouseRebalanceEvents,
+    clearinghouses,
   };
 };

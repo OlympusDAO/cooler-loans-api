@@ -403,8 +403,8 @@ export const generateSnapshots = (
           fundAmount: parseNumber(clearinghouse.fundAmount),
           fundCadence: parseNumber(clearinghouse.fundCadence),
           coolerFactoryAddress: clearinghouse.coolerFactoryAddress,
-          collateralAddress: clearinghouse.collateralAddress,
-          debtAddress: clearinghouse.debtAddress,
+          collateralAddress: clearinghouse.collateralToken,
+          debtAddress: clearinghouse.reserveToken,
         };
 
         currentSnapshot.terms.interestRate = parseNumber(clearinghouse.interestRate);
