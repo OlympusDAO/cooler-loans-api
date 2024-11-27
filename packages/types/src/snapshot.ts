@@ -4,19 +4,19 @@ export type ClearinghouseBalanceSnapshot = {
    */
   address: string;
   /**
-   * Balance of DAI
+   * Balance of the reserve token
    */
-  daiBalance: number;
+  reserveBalance: number;
   /**
-   * Balance of sDAI
+   * Balance of the sReserve token
    */
-  sDaiBalance: number;
+  sReserveBalance: number;
   /**
-   * Balance of sDAI in terms of DAI
+   * Balance of the sReserve token in terms of the reserve token
    */
-  sDaiInDaiBalance: number;
+  sReserveInReserveBalance: number;
   /**
-   * Amount of DAI that the Clearinghouse should be funded with
+   * Amount of the reserve token that the Clearinghouse should be funded with
    */
   fundAmount: number;
   /**
@@ -87,34 +87,34 @@ export type Snapshot = {
    */
   clearinghouseTotals: {
     /**
-     * Total balance of DAI across all Clearinghouses
+     * Total balance of the reserve token across all Clearinghouses
      */
-    daiBalance: number;
+    reserveBalance: number;
     /**
-     * Total balance of sDAI across all Clearinghouses
+     * Total balance of the sReserve token across all Clearinghouses
      */
-    sDaiBalance: number;
+    sReserveBalance: number;
     /**
-     * Total balance of sDAI in terms of DAI across all Clearinghouses
+     * Total balance of the sReserve token in terms of the reserve token across all Clearinghouses
      */
-    sDaiInDaiBalance: number;
+    sReserveInReserveBalance: number;
   };
   /**
    * Represents the state of the Treasury at the time of the snapshot.
    */
   treasury: {
     /**
-     * Total balance of DAI in the active treasury
+     * Total balance of the reserve token in the active treasury
      */
-    daiBalance: number;
+    reserveBalance: number;
     /**
-     * Total balance of sDAI in the active treasury
+     * Total balance of the sReserve token in the active treasury
      */
-    sDaiBalance: number;
+    sReserveBalance: number;
     /**
-     * Total balance of sDAI in terms of DAI in the active treasury
+     * Total balance of the sReserve token in terms of the reserve token in the active treasury
      */
-    sDaiInDaiBalance: number;
+    sReserveInReserveBalance: number;
   };
   /**
    * Current Clearinghouse terms

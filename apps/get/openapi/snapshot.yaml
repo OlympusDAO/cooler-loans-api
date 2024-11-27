@@ -6,12 +6,17 @@
           "description": "Totals for the Clearinghouses at the time of the snapshot.",
           "properties":
             {
-              "daiBalance": { "description": "Total balance of DAI across all Clearinghouses", "type": "number" },
-              "sDaiBalance": { "description": "Total balance of sDAI across all Clearinghouses", "type": "number" },
-              "sDaiInDaiBalance":
-                { "description": "Total balance of sDAI in terms of DAI across all Clearinghouses", "type": "number" },
+              "reserveBalance":
+                { "description": "Total balance of the reserve token across all Clearinghouses", "type": "number" },
+              "sReserveBalance":
+                { "description": "Total balance of the sReserve token across all Clearinghouses", "type": "number" },
+              "sReserveInReserveBalance":
+                {
+                  "description": "Total balance of the sReserve token in terms of the reserve token across all Clearinghouses",
+                  "type": "number",
+                },
             },
-          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "required": ["reserveBalance", "sReserveBalance", "sReserveInReserveBalance"],
           "type": "object",
         },
       "clearinghouses":
@@ -24,25 +29,29 @@
                   "address": { "description": "Address of the Clearinghouse", "type": "string" },
                   "collateralAddress": { "description": "The address of the collateral", "type": "string" },
                   "coolerFactoryAddress": { "description": "The address of the CoolerFactory", "type": "string" },
-                  "daiBalance": { "description": "Balance of DAI", "type": "number" },
                   "debtAddress": { "description": "The address of the debt", "type": "string" },
                   "fundAmount":
-                    { "description": "Amount of DAI that the Clearinghouse should be funded with", "type": "number" },
+                    {
+                      "description": "Amount of the reserve token that the Clearinghouse should be funded with",
+                      "type": "number",
+                    },
                   "fundCadence": { "description": "The cadence of the funding", "type": "number" },
-                  "sDaiBalance": { "description": "Balance of sDAI", "type": "number" },
-                  "sDaiInDaiBalance": { "description": "Balance of sDAI in terms of DAI", "type": "number" },
+                  "reserveBalance": { "description": "Balance of the reserve token", "type": "number" },
+                  "sReserveBalance": { "description": "Balance of the sReserve token", "type": "number" },
+                  "sReserveInReserveBalance":
+                    { "description": "Balance of the sReserve token in terms of the reserve token", "type": "number" },
                 },
               "required":
                 [
                   "address",
                   "collateralAddress",
                   "coolerFactoryAddress",
-                  "daiBalance",
                   "debtAddress",
                   "fundAmount",
                   "fundCadence",
-                  "sDaiBalance",
-                  "sDaiInDaiBalance",
+                  "reserveBalance",
+                  "sReserveBalance",
+                  "sReserveInReserveBalance",
                 ],
               "type": "object",
             },
@@ -94,12 +103,17 @@
           "description": "Represents the state of the Treasury at the time of the snapshot.",
           "properties":
             {
-              "daiBalance": { "description": "Total balance of DAI in the active treasury", "type": "number" },
-              "sDaiBalance": { "description": "Total balance of sDAI in the active treasury", "type": "number" },
-              "sDaiInDaiBalance":
-                { "description": "Total balance of sDAI in terms of DAI in the active treasury", "type": "number" },
+              "reserveBalance":
+                { "description": "Total balance of the reserve token in the active treasury", "type": "number" },
+              "sReserveBalance":
+                { "description": "Total balance of the sReserve token in the active treasury", "type": "number" },
+              "sReserveInReserveBalance":
+                {
+                  "description": "Total balance of the sReserve token in terms of the reserve token in the active treasury",
+                  "type": "number",
+                },
             },
-          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "required": ["reserveBalance", "sReserveBalance", "sReserveInReserveBalance"],
           "type": "object",
         },
     },

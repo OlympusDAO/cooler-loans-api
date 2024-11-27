@@ -35,15 +35,23 @@ type DateSnapshot = {
  */
 type ClearinghouseBalanceSnapshotMap = Record<string, ClearinghouseBalanceSnapshot>;
 
+/**
+ * Updates the day's Clearinghouse balance snapshot with the latest values.
+ *
+ * This is needed as there are multiple Clearinghouses, which each can have multiple updates per day.
+ *
+ * @param clearinghouseBalanceSnapshotMap
+ * @param lender
+ * @param reserveBalance
+ * @param sReserveBalance
+ * @param sReserveInReserveBalance
+ */
 const updateClearinghouseBalanceSnapshot = (
   clearinghouseBalanceSnapshotMap: Record<string, ClearinghouseBalanceSnapshot>,
   lender: string,
   reserveBalance: string | number,
   sReserveBalance: string | number,
   sReserveInReserveBalance: string | number,
-  treasuryReserveBalance: string | number,
-  treasurySReserveBalance: string | number,
-  treasurySReserveInReserveBalance: string | number,
 ) => {
   const clearinghouseBalanceSnapshot = clearinghouseBalanceSnapshotMap[lender];
   if (!clearinghouseBalanceSnapshot) {
@@ -53,9 +61,18 @@ const updateClearinghouseBalanceSnapshot = (
   clearinghouseBalanceSnapshot.reserveBalance = parseNumber(reserveBalance);
   clearinghouseBalanceSnapshot.sReserveBalance = parseNumber(sReserveBalance);
   clearinghouseBalanceSnapshot.sReserveInReserveBalance = parseNumber(sReserveInReserveBalance);
-  clearinghouseBalanceSnapshot.treasuryReserveBalance = parseNumber(treasuryReserveBalance);
-  clearinghouseBalanceSnapshot.treasurySReserveBalance = parseNumber(treasurySReserveBalance);
-  clearinghouseBalanceSnapshot.treasurySReserveInReserveBalance = parseNumber(treasurySReserveInReserveBalance);
+};
+
+/**
+ * Updates the snapshot's treasury with the latest values.
+ *
+ * @param snapshot - The snapshot to update
+ * @param clearinghouseSnapshot - The clearinghouse snapshot to update from
+ */
+const updateSnapshotTreasury = (snapshot: Snapshot, clearinghouseSnapshot: ClearinghouseSnapshot) => {
+  snapshot.treasury.reserveBalance = parseNumber(clearinghouseSnapshot.treasuryReserveBalance);
+  snapshot.treasury.sReserveBalance = parseNumber(clearinghouseSnapshot.treasurySReserveBalance);
+  snapshot.treasury.sReserveInReserveBalance = parseNumber(clearinghouseSnapshot.treasurySReserveInReserveBalance);
 };
 
 const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): number => {
@@ -397,15 +414,14 @@ export const generateSnapshots = (
           reserveBalance: parseNumber(clearinghouseSnapshot.reserveBalance),
           sReserveBalance: parseNumber(clearinghouseSnapshot.sReserveBalance),
           sReserveInReserveBalance: parseNumber(clearinghouseSnapshot.sReserveInReserveBalance),
-          treasuryReserveBalance: parseNumber(clearinghouseSnapshot.treasuryReserveBalance),
-          treasurySReserveBalance: parseNumber(clearinghouseSnapshot.treasurySReserveBalance),
-          treasurySReserveInReserveBalance: parseNumber(clearinghouseSnapshot.treasurySReserveInReserveBalance),
           fundAmount: parseNumber(clearinghouse.fundAmount),
           fundCadence: parseNumber(clearinghouse.fundCadence),
           coolerFactoryAddress: clearinghouse.coolerFactoryAddress,
           collateralAddress: clearinghouse.collateralToken,
           debtAddress: clearinghouse.reserveToken,
         };
+
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
 
         currentSnapshot.terms.interestRate = parseNumber(clearinghouse.interestRate);
         currentSnapshot.terms.duration = parseNumber(clearinghouse.duration);
@@ -468,10 +484,8 @@ export const generateSnapshots = (
           clearinghouseSnapshot.reserveBalance,
           clearinghouseSnapshot.sReserveBalance,
           clearinghouseSnapshot.sReserveInReserveBalance,
-          clearinghouseSnapshot.treasuryReserveBalance,
-          clearinghouseSnapshot.treasurySReserveBalance,
-          clearinghouseSnapshot.treasurySReserveInReserveBalance,
         );
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
       });
 
       // Update loans where there were repayment events
@@ -516,10 +530,8 @@ export const generateSnapshots = (
           clearinghouseSnapshot.reserveBalance,
           clearinghouseSnapshot.sReserveBalance,
           clearinghouseSnapshot.sReserveInReserveBalance,
-          clearinghouseSnapshot.treasuryReserveBalance,
-          clearinghouseSnapshot.treasurySReserveBalance,
-          clearinghouseSnapshot.treasurySReserveInReserveBalance,
         );
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
       });
 
       // Update loans where there were defaulted claim events
@@ -564,10 +576,8 @@ export const generateSnapshots = (
           clearinghouseSnapshot.reserveBalance,
           clearinghouseSnapshot.sReserveBalance,
           clearinghouseSnapshot.sReserveInReserveBalance,
-          clearinghouseSnapshot.treasuryReserveBalance,
-          clearinghouseSnapshot.treasurySReserveBalance,
-          clearinghouseSnapshot.treasurySReserveInReserveBalance,
         );
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
       });
 
       // Update loans where there were extend events
@@ -616,10 +626,8 @@ export const generateSnapshots = (
           clearinghouseSnapshot.reserveBalance,
           clearinghouseSnapshot.sReserveBalance,
           clearinghouseSnapshot.sReserveInReserveBalance,
-          clearinghouseSnapshot.treasuryReserveBalance,
-          clearinghouseSnapshot.treasurySReserveBalance,
-          clearinghouseSnapshot.treasurySReserveInReserveBalance,
         );
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
       });
 
       // No need to handle defund events, as there is a clearinghouse snapshot created for each defund event
@@ -697,10 +705,6 @@ export const generateSnapshots = (
       currentSnapshot.clearinghouseTotals.sReserveBalance += clearinghouseBalanceSnapshot.sReserveBalance;
       currentSnapshot.clearinghouseTotals.sReserveInReserveBalance +=
         clearinghouseBalanceSnapshot.sReserveInReserveBalance;
-      currentSnapshot.treasury.reserveBalance += clearinghouseBalanceSnapshot.treasuryReserveBalance;
-      currentSnapshot.treasury.sReserveBalance += clearinghouseBalanceSnapshot.treasurySReserveBalance;
-      currentSnapshot.treasury.sReserveInReserveBalance +=
-        clearinghouseBalanceSnapshot.treasurySReserveInReserveBalance;
     });
 
     // Update the clearinghouses array
