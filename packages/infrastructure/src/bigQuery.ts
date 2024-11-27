@@ -59,6 +59,7 @@ export const createBigQueryTable = (
     {
       datasetId: dataset.datasetId,
       tableId: name,
+      deletionProtection: false, // Allow for table deletion, since it is backed by a GCS bucket and we sometimes need to change settings or the schema
       externalDataConfiguration: {
         sourceFormat: "NEWLINE_DELIMITED_JSON",
         sourceUris: [sourceUri],
