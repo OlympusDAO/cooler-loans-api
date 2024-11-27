@@ -1,7 +1,7 @@
 config:
   cooler-loans-api:alertEmail:
     secure: AAABANkHwERItdBf1fRBExjTMflbX2icrfQ4T/RVKvzLMRBzwhyZf5ZkFJOubvsijg==
-  cooler-loans-api:cacheBigQueryDataset: Cooler_Loans_QmQoJMZT4bLLUNvf9Z15VNub6Wk1oq6VcMm34omrrVZevs
+  cooler-loans-api:cacheBigQueryDataset: Cooler_Loans_QmbKnrp5jZKdvvnzTfKxWDTUCzDnZp1zgqjVuZscd9fPGS
   cooler-loans-api:cacheBucket: olympus-subgraph-cache-dev-1d625e2
   cooler-loans-api:cacheProject: subgraph-cache-dev
   gcp:project: cooler-loans-api-dev
