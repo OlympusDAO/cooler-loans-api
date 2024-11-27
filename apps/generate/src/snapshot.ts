@@ -204,9 +204,15 @@ const getSecondsToExpiry = (currentDate: Date, expiryTimestamp: number): number 
   return Math.floor(timestampDifference / 1000);
 };
 
+/**
+ * Maps a timestamp to the events that occurred at that timestamp
+ */
 type EventsByTimestamp = Record<
   number,
   {
+    /**
+     * A map of clearinghouse snapshot ids to the clearinghouse snapshots
+     */
     clearinghouseSnapshots: Record<string, ClearinghouseSnapshot>;
     creationEvents: ClearLoanRequestEvent[];
     repaymentEvents: RepayLoanEvent[];
@@ -447,9 +453,9 @@ export const generateSnapshots = (
         }
 
         // Fetch the clearinghouse snapshot
-        const clearinghouseSnapshot = records.clearinghouseSnapshots[loan.clearinghouse.id];
+        const clearinghouseSnapshot = records.clearinghouseSnapshots[creationEvent.clearinghouseSnapshot.id];
         if (!clearinghouseSnapshot) {
-          throwError(`creationEvents: Could not find clearinghouse snapshot ${loan.clearinghouse.id}`);
+          throwError(`creationEvents: Could not find clearinghouse snapshot ${creationEvent.clearinghouseSnapshot.id}`);
         }
 
         // Add any new loans into running list
@@ -501,9 +507,11 @@ export const generateSnapshots = (
         }
 
         // Fetch the clearinghouse snapshot
-        const clearinghouseSnapshot = records.clearinghouseSnapshots[loan.lenderAddress];
+        const clearinghouseSnapshot = records.clearinghouseSnapshots[repaymentEvent.clearinghouseSnapshot.id];
         if (!clearinghouseSnapshot) {
-          throwError(`repaymentEvents: Could not find clearinghouse snapshot ${loan.lenderAddress}`);
+          throwError(
+            `repaymentEvents: Could not find clearinghouse snapshot ${repaymentEvent.clearinghouseSnapshot.id}`,
+          );
         }
 
         // Update the loan state
@@ -547,9 +555,11 @@ export const generateSnapshots = (
         }
 
         // Fetch the clearinghouse snapshot
-        const clearinghouseSnapshot = records.clearinghouseSnapshots[loan.lenderAddress];
+        const clearinghouseSnapshot = records.clearinghouseSnapshots[defaultedClaimEvent.clearinghouseSnapshot.id];
         if (!clearinghouseSnapshot) {
-          throwError(`defaultedClaim: Could not find clearinghouse snapshot ${loan.lenderAddress}`);
+          throwError(
+            `defaultedClaim: Could not find clearinghouse snapshot ${defaultedClaimEvent.clearinghouseSnapshot.id}`,
+          );
         }
 
         const collateralValueClaimed = parseNumber(defaultedClaimEvent.collateralValueClaimed);
@@ -593,9 +603,9 @@ export const generateSnapshots = (
         }
 
         // Fetch the clearinghouse snapshot
-        const clearinghouseSnapshot = records.clearinghouseSnapshots[loan.lenderAddress];
+        const clearinghouseSnapshot = records.clearinghouseSnapshots[extendEvent.clearinghouseSnapshot.id];
         if (!clearinghouseSnapshot) {
-          throwError(`repaymentEvents: Could not find clearinghouse snapshot ${loan.lenderAddress}`);
+          throwError(`extendEvents: Could not find clearinghouse snapshot ${extendEvent.clearinghouseSnapshot.id}`);
         }
 
         // Update the loan
