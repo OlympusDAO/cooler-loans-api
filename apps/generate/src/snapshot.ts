@@ -8,11 +8,13 @@ import {
   CoolerLoan,
   CoolerLoanRequest,
   ExtendLoanEvent,
+  RebalanceEvent,
   RepayLoanEvent,
 } from "@repo/subgraph-cache-types/types";
 import { LoanSnapshot, LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { ClearinghouseBalanceSnapshot, Snapshot } from "@repo/types/snapshot";
 
+import { DAI_ADDRESS, USDS_ADDRESS } from "./constants";
 import { ClearinghouseEvents } from "./types";
 
 type DateSnapshot = {
@@ -70,9 +72,18 @@ const updateClearinghouseBalanceSnapshot = (
  * @param clearinghouseSnapshot - The clearinghouse snapshot to update from
  */
 const updateSnapshotTreasury = (snapshot: Snapshot, clearinghouseSnapshot: ClearinghouseSnapshot) => {
-  snapshot.treasury.reserveBalance = parseNumber(clearinghouseSnapshot.treasuryReserveBalance);
-  snapshot.treasury.sReserveBalance = parseNumber(clearinghouseSnapshot.treasurySReserveBalance);
-  snapshot.treasury.sReserveInReserveBalance = parseNumber(clearinghouseSnapshot.treasurySReserveInReserveBalance);
+  // If the Clearinghouse is DAI
+  if (clearinghouseSnapshot.reserveToken.toLowerCase() === DAI_ADDRESS.toLowerCase()) {
+    snapshot.treasury.daiBalance = parseNumber(clearinghouseSnapshot.treasuryReserveBalance);
+    snapshot.treasury.sDaiBalance = parseNumber(clearinghouseSnapshot.treasurySReserveBalance);
+    snapshot.treasury.sDaiInDaiBalance = parseNumber(clearinghouseSnapshot.treasurySReserveInReserveBalance);
+  } else if (clearinghouseSnapshot.reserveToken.toLowerCase() === USDS_ADDRESS.toLowerCase()) {
+    snapshot.treasury.usdsBalance = parseNumber(clearinghouseSnapshot.treasuryReserveBalance);
+    snapshot.treasury.sUsdsBalance = parseNumber(clearinghouseSnapshot.treasurySReserveBalance);
+    snapshot.treasury.sUsdsInUsdsBalance = parseNumber(clearinghouseSnapshot.treasurySReserveInReserveBalance);
+  } else {
+    throwError(`updateSnapshotTreasury: Unknown reserve token ${clearinghouseSnapshot.reserveToken}`);
+  }
 };
 
 const calculateInterestRepayment = (repayment: number, loan: LoanSnapshot): number => {
@@ -118,9 +129,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
       collateralDeposited: 0,
       clearinghouses: [],
       clearinghouseTotals: {
-        reserveBalance: 0,
-        sReserveBalance: 0,
-        sReserveInReserveBalance: 0,
+        daiBalance: 0,
+        sDaiBalance: 0,
+        sDaiInDaiBalance: 0,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
       terms: {
         interestRate: 0,
@@ -128,9 +142,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
         loanToCollateral: 0,
       },
       treasury: {
-        reserveBalance: 0,
-        sReserveBalance: 0,
-        sReserveInReserveBalance: 0,
+        daiBalance: 0,
+        sDaiBalance: 0,
+        sDaiInDaiBalance: 0,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
       expiryBuckets: {
         active: 0,
@@ -163,9 +180,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
     days121: 0,
   };
   newSnapshot.clearinghouseTotals = {
-    reserveBalance: 0,
-    sReserveBalance: 0,
-    sReserveInReserveBalance: 0,
+    daiBalance: 0,
+    sDaiBalance: 0,
+    sDaiInDaiBalance: 0,
+    usdsBalance: 0,
+    sUsdsBalance: 0,
+    sUsdsInUsdsBalance: 0,
   };
 
   // Ensure the terms has a value
@@ -180,9 +200,12 @@ const createSnapshot = (currentDate: Date, previousSnapshot: Snapshot | null): S
   // Ensure the treasury snapshot has a value
   if (!newSnapshot.treasury) {
     newSnapshot.treasury = {
-      reserveBalance: 0,
-      sReserveBalance: 0,
-      sReserveInReserveBalance: 0,
+      daiBalance: 0,
+      sDaiBalance: 0,
+      sDaiInDaiBalance: 0,
+      usdsBalance: 0,
+      sUsdsBalance: 0,
+      sUsdsInUsdsBalance: 0,
     };
   }
 
@@ -220,6 +243,7 @@ type EventsByTimestamp = Record<
     extendEvents: ExtendLoanEvent[];
     createdLoans: Record<string, CoolerLoan>;
     loanRequests: Record<string, CoolerLoanRequest>;
+    rebalanceEvents: RebalanceEvent[];
   }
 >;
 
@@ -232,6 +256,7 @@ const newDateEvents = () => {
     extendEvents: [],
     createdLoans: {},
     loanRequests: {},
+    rebalanceEvents: [],
   };
 };
 
@@ -309,6 +334,16 @@ const populateEventsByTimestamp = (
       dateEventsByTimestamp[timestamp] = newDateEvents();
     }
     dateEventsByTimestamp[timestamp].loanRequests[id] = loanRequest;
+  });
+
+  // Rebalance events
+  const currentRebalanceEvents = clearinghouseEvents.rebalanceEvents[currentDateString] || [];
+  currentRebalanceEvents.forEach(rebalanceEvent => {
+    const timestamp = parseNumber(rebalanceEvent.blockTimestamp);
+    if (!dateEventsByTimestamp[timestamp]) {
+      dateEventsByTimestamp[timestamp] = newDateEvents();
+    }
+    dateEventsByTimestamp[timestamp].rebalanceEvents.push(rebalanceEvent);
   });
 
   // Sort the events by timestamp
@@ -640,9 +675,34 @@ export const generateSnapshots = (
         updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
       });
 
-      // No need to handle defund events, as there is a clearinghouse snapshot created for each defund event
+      // Update the clearinghouse snapshot for the rebalance event
+      const currentRebalanceEvents = records.rebalanceEvents;
+      logger.debug(`${FUNC}: processing ${currentRebalanceEvents.length} rebalance events`);
+      currentRebalanceEvents.forEach(rebalanceEvent => {
+        logger.debug(`${FUNC}: processing rebalance event ${rebalanceEvent.id}`);
 
-      // No need to handle rebalance events, as there is a clearinghouse snapshot created for each rebalance event
+        // Fetch the clearinghouse snapshot
+        const clearinghouseSnapshot = records.clearinghouseSnapshots[rebalanceEvent.clearinghouseSnapshot.id];
+        if (!clearinghouseSnapshot) {
+          throwError(
+            `rebalanceEvents: Could not find clearinghouse snapshot ${rebalanceEvent.clearinghouseSnapshot.id}`,
+          );
+        }
+
+        // Nothing to update for loans
+
+        // Adjust the clearinghouse balances to reflect the value at the time of the event
+        updateClearinghouseBalanceSnapshot(
+          currentClearinghouseBalanceSnapshotsMap,
+          rebalanceEvent.clearinghouse.id,
+          clearinghouseSnapshot.reserveBalance,
+          clearinghouseSnapshot.sReserveBalance,
+          clearinghouseSnapshot.sReserveInReserveBalance,
+        );
+        updateSnapshotTreasury(currentSnapshot, clearinghouseSnapshot);
+      });
+
+      // No need to handle defund events, as there is a clearinghouse snapshot created for each defund event
     }
 
     // Update secondsToExpiry and status for all loans
@@ -711,10 +771,17 @@ export const generateSnapshots = (
 
     // Update the clearinghouse balance totals
     Object.values(currentClearinghouseBalanceSnapshotsMap).forEach(clearinghouseBalanceSnapshot => {
-      currentSnapshot.clearinghouseTotals.reserveBalance += clearinghouseBalanceSnapshot.reserveBalance;
-      currentSnapshot.clearinghouseTotals.sReserveBalance += clearinghouseBalanceSnapshot.sReserveBalance;
-      currentSnapshot.clearinghouseTotals.sReserveInReserveBalance +=
-        clearinghouseBalanceSnapshot.sReserveInReserveBalance;
+      if (clearinghouseBalanceSnapshot.debtAddress.toLowerCase() === DAI_ADDRESS.toLowerCase()) {
+        currentSnapshot.clearinghouseTotals.daiBalance += clearinghouseBalanceSnapshot.reserveBalance;
+        currentSnapshot.clearinghouseTotals.sDaiBalance += clearinghouseBalanceSnapshot.sReserveBalance;
+        currentSnapshot.clearinghouseTotals.sDaiInDaiBalance += clearinghouseBalanceSnapshot.sReserveInReserveBalance;
+      } else if (clearinghouseBalanceSnapshot.debtAddress.toLowerCase() === USDS_ADDRESS.toLowerCase()) {
+        currentSnapshot.clearinghouseTotals.usdsBalance += clearinghouseBalanceSnapshot.reserveBalance;
+        currentSnapshot.clearinghouseTotals.sUsdsBalance += clearinghouseBalanceSnapshot.sReserveBalance;
+        currentSnapshot.clearinghouseTotals.sUsdsInUsdsBalance += clearinghouseBalanceSnapshot.sReserveInReserveBalance;
+      } else {
+        throwError(`updateClearinghouseBalanceTotals: Unknown debt token ${clearinghouseBalanceSnapshot.debtAddress}`);
+      }
     });
 
     // Update the clearinghouses array

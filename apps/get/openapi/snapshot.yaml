@@ -6,17 +6,27 @@
           "description": "Totals for the Clearinghouses at the time of the snapshot.",
           "properties":
             {
-              "reserveBalance":
-                { "description": "Total balance of the reserve token across all Clearinghouses", "type": "number" },
-              "sReserveBalance":
-                { "description": "Total balance of the sReserve token across all Clearinghouses", "type": "number" },
-              "sReserveInReserveBalance":
+              "daiBalance":
+                { "description": "Total balance of the DAI token across all Clearinghouses", "type": "number" },
+              "sDaiBalance":
+                { "description": "Total balance of the sDAI token across all Clearinghouses", "type": "number" },
+              "sDaiInDaiBalance":
                 {
-                  "description": "Total balance of the sReserve token in terms of the reserve token across all Clearinghouses",
+                  "description": "Total balance of the sDAI token in terms of DAI  across all Clearinghouses",
                   "type": "number",
                 },
+              "sUsdsBalance":
+                { "description": "Total balance of the sUSDS token across all Clearinghouses", "type": "number" },
+              "sUsdsInUsdsBalance":
+                {
+                  "description": "Total balance of the sUSDS token in terms of USDS across all Clearinghouses",
+                  "type": "number",
+                },
+              "usdsBalance":
+                { "description": "Total balance of the USDS token across all Clearinghouses", "type": "number" },
             },
-          "required": ["reserveBalance", "sReserveBalance", "sReserveInReserveBalance"],
+          "required":
+            ["daiBalance", "sDaiBalance", "sDaiInDaiBalance", "sUsdsBalance", "sUsdsInUsdsBalance", "usdsBalance"],
           "type": "object",
         },
       "clearinghouses":
@@ -103,17 +113,27 @@
           "description": "Represents the state of the Treasury at the time of the snapshot.",
           "properties":
             {
-              "reserveBalance":
-                { "description": "Total balance of the reserve token in the active treasury", "type": "number" },
-              "sReserveBalance":
-                { "description": "Total balance of the sReserve token in the active treasury", "type": "number" },
-              "sReserveInReserveBalance":
+              "daiBalance":
+                { "description": "Total balance of the DAI token in the active treasury", "type": "number" },
+              "sDaiBalance":
+                { "description": "Total balance of the sDAI token in the active treasury", "type": "number" },
+              "sDaiInDaiBalance":
                 {
-                  "description": "Total balance of the sReserve token in terms of the reserve token in the active treasury",
+                  "description": "Total balance of the sDAI token in terms of DAI in the active treasury",
                   "type": "number",
                 },
+              "sUsdsBalance":
+                { "description": "Total balance of the sUSDS token in the active treasury", "type": "number" },
+              "sUsdsInUsdsBalance":
+                {
+                  "description": "Total balance of the sUSDS token in terms of USDS in the active treasury",
+                  "type": "number",
+                },
+              "usdsBalance":
+                { "description": "Total balance of the USDS token in the active treasury", "type": "number" },
             },
-          "required": ["reserveBalance", "sReserveBalance", "sReserveInReserveBalance"],
+          "required":
+            ["daiBalance", "sDaiBalance", "sDaiInDaiBalance", "sUsdsBalance", "sUsdsInUsdsBalance", "usdsBalance"],
           "type": "object",
         },
     },

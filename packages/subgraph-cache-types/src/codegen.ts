@@ -12,6 +12,7 @@ const tables = [
   "CoolerLoan",
   "CoolerLoanRequest",
   "Clearinghouse",
+  "RebalanceEvent",
 ];
 
 const datasetId = process.env.CACHE_BIGQUERY_DATASET;

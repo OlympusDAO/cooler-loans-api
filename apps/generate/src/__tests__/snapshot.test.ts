@@ -3,6 +3,8 @@ import { generateSnapshots } from "../snapshot";
 import { ClearinghouseEvents } from "../types";
 import { LoanSnapshotMap } from "@repo/types/loanSnapshot";
 import { ClearinghouseSnapshot, CoolerLoan } from "@repo/subgraph-cache-types";
+import { DAI_ADDRESS, USDS_ADDRESS, SDAI_ADDRESS, SUSDS_ADDRESS } from "../constants";
+import { throwError } from "@repo/shared/logging";
 
 const LOAN_ID = "0x3-0";
 const LOAN_PRINCIPAL = 99000;
@@ -41,8 +43,6 @@ const CLEARINGHOUSE_FUND_AMOUNT = 18000000;
 const CLEARINGHOUSE_FUND_CADENCE = 7 * 24 * 60 * 60;
 const CLEARINGHOUSE_COOLER_FACTORY_ADDRESS = "0x00000";
 const CLEARINGHOUSE_COLLATERAL_ADDRESS = "0x04";
-const CLEARINGHOUSE_DEBT_ADDRESS = "0x05";
-const CLEARINGHOUSE_SRESERVE_ADDRESS = "0x00003";
 const CLEARINGHOUSE_ADDRESS = "0x02";
 const CLEARINGHOUSE_CREATION_BLOCK = "12000";
 const CLEARINGHOUSE_CREATION_TIMESTAMP = 1690876800;
@@ -111,9 +111,9 @@ const getSampleData = (): ClearinghouseEvents => {
         coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
         collateralToken: CLEARINGHOUSE_COLLATERAL_ADDRESS,
         collateralTokenDecimals: 18,
-        reserveToken: CLEARINGHOUSE_DEBT_ADDRESS,
+        reserveToken: DAI_ADDRESS,
         reserveTokenDecimals: 18,
-        sReserveToken: CLEARINGHOUSE_SRESERVE_ADDRESS,
+        sReserveToken: SDAI_ADDRESS,
         sReserveTokenDecimals: 18,
         createdBlock: CLEARINGHOUSE_CREATION_BLOCK,
         createdTimestamp: CLEARINGHOUSE_CREATION_TIMESTAMP.toString(),
@@ -290,7 +290,7 @@ const getSampleData = (): ClearinghouseEvents => {
           requestId: "0",
           borrower: "0x01",
           collateralToken: CLEARINGHOUSE_COLLATERAL_ADDRESS,
-          debtToken: CLEARINGHOUSE_DEBT_ADDRESS,
+          debtToken: DAI_ADDRESS,
           amount: LOAN_PRINCIPAL.toString(),
           interestPercentage: CLEARINGHOUSE_INTEREST_RATE.toString(),
           loanToCollateralRatio: CLEARINGHOUSE_LOAN_TO_COLLATERAL.toString(),
@@ -304,6 +304,7 @@ const getSampleData = (): ClearinghouseEvents => {
         },
       },
     },
+    rebalanceEvents: {},
   };
 };
 
@@ -319,6 +320,9 @@ const getClearinghouseSnapshot = (
   treasuryReserveBalance: number,
   treasurySReserveBalance: number,
   treasurySReserveInReserveBalance: number,
+  reserveToken: string = DAI_ADDRESS,
+  sReserveToken: string = SDAI_ADDRESS,
+  clearinghouseAddress: string = CLEARINGHOUSE_ADDRESS,
 ): ClearinghouseSnapshot => {
   return {
     __typename: "ClearinghouseSnapshot",
@@ -329,14 +333,14 @@ const getClearinghouseSnapshot = (
     transactionHash: "0x0000002",
     clearinghouse: {
       __typename: "Clearinghouse",
-      id: CLEARINGHOUSE_ADDRESS,
+      id: clearinghouseAddress,
     },
     isActive: true,
     nextRebalanceTimestamp: "1694332800",
     principalReceivables: principalReceivables.toString(),
     interestReceivables: interestReceivables.toString(),
-    reserveToken: CLEARINGHOUSE_DEBT_ADDRESS,
-    sReserveToken: CLEARINGHOUSE_SRESERVE_ADDRESS,
+    reserveToken: reserveToken,
+    sReserveToken: sReserveToken,
     reserveBalance: reserveBalance.toString(),
     sReserveBalance: sReserveBalance.toString(),
     sReserveInReserveBalance: sReserveInReserveBalance.toString(),
@@ -376,32 +380,59 @@ type ClearinghouseBalance = {
   daiBalance: number;
   sDaiBalance: number;
   sDaiInDaiBalance: number;
+  usdsBalance: number;
+  sUsdsBalance: number;
+  sUsdsInUsdsBalance: number;
 };
 
-const assertClearinghouseSnapshots = (snapshot: Snapshot, balances: ClearinghouseBalance[]) => {
+const assertClearinghouseSnapshots = (
+  snapshot: Snapshot,
+  balances: ClearinghouseBalance[],
+  tokens: Record<string, string> = {
+    [CLEARINGHOUSE_ADDRESS]: DAI_ADDRESS,
+  },
+) => {
   // Check the clearinghouse balances
   const clearinghouseSnapshots = snapshot.clearinghouses;
   expect(clearinghouseSnapshots).toHaveLength(balances.length);
   for (let i = 0; i < clearinghouseSnapshots.length; i++) {
     const clearinghouseSnapshot = clearinghouseSnapshots[i];
     const balance = balances[i];
-    expect(clearinghouseSnapshot.reserveBalance).toEqual(balance.daiBalance);
-    expect(clearinghouseSnapshot.sReserveBalance).toEqual(balance.sDaiBalance);
-    expect(clearinghouseSnapshot.sReserveInReserveBalance).toEqual(balance.sDaiInDaiBalance);
+
+    // Get the expected reserve token
+    const reserveToken = tokens[clearinghouseSnapshot.address];
+
+    // Check balances
+    if (reserveToken.toLowerCase() === DAI_ADDRESS.toLowerCase()) {
+      expect(clearinghouseSnapshot.reserveBalance).toEqual(balance.daiBalance);
+      expect(clearinghouseSnapshot.sReserveBalance).toEqual(balance.sDaiBalance);
+      expect(clearinghouseSnapshot.sReserveInReserveBalance).toEqual(balance.sDaiInDaiBalance);
+    } else if (reserveToken.toLowerCase() === USDS_ADDRESS.toLowerCase()) {
+      expect(clearinghouseSnapshot.reserveBalance).toEqual(balance.usdsBalance);
+      expect(clearinghouseSnapshot.sReserveBalance).toEqual(balance.sUsdsBalance);
+      expect(clearinghouseSnapshot.sReserveInReserveBalance).toEqual(balance.sUsdsInUsdsBalance);
+    } else {
+      throwError(`Unknown reserve token ${reserveToken} for clearinghouse ${clearinghouseSnapshot.address}`);
+    }
+
     expect(clearinghouseSnapshot.fundAmount).toEqual(CLEARINGHOUSE_FUND_AMOUNT);
     expect(clearinghouseSnapshot.fundCadence).toEqual(CLEARINGHOUSE_FUND_CADENCE);
     expect(clearinghouseSnapshot.coolerFactoryAddress).toEqual(CLEARINGHOUSE_COOLER_FACTORY_ADDRESS);
     expect(clearinghouseSnapshot.collateralAddress).toEqual(CLEARINGHOUSE_COLLATERAL_ADDRESS);
-    expect(clearinghouseSnapshot.debtAddress).toEqual(CLEARINGHOUSE_DEBT_ADDRESS);
-    expect(clearinghouseSnapshot.address).toEqual(CLEARINGHOUSE_ADDRESS);
+    expect(clearinghouseSnapshot.debtAddress).toEqual(reserveToken);
   }
 
   // Check the total
   const clearinghouseTotals = snapshot.clearinghouseTotals;
-  expect(clearinghouseTotals.reserveBalance).toEqual(balances.reduce((acc, balance) => acc + balance.daiBalance, 0));
-  expect(clearinghouseTotals.sReserveBalance).toEqual(balances.reduce((acc, balance) => acc + balance.sDaiBalance, 0));
-  expect(clearinghouseTotals.sReserveInReserveBalance).toEqual(
+  expect(clearinghouseTotals.daiBalance).toEqual(balances.reduce((acc, balance) => acc + balance.daiBalance, 0));
+  expect(clearinghouseTotals.sDaiBalance).toEqual(balances.reduce((acc, balance) => acc + balance.sDaiBalance, 0));
+  expect(clearinghouseTotals.sDaiInDaiBalance).toEqual(
     balances.reduce((acc, balance) => acc + balance.sDaiInDaiBalance, 0),
+  );
+  expect(clearinghouseTotals.usdsBalance).toEqual(balances.reduce((acc, balance) => acc + balance.usdsBalance, 0));
+  expect(clearinghouseTotals.sUsdsBalance).toEqual(balances.reduce((acc, balance) => acc + balance.sUsdsBalance, 0));
+  expect(clearinghouseTotals.sUsdsInUsdsBalance).toEqual(
+    balances.reduce((acc, balance) => acc + balance.sUsdsInUsdsBalance, 0),
   );
 };
 
@@ -410,10 +441,16 @@ const assertTreasurySnapshot = (
   daiBalance: number,
   sDaiBalance: number,
   sDaiInDaiBalance: number,
+  usdsBalance: number = 0,
+  sUsdsBalance: number = 0,
+  sUsdsInUsdsBalance: number = 0,
 ) => {
-  expect(snapshot.treasury.reserveBalance).toEqual(daiBalance);
-  expect(snapshot.treasury.sReserveBalance).toEqual(sDaiBalance);
-  expect(snapshot.treasury.sReserveInReserveBalance).toEqual(sDaiInDaiBalance);
+  expect(snapshot.treasury.daiBalance).toEqual(daiBalance);
+  expect(snapshot.treasury.sDaiBalance).toEqual(sDaiBalance);
+  expect(snapshot.treasury.sDaiInDaiBalance).toEqual(sDaiInDaiBalance);
+  expect(snapshot.treasury.usdsBalance).toEqual(usdsBalance);
+  expect(snapshot.treasury.sUsdsBalance).toEqual(sUsdsBalance);
+  expect(snapshot.treasury.sUsdsInUsdsBalance).toEqual(sUsdsInUsdsBalance);
 };
 
 const assertExpiryBuckets = (snapshot: Snapshot, active: number, expired: number, days30: number, days121: number) => {
@@ -451,6 +488,7 @@ describe("generateSnapshots", () => {
       createdLoans: {},
       loanRequests: {},
       clearinghouses: {},
+      rebalanceEvents: {},
     };
 
     const result = generateSnapshots(startDate, beforeDate, previousDateRecords, previousLoanSnapshot, subgraphData);
@@ -473,6 +511,7 @@ describe("generateSnapshots", () => {
       createdLoans: {},
       loanRequests: {},
       clearinghouses: {},
+      rebalanceEvents: {},
     };
 
     const result = generateSnapshots(startDate, beforeDate, previousDateRecords, previousLoanSnapshot, subgraphData);
@@ -549,6 +588,9 @@ describe("generateSnapshots", () => {
         daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION,
         sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION,
         sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -593,6 +635,9 @@ describe("generateSnapshots", () => {
         daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION,
         sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION,
         sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -719,7 +764,7 @@ describe("generateSnapshots", () => {
         requestId: "1",
         borrower: "0x01",
         collateralToken: CLEARINGHOUSE_COLLATERAL_ADDRESS,
-        debtToken: CLEARINGHOUSE_DEBT_ADDRESS,
+        debtToken: DAI_ADDRESS,
         amount: loanTwoPrincipal.toString(),
         interestPercentage: CLEARINGHOUSE_INTEREST_RATE.toString(),
         loanToCollateralRatio: CLEARINGHOUSE_LOAN_TO_COLLATERAL.toString(),
@@ -850,6 +895,9 @@ describe("generateSnapshots", () => {
         daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT,
         sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT,
         sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -900,6 +948,9 @@ describe("generateSnapshots", () => {
         daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT,
         sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT,
         sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -1015,6 +1066,9 @@ describe("generateSnapshots", () => {
         daiBalance: clearinghouseDaiBalance,
         sDaiBalance: clearinghouseSDaiBalance,
         sDaiInDaiBalance: clearinghouseSDaiInDaiBalance,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(snapshotTwelve, treasuryDaiBalance, treasurySDaiBalance, treasurySDaiInDaiBalance);
@@ -1045,6 +1099,9 @@ describe("generateSnapshots", () => {
         daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_CREATION,
         sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_CREATION,
         sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_CREATION,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -1070,6 +1127,9 @@ describe("generateSnapshots", () => {
         daiBalance: 9000000.0,
         sDaiBalance: 500000.0,
         sDaiInDaiBalance: 600000.01,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(snapshotTwenty, 1100, 1700, 1800);
@@ -1086,6 +1146,9 @@ describe("generateSnapshots", () => {
         daiBalance: 9000000.0,
         sDaiBalance: 500000.0,
         sDaiInDaiBalance: 600000.01,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(snapshotTwentyOne, 1100, 1700, 1800);
@@ -1166,6 +1229,7 @@ describe("generateSnapshots", () => {
       createdLoans: {},
       loanRequests: {},
       clearinghouses: {},
+      rebalanceEvents: {},
     };
 
     const snapshots = generateSnapshots(startDate, beforeDate, null, null, subgraphData);
@@ -1196,9 +1260,12 @@ describe("generateSnapshots", () => {
       collateralClaimedValue: 123456,
       collateralDeposited: 1234,
       clearinghouseTotals: {
-        reserveBalance: 12345,
-        sReserveBalance: 56789,
-        sReserveInReserveBalance: 101010,
+        daiBalance: 12345,
+        sDaiBalance: 56789,
+        sDaiInDaiBalance: 101010,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
       clearinghouses: [
         {
@@ -1210,13 +1277,16 @@ describe("generateSnapshots", () => {
           fundCadence: CLEARINGHOUSE_FUND_CADENCE,
           coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
           collateralAddress: CLEARINGHOUSE_COLLATERAL_ADDRESS,
-          debtAddress: CLEARINGHOUSE_DEBT_ADDRESS,
+          debtAddress: DAI_ADDRESS,
         },
       ],
       treasury: {
-        reserveBalance: 111111,
-        sReserveBalance: 3333,
-        sReserveInReserveBalance: 4444,
+        daiBalance: 111111,
+        sDaiBalance: 3333,
+        sDaiInDaiBalance: 4444,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
       terms: {
         duration: CLEARINGHOUSE_DURATION_SECONDS,
@@ -1266,6 +1336,7 @@ describe("generateSnapshots", () => {
       createdLoans: {},
       loanRequests: {},
       clearinghouses: {},
+      rebalanceEvents: {},
     };
 
     const snapshots = generateSnapshots(
@@ -1294,6 +1365,9 @@ describe("generateSnapshots", () => {
         daiBalance: 12345,
         sDaiBalance: 56789,
         sDaiInDaiBalance: 101010,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(snapshotOne, 111111, 3333, 4444);
@@ -1669,7 +1743,7 @@ describe("generateSnapshots", () => {
         requestId: "1",
         borrower: "0x01",
         collateralToken: CLEARINGHOUSE_COLLATERAL_ADDRESS,
-        debtToken: CLEARINGHOUSE_DEBT_ADDRESS,
+        debtToken: DAI_ADDRESS,
         interestPercentage: CLEARINGHOUSE_INTEREST_RATE.toString(),
         durationSeconds: CLEARINGHOUSE_DURATION_SECONDS.toString(),
         amount: loanTwoPrincipal.toString(),
@@ -1841,6 +1915,9 @@ describe("generateSnapshots", () => {
         daiBalance: newClearinghouseDaiBalance,
         sDaiBalance: newClearinghouseSDaiBalance,
         sDaiInDaiBalance: newClearinghouseSDaiInDaiBalance,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(snapshotTwo, newTreasuryDaiBalance, newTreasurySDaiBalance, newTreasurySDaiInDaiBalance);
@@ -2457,6 +2534,9 @@ describe("generateSnapshots", () => {
         daiBalance: repaymentTwoClearinghouseDaiBalance,
         sDaiBalance: repaymentTwoClearinghouseSDaiBalance,
         sDaiInDaiBalance: repaymentTwoClearinghouseSDaiInDaiBalance,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -2623,6 +2703,9 @@ describe("generateSnapshots", () => {
         daiBalance: extensionOneClearinghouseDaiBalance,
         sDaiBalance: extensionOneClearinghouseSDaiBalance,
         sDaiInDaiBalance: extensionOneClearinghouseSDaiInDaiBalance,
+        usdsBalance: 0,
+        sUsdsBalance: 0,
+        sUsdsInUsdsBalance: 0,
       },
     ]);
     assertTreasurySnapshot(
@@ -2630,6 +2713,138 @@ describe("generateSnapshots", () => {
       extensionOneTreasuryDaiBalance,
       extensionOneTreasurySDaiBalance,
       extensionOneTreasurySDaiInDaiBalance,
+    );
+  });
+
+  it("handles usds", () => {
+    const startDate = new Date("2023-08-01");
+    const beforeDate = new Date("2023-08-13");
+    const previousDateRecords: Snapshot | null = null;
+    const previousLoanSnapshot: LoanSnapshotMap = {};
+    const subgraphData = getSampleData();
+
+    // Define a new Clearinghouse with USDS
+    const usdsClearinghouseAddress = "0x1234567890123456789012345678901234567890";
+    subgraphData.clearinghouses[usdsClearinghouseAddress] = {
+      __typename: "Clearinghouse",
+      id: usdsClearinghouseAddress,
+      address: usdsClearinghouseAddress,
+      createdBlock: "1234567890",
+      createdTimestamp: "1234567890",
+      version: "1",
+      singleton: {
+        __typename: "ClearinghouseSingleton",
+        id: "0x1111111111111111111111111111111111111111",
+      },
+      coolerFactoryAddress: CLEARINGHOUSE_COOLER_FACTORY_ADDRESS,
+      collateralToken: CLEARINGHOUSE_COLLATERAL_ADDRESS,
+      collateralTokenDecimals: 18,
+      reserveToken: USDS_ADDRESS,
+      reserveTokenDecimals: 18,
+      fundAmount: CLEARINGHOUSE_FUND_AMOUNT.toString(),
+      fundCadence: CLEARINGHOUSE_FUND_CADENCE.toString(),
+      sReserveToken: SUSDS_ADDRESS,
+      sReserveTokenDecimals: 18,
+      interestRate: "0",
+      duration: "0",
+      loanToCollateral: "0",
+      dt: "2023-08-12",
+      loans: [],
+      snapshots: [],
+    };
+    // Define a rebalance event for the new Clearinghouse
+    const rebalanceTimestamp = 1691654400;
+    const usdsClearinghouseSnapshotId = "2023-08-12-rebalance";
+    subgraphData.rebalanceEvents["2023-08-12"] = [
+      ...(subgraphData.rebalanceEvents["2023-08-12"] || []),
+      {
+        __typename: "RebalanceEvent",
+        id: "0x1234567890123456789012345678901234567890",
+        date: "2023-08-12",
+        blockNumber: "1234567890",
+        blockTimestamp: rebalanceTimestamp.toString(),
+        transactionHash: "0x0000002",
+        clearinghouse: {
+          __typename: "Clearinghouse",
+          id: usdsClearinghouseAddress,
+        },
+        clearinghouseSnapshot: {
+          __typename: "ClearinghouseSnapshot",
+          id: usdsClearinghouseSnapshotId,
+        },
+        amount: "0",
+        dt: "2023-08-12",
+      },
+    ];
+    // Define a Clearinghouse snapshot for the new Clearinghouse
+    const clearinghouseUsdsBalance = 1000;
+    const clearinghouseSUsdsBalance = 1001;
+    const clearinghouseSUsdsInUsdsBalance = 1002;
+    const treasuryUsdsBalance = 1003;
+    const treasurySUsdsBalance = 1004;
+    const treasurySUsdsInUsdsBalance = 1005;
+    subgraphData.clearinghouseSnapshots["2023-08-12"] = [
+      ...(subgraphData.clearinghouseSnapshots["2023-08-12"] || []),
+      getClearinghouseSnapshot(
+        usdsClearinghouseSnapshotId,
+        "2023-08-12",
+        rebalanceTimestamp,
+        0,
+        0,
+        clearinghouseUsdsBalance,
+        clearinghouseSUsdsBalance,
+        clearinghouseSUsdsInUsdsBalance,
+        treasuryUsdsBalance,
+        treasurySUsdsBalance,
+        treasurySUsdsInUsdsBalance,
+        USDS_ADDRESS,
+        SUSDS_ADDRESS,
+        usdsClearinghouseAddress,
+      ),
+    ];
+
+    // Generate snapshots
+    const snapshots = generateSnapshots(startDate, beforeDate, previousDateRecords, previousLoanSnapshot, subgraphData);
+
+    // Day 12
+    const snapshotTwelve = snapshots[11].snapshot;
+
+    // Should incorporate USDS balances from the new Clearinghouse
+    assertClearinghouseSnapshots(
+      snapshotTwelve,
+      [
+        {
+          daiBalance: CLEARINGHOUSE_DAI_BALANCE_AFTER_REPAYMENT,
+          sDaiBalance: CLEARINGHOUSE_SDAI_BALANCE_AFTER_REPAYMENT,
+          sDaiInDaiBalance: CLEARINGHOUSE_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
+          usdsBalance: 0,
+          sUsdsBalance: 0,
+          sUsdsInUsdsBalance: 0,
+        },
+        {
+          daiBalance: 0,
+          sDaiBalance: 0,
+          sDaiInDaiBalance: 0,
+          usdsBalance: clearinghouseUsdsBalance,
+          sUsdsBalance: clearinghouseSUsdsBalance,
+          sUsdsInUsdsBalance: clearinghouseSUsdsInUsdsBalance,
+        },
+      ],
+      {
+        [CLEARINGHOUSE_ADDRESS]: DAI_ADDRESS,
+        [usdsClearinghouseAddress]: USDS_ADDRESS,
+      },
+    );
+
+    // Should incorporate USDS balances from the treasury
+    assertTreasurySnapshot(
+      snapshotTwelve,
+      TREASURY_DAI_BALANCE_AFTER_REPAYMENT,
+      TREASURY_SDAI_BALANCE_AFTER_REPAYMENT,
+      TREASURY_SDAI_IN_DAI_BALANCE_AFTER_REPAYMENT,
+      treasuryUsdsBalance,
+      treasurySUsdsBalance,
+      treasurySUsdsInUsdsBalance,
     );
   });
 });

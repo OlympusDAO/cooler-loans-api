@@ -10,6 +10,7 @@ import type {
   CoolerLoan,
   CoolerLoanRequest,
   ExtendLoanEvent,
+  RebalanceEvent,
   RepayLoanEvent,
 } from "@repo/subgraph-cache-types";
 
@@ -144,6 +145,17 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
   )) as Clearinghouse[];
   logger.debug(`Fetched ${clearinghouseRows.length} clearinghouses`);
 
+  // Rebalance events
+  const rebalanceRows = (await performQuery(
+    bigQuery,
+    `
+    SELECT *
+    FROM \`${cacheProject}.${cacheBigQueryDataset}.RebalanceEvent\`
+    WHERE dt >= '${getISO8601DateString(startDate)}' AND dt < '${getISO8601DateString(beforeDate)}'
+  `,
+  )) as RebalanceEvent[];
+  logger.debug(`Fetched ${rebalanceRows.length} rebalance events`);
+
   // Format
   // Each map is keyed on the date in YYYY-MM-DD format and has an array of events as the value
   // Clearinghouse snapshots
@@ -252,6 +264,20 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     {} as Record<string, Clearinghouse>,
   );
 
+  // Rebalance events
+  const rebalanceEvents = rebalanceRows.reduce(
+    (acc, row) => {
+      const date = getDateValue(row.dt);
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(row);
+      return acc;
+    },
+    {} as Record<string, RebalanceEvent[]>,
+  );
+  logger.debug(`Rebalance event dates: ${Object.keys(rebalanceEvents).join(", ")}`);
+
   logger.info(`Completed fetching clearinghouse events`);
 
   return {
@@ -263,5 +289,6 @@ export const getClearinghouseEvents = async (startDate: Date, beforeDate: Date):
     createdLoans,
     loanRequests,
     clearinghouses,
+    rebalanceEvents,
   };
 };

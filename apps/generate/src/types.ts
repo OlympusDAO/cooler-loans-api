@@ -6,6 +6,7 @@ import type {
   CoolerLoan,
   CoolerLoanRequest,
   ExtendLoanEvent,
+  RebalanceEvent,
   RepayLoanEvent,
 } from "@repo/subgraph-cache-types";
 
@@ -49,4 +50,9 @@ export type ClearinghouseEvents = {
    * A map of clearinghouse addresses to the Clearinghouse.
    */
   clearinghouses: Record<string, Clearinghouse>;
+
+  /**
+   * A map of YYYY-MM-DD date strings to the rebalance events for that date.
+   */
+  rebalanceEvents: Record<string, RebalanceEvent[]>;
 };

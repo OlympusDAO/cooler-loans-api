@@ -32,9 +32,12 @@ const formatSnapshot = (row: Snapshot): Snapshot => {
       fundCadence: parseNumber(clearinghouse.fundCadence),
     })),
     clearinghouseTotals: {
-      reserveBalance: parseNumber(row.clearinghouseTotals.reserveBalance),
-      sReserveBalance: parseNumber(row.clearinghouseTotals.sReserveBalance),
-      sReserveInReserveBalance: parseNumber(row.clearinghouseTotals.sReserveInReserveBalance),
+      daiBalance: parseNumber(row.clearinghouseTotals.daiBalance),
+      sDaiBalance: parseNumber(row.clearinghouseTotals.sDaiBalance),
+      sDaiInDaiBalance: parseNumber(row.clearinghouseTotals.sDaiInDaiBalance),
+      usdsBalance: parseNumber(row.clearinghouseTotals.usdsBalance),
+      sUsdsBalance: parseNumber(row.clearinghouseTotals.sUsdsBalance),
+      sUsdsInUsdsBalance: parseNumber(row.clearinghouseTotals.sUsdsInUsdsBalance),
     },
     expiryBuckets: {
       active: parseNumber(row.expiryBuckets.active),
@@ -57,9 +60,12 @@ const formatSnapshot = (row: Snapshot): Snapshot => {
     },
     treasury: {
       ...row.treasury,
-      reserveBalance: parseNumber(row.treasury.reserveBalance),
-      sReserveBalance: parseNumber(row.treasury.sReserveBalance),
-      sReserveInReserveBalance: parseNumber(row.treasury.sReserveInReserveBalance),
+      daiBalance: parseNumber(row.treasury.daiBalance),
+      sDaiBalance: parseNumber(row.treasury.sDaiBalance),
+      sDaiInDaiBalance: parseNumber(row.treasury.sDaiInDaiBalance),
+      usdsBalance: parseNumber(row.treasury.usdsBalance),
+      sUsdsBalance: parseNumber(row.treasury.sUsdsBalance),
+      sUsdsInUsdsBalance: parseNumber(row.treasury.sUsdsInUsdsBalance),
     },
   };
 };
