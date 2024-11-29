@@ -2,19 +2,22 @@
   "clearinghouseTotals": {
     "daiBalance": "0",
     "sDaiBalance": "0",
-    "sDaiInDaiBalance": "0"
+    "sDaiInDaiBalance": "0",
+    "usdsBalance": "0",
+    "sUsdsBalance": "0",
+    "sUsdsInUsdsBalance": "0"
   },
   "clearinghouses": [
     {
       "address": "0x0000000000000000000000000000000000000000",
       "collateralAddress": "0x0000000000000000000000000000000000000000",
       "coolerFactoryAddress": "0x0000000000000000000000000000000000000000",
-      "daiBalance": "0",
+      "reserveBalance": "0",
       "debtAddress": "0x0000000000000000000000000000000000000000",
       "fundAmount": "0",
       "fundCadence": "0",
-      "sDaiBalance": "0",
-      "sDaiInDaiBalance": "0"
+      "sReserveBalance": "0",
+      "sReserveInReserveBalance": "0"
     }
   ],
   "collateralDeposited": "0",
@@ -39,6 +42,9 @@
   "treasury": {
     "daiBalance": "0",
     "sDaiBalance": "0",
-    "sDaiInDaiBalance": "0"
+    "sDaiInDaiBalance": "0",
+    "usdsBalance": "0",
+    "sUsdsBalance": "0",
+    "sUsdsInUsdsBalance": "0"
   }
 }
