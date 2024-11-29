@@ -1,0 +1,31 @@
+{
+  "name": "@repo/subgraph-cache-types",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "types": [
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@google-cloud/bigquery": "^7.9.1",
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^18",
+    "tsup": "^8.3.0",
+    "typescript": "~5.5.0"
+  },
+  "scripts": {
+    "codegen": "ts-node src/codegen.ts",
+    "build": "yarn run codegen && tsc --noEmit && tsup",
+    "lint": "prettier --write . && eslint --fix ."
+  }
+}

@@ -6,12 +6,27 @@
           "description": "Totals for the Clearinghouses at the time of the snapshot.",
           "properties":
             {
-              "daiBalance": { "description": "Total balance of DAI across all Clearinghouses", "type": "number" },
-              "sDaiBalance": { "description": "Total balance of sDAI across all Clearinghouses", "type": "number" },
+              "daiBalance":
+                { "description": "Total balance of the DAI token across all Clearinghouses", "type": "number" },
+              "sDaiBalance":
+                { "description": "Total balance of the sDAI token across all Clearinghouses", "type": "number" },
               "sDaiInDaiBalance":
-                { "description": "Total balance of sDAI in terms of DAI across all Clearinghouses", "type": "number" },
+                {
+                  "description": "Total balance of the sDAI token in terms of DAI  across all Clearinghouses",
+                  "type": "number",
+                },
+              "sUsdsBalance":
+                { "description": "Total balance of the sUSDS token across all Clearinghouses", "type": "number" },
+              "sUsdsInUsdsBalance":
+                {
+                  "description": "Total balance of the sUSDS token in terms of USDS across all Clearinghouses",
+                  "type": "number",
+                },
+              "usdsBalance":
+                { "description": "Total balance of the USDS token across all Clearinghouses", "type": "number" },
             },
-          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "required":
+            ["daiBalance", "sDaiBalance", "sDaiInDaiBalance", "sUsdsBalance", "sUsdsInUsdsBalance", "usdsBalance"],
           "type": "object",
         },
       "clearinghouses":
@@ -24,25 +39,29 @@
                   "address": { "description": "Address of the Clearinghouse", "type": "string" },
                   "collateralAddress": { "description": "The address of the collateral", "type": "string" },
                   "coolerFactoryAddress": { "description": "The address of the CoolerFactory", "type": "string" },
-                  "daiBalance": { "description": "Balance of DAI", "type": "number" },
                   "debtAddress": { "description": "The address of the debt", "type": "string" },
                   "fundAmount":
-                    { "description": "Amount of DAI that the Clearinghouse should be funded with", "type": "number" },
+                    {
+                      "description": "Amount of the reserve token that the Clearinghouse should be funded with",
+                      "type": "number",
+                    },
                   "fundCadence": { "description": "The cadence of the funding", "type": "number" },
-                  "sDaiBalance": { "description": "Balance of sDAI", "type": "number" },
-                  "sDaiInDaiBalance": { "description": "Balance of sDAI in terms of DAI", "type": "number" },
+                  "reserveBalance": { "description": "Balance of the reserve token", "type": "number" },
+                  "sReserveBalance": { "description": "Balance of the sReserve token", "type": "number" },
+                  "sReserveInReserveBalance":
+                    { "description": "Balance of the sReserve token in terms of the reserve token", "type": "number" },
                 },
               "required":
                 [
                   "address",
                   "collateralAddress",
                   "coolerFactoryAddress",
-                  "daiBalance",
                   "debtAddress",
                   "fundAmount",
                   "fundCadence",
-                  "sDaiBalance",
-                  "sDaiInDaiBalance",
+                  "reserveBalance",
+                  "sReserveBalance",
+                  "sReserveInReserveBalance",
                 ],
               "type": "object",
             },
@@ -94,12 +113,27 @@
           "description": "Represents the state of the Treasury at the time of the snapshot.",
           "properties":
             {
-              "daiBalance": { "description": "Total balance of DAI in the active treasury", "type": "number" },
-              "sDaiBalance": { "description": "Total balance of sDAI in the active treasury", "type": "number" },
+              "daiBalance":
+                { "description": "Total balance of the DAI token in the active treasury", "type": "number" },
+              "sDaiBalance":
+                { "description": "Total balance of the sDAI token in the active treasury", "type": "number" },
               "sDaiInDaiBalance":
-                { "description": "Total balance of sDAI in terms of DAI in the active treasury", "type": "number" },
+                {
+                  "description": "Total balance of the sDAI token in terms of DAI in the active treasury",
+                  "type": "number",
+                },
+              "sUsdsBalance":
+                { "description": "Total balance of the sUSDS token in the active treasury", "type": "number" },
+              "sUsdsInUsdsBalance":
+                {
+                  "description": "Total balance of the sUSDS token in terms of USDS in the active treasury",
+                  "type": "number",
+                },
+              "usdsBalance":
+                { "description": "Total balance of the USDS token in the active treasury", "type": "number" },
             },
-          "required": ["daiBalance", "sDaiBalance", "sDaiInDaiBalance"],
+          "required":
+            ["daiBalance", "sDaiBalance", "sDaiInDaiBalance", "sUsdsBalance", "sUsdsInUsdsBalance", "usdsBalance"],
           "type": "object",
         },
     },

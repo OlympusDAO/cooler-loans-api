@@ -9,19 +9,37 @@
         "name": "daiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of DAI across all Clearinghouses"
+        "description": "Total balance of the DAI token across all Clearinghouses"
       },
       {
         "name": "sDaiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of sDAI across all Clearinghouses"
+        "description": "Total balance of the sDAI token across all Clearinghouses"
       },
       {
         "name": "sDaiInDaiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of sDAI in terms of DAI across all Clearinghouses"
+        "description": "Total balance of the sDAI token in terms of DAI  across all Clearinghouses"
+      },
+      {
+        "name": "sUsdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the sUSDS token across all Clearinghouses"
+      },
+      {
+        "name": "sUsdsInUsdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the sUSDS token in terms of USDS across all Clearinghouses"
+      },
+      {
+        "name": "usdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the USDS token across all Clearinghouses"
       }
     ]
   },
@@ -43,21 +61,31 @@
         "mode": "REQUIRED",
         "description": "The address of the CoolerFactory"
       },
-      { "name": "daiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Balance of DAI" },
       { "name": "debtAddress", "type": "STRING", "mode": "REQUIRED", "description": "The address of the debt" },
       {
         "name": "fundAmount",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Amount of DAI that the Clearinghouse should be funded with"
+        "description": "Amount of the reserve token that the Clearinghouse should be funded with"
       },
       { "name": "fundCadence", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "The cadence of the funding" },
-      { "name": "sDaiBalance", "type": "BIGNUMERIC", "mode": "REQUIRED", "description": "Balance of sDAI" },
       {
-        "name": "sDaiInDaiBalance",
+        "name": "reserveBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Balance of sDAI in terms of DAI"
+        "description": "Balance of the reserve token"
+      },
+      {
+        "name": "sReserveBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Balance of the sReserve token"
+      },
+      {
+        "name": "sReserveInReserveBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Balance of the sReserve token in terms of the reserve token"
       }
     ]
   },
@@ -177,19 +205,37 @@
         "name": "daiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of DAI in the active treasury"
+        "description": "Total balance of the DAI token in the active treasury"
       },
       {
         "name": "sDaiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of sDAI in the active treasury"
+        "description": "Total balance of the sDAI token in the active treasury"
       },
       {
         "name": "sDaiInDaiBalance",
         "type": "BIGNUMERIC",
         "mode": "REQUIRED",
-        "description": "Total balance of sDAI in terms of DAI in the active treasury"
+        "description": "Total balance of the sDAI token in terms of DAI in the active treasury"
+      },
+      {
+        "name": "sUsdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the sUSDS token in the active treasury"
+      },
+      {
+        "name": "sUsdsInUsdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the sUSDS token in terms of USDS in the active treasury"
+      },
+      {
+        "name": "usdsBalance",
+        "type": "BIGNUMERIC",
+        "mode": "REQUIRED",
+        "description": "Total balance of the USDS token in the active treasury"
       }
     ]
   }
