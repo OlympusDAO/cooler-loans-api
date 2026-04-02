@@ -9,7 +9,8 @@
   "scripts": {
     "build": "turbo build",
     "test": "turbo test",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
     "syncpack": "^13.0.0",
@@ -17,11 +18,11 @@
   },
   "engines": {
     "node": ">=18",
-    "npm": "please-use-yarn",
-    "pnpm": "please-use-yarn",
-    "yarn": ">=1.22.0 <2.0.0"
+    "npm": "use-pnpm",
+    "pnpm": "10.33.0",
+    "yarn": "use-pnpm"
   },
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "pnpm@10.33.0",
   "workspaces": [
     "apps/*",
     "packages/*"
