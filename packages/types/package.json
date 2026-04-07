@@ -21,14 +21,15 @@
     }
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^18",
     "tsup": "^8.3.0",
     "typescript": "~5.5.0"
   },
   "scripts": {
     "build": "tsc --noEmit && tsup",
-    "lint": "prettier --write . && eslint --fix ."
+    "lint": "prettier --write . && eslint --fix .",
+    "lint:check": "prettier --check . && eslint ."
   }
 }

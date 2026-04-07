@@ -9,15 +9,16 @@
     "@google-cloud/bigquery": "^7.9.1",
     "@google-cloud/firestore": "^7.10.0",
     "@google-cloud/functions-framework": "^3.4.2",
-    "@repo/shared": "*",
-    "@repo/types": "*",
+    "@repo/shared": "workspace:*",
+    "@repo/types": "workspace:*",
     "cors": "^2.8.5",
     "express": "^4.21.1"
   },
   "devDependencies": {
     "@openapi-contrib/json-schema-to-openapi-schema": "^2.2.5",
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@types/express": "^4.17.21",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/cors": "^2.8.17",
     "@types/node": "^18",
     "express": "^4.21.1",
@@ -27,12 +28,13 @@
     "typescript-json-schema": "^0.61.0"
   },
   "scripts": {
-    "build:jsonschema": "yarn typescript-json-schema ../../packages/types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
-    "build:openapi": "yarn -s json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
-    "build": "tsc --noEmit && tsup && yarn build:jsonschema && yarn build:openapi",
-    "gcp-build": "yarn run build",
+    "build:jsonschema": "pnpm exec typescript-json-schema ../../packages/types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema",
+    "build:openapi": "pnpm exec json-schema-to-openapi-schema convert tmp/snapshot.jsonschema > openapi/snapshot.yaml && prettier --write openapi/",
+    "build": "tsc --noEmit && tsup && pnpm run build:jsonschema && pnpm run build:openapi",
+    "gcp-build": "pnpm run build",
     "lint": "prettier --write . && eslint --fix .",
-    "prestart": "yarn run build",
+    "lint:check": "prettier --check . && eslint .",
+    "prestart": "pnpm run build",
     "start": "npx @google-cloud/functions-framework --target=app"
   }
 }

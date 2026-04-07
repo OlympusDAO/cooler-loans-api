@@ -63,7 +63,7 @@ export const createGenerateFunction = (
       sourceArchiveBucket: functionAssetsBucket.name,
       sourceArchiveObject: functionBucketObject.name,
       triggerHttp: true,
-      runtime: "nodejs18",
+      runtime: "nodejs22",
       entryPoint: "handleGenerate",
       timeout: 540,
       maxInstances: 1,
@@ -205,7 +205,7 @@ export const createGetFunction = (
       sourceArchiveBucket: functionAssetsBucket.name,
       sourceArchiveObject: functionBucketObject.name,
       triggerHttp: true,
-      runtime: "nodejs18",
+      runtime: "nodejs22",
       entryPoint: "app",
       availableMemoryMb: 512,
       environmentVariables: {
