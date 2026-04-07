@@ -8,14 +8,15 @@
   "dependencies": {
     "@google-cloud/bigquery": "^7.9.1",
     "@google-cloud/storage": "^7.13.0",
-    "@repo/shared": "*",
-    "@repo/types": "*",
+    "@repo/shared": "workspace:*",
+    "@repo/types": "workspace:*",
     "jsonl-parse-stringify": "^1.0.3"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/subgraph-cache-types": "*",
-    "@repo/typescript-config": "*",
+    "@types/express": "^4.17.21",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/subgraph-cache-types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/jest": "^29.5.0",
     "@types/node": "^18",
     "jest": "^29.1.1",
@@ -25,8 +26,9 @@
   },
   "scripts": {
     "build": "tsc --noEmit && tsup",
-    "gcp-build": "yarn run build",
+    "gcp-build": "pnpm run build",
     "lint": "prettier --write . && eslint --fix .",
+    "lint:check": "prettier --check . && eslint .",
     "test": "jest"
   }
 }

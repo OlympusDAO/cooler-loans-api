@@ -7,10 +7,10 @@
   "devDependencies": {
     "@pulumi/gcp": "^8.6.0",
     "@pulumi/pulumi": "^3.137.0",
-    "@repo/bigquery-codegen": "*",
-    "@repo/eslint-config": "*",
-    "@repo/types": "*",
-    "@repo/typescript-config": "*",
+    "@repo/bigquery-codegen": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^18",
     "cooler-loans-api-generate": "*",
@@ -22,6 +22,7 @@
     "build": "tsc",
     "deploy": "pulumi up --stack dev",
     "lint": "prettier --write . && eslint --fix .",
+    "lint:check": "prettier --check . && eslint .",
     "refresh": "pulumi refresh --stack dev"
   }
 }

@@ -5,17 +5,18 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/types": "*",
-    "@repo/typescript-config": "*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "jsonschema-bigquery": "^7.0.0",
     "typescript-json-schema": "^0.61.0"
   },
   "scripts": {
-    "build": "yarn run build:jsonschema && yarn run build:bigquery",
-    "postbuild": "yarn run lint",
-    "build:jsonschema": "yarn typescript-json-schema ../types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema && yarn typescript-json-schema ../types/src/loanSnapshot.ts LoanSnapshot --required -o tmp/loanSnapshot.jsonschema",
-    "build:bigquery": "yarn -s jsbq -j tmp/snapshot.jsonschema > schemas/snapshot.json && yarn -s jsbq -j tmp/loanSnapshot.jsonschema > schemas/loanSnapshot.json",
-    "lint": "prettier --write ."
+    "build": "pnpm run build:jsonschema && pnpm run build:bigquery",
+    "postbuild": "pnpm run lint",
+    "build:jsonschema": "pnpm exec typescript-json-schema ../types/src/snapshot.ts Snapshot --required -o tmp/snapshot.jsonschema && pnpm exec typescript-json-schema ../types/src/loanSnapshot.ts LoanSnapshot --required -o tmp/loanSnapshot.jsonschema",
+    "build:bigquery": "pnpm exec jsbq -j tmp/snapshot.jsonschema > schemas/snapshot.json && pnpm exec jsbq -j tmp/loanSnapshot.jsonschema > schemas/loanSnapshot.json",
+    "lint": "prettier --write .",
+    "lint:check": "prettier --check ."
   }
 }

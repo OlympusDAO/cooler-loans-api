@@ -47,6 +47,7 @@
     "name": "clearinghouses",
     "type": "RECORD",
     "mode": "REPEATED",
+    "description": "State of the Clearinghouses at the time of the snapshot.",
     "fields": [
       { "name": "address", "type": "STRING", "mode": "REQUIRED", "description": "Address of the Clearinghouse" },
       {
